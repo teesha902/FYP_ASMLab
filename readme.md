@@ -4,7 +4,7 @@
 - find and stabilize package and python versions, upgrade if neccessary
 - reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
 - turn hardcoded variables into passable variables
-- reduce number of files generated maybe?
+- reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
 - build an LED detector (POC done @ led_tracker.ipynb)
 
 #### stage 2?
@@ -40,7 +40,7 @@ If missing data rate > 10%:
 Subset relevant coords (SUBSET_CSV.py) --> Interpolate and convert coords to mm (interpolate-convert_mm.py) --> get distance, velocity, acceleration, correct n incorrect distances based on mean + 2SD (Dist_Ac_Vel.py)
  
 - subset generates 6 randomly selected 3 second segments within the first minute or 6s each before and after LED
-- Distance velocity and acc provide raw outputs per frame adn descriptive measures?
+- Distance velocity and acc provide raw outputs per frame and descriptive measures?
 
 
 ### Plot generation
