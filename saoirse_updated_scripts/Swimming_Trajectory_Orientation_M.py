@@ -7,20 +7,20 @@ import glob
 import os
 
 #This calculates the swimming trajectory of the fish from one head coordinate to the next
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
+path = ('/Users/saoirselightbourne/Desktop/KF_SUMMER_2022/Raw_CSVs/d77')
 csv_files = glob.glob(os.path.join(path, "*.csv"))
-data = []
 
 for f in csv_files:
     csv = pd.read_csv(f)
     full_path = (f.split("\\")[-1])
-    d48='d48_'
-    name=full_path[51:54]
-    folder=full_path[54:56]
+    d77='d77_'
+    name = full_path[66:68]
+    folder = full_path[68:71]
 
 
-    led_csv12=pd.read_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/d48_'+name+folder+'_12S_INTER_MM.csv')
-    
+
+    led_csv12 = pd.read_csv('/Users/saoirselightbourne/Desktop/KF_SUMMER_2022/Raw_CSVs/d77/Cropped_CSV_d77/d77_' + name + folder + '_12S_INTER_MM.csv')
+
     #Subset frame when LED turns on
     three_sec_mark=int(len(led_csv12)/2)
     #The original code was getting angle of the fish's body from tail to head @3 seconds
@@ -49,18 +49,14 @@ for f in csv_files:
         return 360-np.rad2deg((ang1 - ang2) % (2 * np.pi))
     
     angle=angle_between(centred_head_0s,centred_head_3s)#angle_between(tail_0s,head_0s)
-    data.append([name+folder, angle])
-print (data)
-#Write to excel 
-results_df = pd.DataFrame(data, columns=["Fish Name", 'Trajectory Angle (deg)'])
-print(results_df)
-# file_data={'Fish Name':[name+folder],'Trajectory Angle (deg)':[angle]}
-
-# file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
-
-# writer = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/d48_testing.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
-# results_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-# writer.save()
-# print("Ran:"+name +folder)
+    #Write to excel
     
-# /Users/asmlabuser1/Scripts_Ari/testing
+    file_data={'Fish Name':[name+folder],'Trajectory Angle (deg)':[angle]}
+    
+    file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
+    
+    writer = pd.ExcelWriter('/Users/saoirselightbourne/Desktop/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Trajectory_Orientation/d77/d77_'+name+folder+'.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
+    file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+    writer.save()
+    print("Ran:"+name +folder)
+    
