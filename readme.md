@@ -4,7 +4,7 @@
 - find and stabilize package and python versions, upgrade if neccessary
 - reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
 - turn hardcoded variables into passable variables
-- reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
+- reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface) (POC testing done, verification + full dataset + proper tqdm left, but can be done with refactoring?)
 - build an LED detector (POC done @ led_tracker.ipynb)
 - python file for DLC (POC for refine tracklets done)
 
