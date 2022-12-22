@@ -5,11 +5,11 @@ from openpyxl import load_workbook
 import os
 import glob
 import numpy as np
-
+from tqdm import tqdm
 path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
-csv_files = glob.glob(os.path.join(path, "*.csv"))
-
-for f in csv_files:
+csv_files = glob.glob(os.path.join(path, "*.csv"))[:10]
+data = []
+for f in tqdm(csv_files):
     csv = pd.read_csv(f)
     full_path = (f.split("\\")[-1])
     d48='d48_'
@@ -93,19 +93,21 @@ for f in csv_files:
     
     
     # # #Write to Excel
-    file_data={'Fish Name':[],'Video Length':[],'Max Y (Objecttive)':[],'Max Y (Entire Video)':[],'Max Y (0-3S)':[],'Max Y (3-6S)':[],
-               "Displacement_LED_On_Objective_mm":[],"Displacement_LED_On_Whole_mm":[],"Displacement_LED_On_03_mm":[],"Displacement_LED_On_36_mm":[],
-               "Displacement_LED_Off_Objective_mm":[],"Displacement_LED_Off_Whole_mm":[],"Displacement_LED_Off_03_mm":[], "Displacement_LED_Off_36_mm":[],
-               "Displacement_6S_Objective_mm":[],"Displacement_6S_Whole_mm":[],"Displacement_LED_6S_03_mm":[],"Displacement_LED_6S_36_mm":[],
-               "Maximum Displacement_Objective_mm":[],"Maximum Displacement_Whole_mm":[],"Maximum Displacement_03_mm":[],"Maximum Displacement_36_mm":[],"Time_Reach_Top_After_Food":[]}
+    data.append({'Fish Name':name+folder,'Video Length':exp_time,'Max Y (Objective)':objective_max,'Max Y (Entire Video)':top_tank_whole,'Max Y (0-3S)':top_tank_03,'Max Y (3-6S)':top_tank_36,
+               "Displacement_LED_On_Objective_mm":dist_surface_0s_ob,"Displacement_LED_On_Whole_mm":dist_surface_0s_whole,"Displacement_LED_On_03_mm":dist_surface_3S_03,"Displacement_LED_On_36_mm":dist_surface_3S_36,
+               "Displacement_LED_Off_Objective_mm":dist_surface_3S_ob,"Displacement_LED_Off_Whole_mm":dist_surface_3S_whole,"Displacement_LED_Off_03_mm":dist_surface_3S_03 ,"Displacement_LED_Off_36_mm":dist_surface_3S_36,
+               "Displacement_6S_Objective_mm":dist_surface_6S_ob,"Displacement_6S_Whole_mm":dist_surface_6S_whole,"Displacement_LED_6S_03_mm":dist_surface_6S_03,"Displacement_LED_6S_36_mm":dist_surface_6S_36,
+               "Maximum Displacement_Objective_mm":max_dis_ob,"Maximum Displacement_Whole_mm":max_dis_whole,"Maximum Displacement_03_mm":max_dis_03,"Maximum Displacement_36_mm":max_dis_36,"Time_Reach_Top_After_Food":first_reach_food_sec})
     
-    file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
+    # QUESTION: is Displacement_LED_On_03_mm and Displacement_LED_Off_03_mm supposed to be same??????
+
+    # file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
     
-    # pd.DataFrame(file_data)
-    
-    # writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
-    # file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-    # writer.save()
+results_df=pd.DataFrame(data)
+
+writer = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/d48_surface_v1_M.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
+results_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+writer.save()
     
     # #Data frame with values
     
