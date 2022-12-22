@@ -106,17 +106,17 @@ for f in csv_files:
     #Average Angle
     av_angle= (first_angle+second_angle+third_angle+fourth_angle+fifth_angle+sixth_angle)/6
     
-    #Write to excel
+    # #Write to excel
     
-    file_data={'Fish Name':[name+folder],' First Trajectory Angle (deg)':[first_angle],' Second Trajectory Angle (deg)':[second_angle],
-               ' Third Trajectory Angle (deg)':[third_angle],' Fourth Trajectory Angle (deg)':[fourth_angle],
-               ' Fifth Trajectory Angle (deg)':[fifth_angle],' Sixth Trajectory Angle (deg)':[sixth_angle],
-               ' Average Trajectory Angle (deg)':[av_angle]}
+    # file_data={'Fish Name':[name+folder],' First Trajectory Angle (deg)':[first_angle],' Second Trajectory Angle (deg)':[second_angle],
+    #            ' Third Trajectory Angle (deg)':[third_angle],' Fourth Trajectory Angle (deg)':[fourth_angle],
+    #            ' Fifth Trajectory Angle (deg)':[fifth_angle],' Sixth Trajectory Angle (deg)':[sixth_angle],
+    #            ' Average Trajectory Angle (deg)':[av_angle]}
     
-    file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
+    # file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
     
-    writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Body_Orientation_Random_3s/d48_'+name+folder+'.xlsx')
-    file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-    writer.save()
-    print("Ran:"+name +folder)
+    # writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Body_Orientation_Random_3s/d48_'+name+folder+'.xlsx')
+    # file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+    # writer.save()
+    # print("Ran:"+name +folder)
     

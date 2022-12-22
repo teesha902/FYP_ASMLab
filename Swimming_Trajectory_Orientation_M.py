@@ -50,12 +50,12 @@ for f in csv_files:
     angle=angle_between(centred_head_0s,centred_head_3s)#angle_between(tail_0s,head_0s)
     #Write to excel
     
-    file_data={'Fish Name':[name+folder],'Trajectory Angle (deg)':[angle]}
+    # file_data={'Fish Name':[name+folder],'Trajectory Angle (deg)':[angle]}
     
-    file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
+    # file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
     
-    writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Trajectory_Orientation/d48_'+name+folder+'.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
-    file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-    writer.save()
-    print("Ran:"+name +folder)
+    # writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Trajectory_Orientation/d48_'+name+folder+'.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
+    # file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+    # writer.save()
+    # print("Ran:"+name +folder)
     

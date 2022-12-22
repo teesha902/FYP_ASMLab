@@ -103,21 +103,21 @@ for f in csv_files:
     
     # pd.DataFrame(file_data)
     
-    writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
-    file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-    writer.save()
+    # writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
+    # file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+    # writer.save()
     
-    #Data frame with values
+    # #Data frame with values
     
-    frames= (name+folder,exp_time,objective_max,top_tank_whole,top_tank_03,top_tank_36,
-             dist_surface_0s_ob,dist_surface_0s_whole,dist_surface_3S_03,dist_surface_3S_36,
-             dist_surface_3S_ob,dist_surface_3S_whole,dist_surface_3S_03,dist_surface_3S_36,
-             dist_surface_6S_ob,dist_surface_6S_whole,dist_surface_6S_03,dist_surface_6S_36,
-             max_dis_ob,max_dis_whole,max_dis_03,max_dis_36,first_reach_food_sec)
+    # frames= (name+folder,exp_time,objective_max,top_tank_whole,top_tank_03,top_tank_36,
+    #          dist_surface_0s_ob,dist_surface_0s_whole,dist_surface_3S_03,dist_surface_3S_36,
+    #          dist_surface_3S_ob,dist_surface_3S_whole,dist_surface_3S_03,dist_surface_3S_36,
+    #          dist_surface_6S_ob,dist_surface_6S_whole,dist_surface_6S_03,dist_surface_6S_36,
+    #          max_dis_ob,max_dis_whole,max_dis_03,max_dis_36,first_reach_food_sec)
     
-    book = openpyxl.load_workbook('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
-    sheet = book.active
-    rows = frames
-    sheet.append(rows)
-    book.save('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
-    print("Ran:"+name +folder)
+    # book = openpyxl.load_workbook('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
+    # sheet = book.active
+    # rows = frames
+    # sheet.append(rows)
+    # book.save('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Surface/'+d48+name+folder+'.xlsx')
+    # print("Ran:"+name +folder)

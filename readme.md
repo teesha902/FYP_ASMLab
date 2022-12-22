@@ -6,8 +6,10 @@
 - turn hardcoded variables into passable variables
 - reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
 - build an LED detector (POC done @ led_tracker.ipynb)
+- python file for DLC (POC for refine tracklets done)
 
 #### stage 2?
+- refactor code
 - multiprocessing to improve performance
 - use notebook for ease of use. May still continue with the scripts format, but use notebook for interfacing instead of terminal 
 

@@ -62,9 +62,9 @@ print(results_df)
 
 # file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
 
-writer = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/d48_testing.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
-results_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-writer.save()
+# writer = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/d48_testing.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
+# results_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+# writer.save()
 # print("Ran:"+name +folder)
     
 # /Users/asmlabuser1/Scripts_Ari/testing

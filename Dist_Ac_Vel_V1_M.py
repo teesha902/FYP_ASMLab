@@ -58,9 +58,9 @@ for f in csv_files:
     
     file_data_df=pd.DataFrame(file_data).T
     
-    writer_raw = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Dist_Ac_Vel/'+folder_name+'_'+name+folder+'.xlsx')
+    # writer_raw = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/Dist_Ac_Vel/'+folder_name+'_'+name+folder+'.xlsx')
     
-    file_data_df.to_excel(writer_raw,index=True,header=False,sheet_name='Dist_03_36_mm')
+    # file_data_df.to_excel(writer_raw,index=True,header=False,sheet_name='Dist_03_36_mm')
     
     ##################
     #####DISTANCE#####
@@ -603,39 +603,39 @@ for f in csv_files:
     
     SD_dist_3sec_seg= statistics.stdev(average_dist_list_df_list)
     
-    #Write to excel
-    # Average of the randomly generated 3 second segments
-    file_data_descriptive={'Fish Name':[name +folder],'Experiment Length':[exp_time_string]}
-    file_data_descriptive_df=pd.DataFrame(file_data_descriptive)
-    writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Descriptive_Data/'+folder_name+'_'+name+folder+'.xlsx')
-    file_data_descriptive_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow=1)
+    # #Write to excel
+    # # Average of the randomly generated 3 second segments
+    # file_data_descriptive={'Fish Name':[name +folder],'Experiment Length':[exp_time_string]}
+    # file_data_descriptive_df=pd.DataFrame(file_data_descriptive)
+    # writer = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/Descriptive_Data/'+folder_name+'_'+name+folder+'.xlsx')
+    # file_data_descriptive_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow=1)
     
     
     
-    #Put titles and units
-    #Distance
-    file_data_dist={'Distance Travelled (mm)':[]}
-    file_data_dist_df=pd.DataFrame(file_data_dist).T
-    file_data_dist_df.to_excel(writer,index=True,header=False,sheet_name= folder,startrow=0 ,startcol=2)
+    # #Put titles and units
+    # #Distance
+    # file_data_dist={'Distance Travelled (mm)':[]}
+    # file_data_dist_df=pd.DataFrame(file_data_dist).T
+    # file_data_dist_df.to_excel(writer,index=True,header=False,sheet_name= folder,startrow=0 ,startcol=2)
     
-    #Velocity
-    file_data_vel={'Velocity (mm per second)':[]}
-    file_data_vel_df=pd.DataFrame(file_data_vel).T
-    file_data_vel_df.to_excel(writer,index=True,header=False,sheet_name= folder,startrow=0 ,startcol=21)
+    # #Velocity
+    # file_data_vel={'Velocity (mm per second)':[]}
+    # file_data_vel_df=pd.DataFrame(file_data_vel).T
+    # file_data_vel_df.to_excel(writer,index=True,header=False,sheet_name= folder,startrow=0 ,startcol=21)
     
-    #Acceleration
-    file_data_acc={'Acceleration (mm per second per second)':[]}
-    file_data_acc_df=pd.DataFrame(file_data_acc).T
-    file_data_acc_df.to_excel(writer,index=True,header=False,sheet_name= folder,startrow= 0,startcol=37)
+    # #Acceleration
+    # file_data_acc={'Acceleration (mm per second per second)':[]}
+    # file_data_acc_df=pd.DataFrame(file_data_acc).T
+    # file_data_acc_df.to_excel(writer,index=True,header=False,sheet_name= folder,startrow= 0,startcol=37)
     
     
-    total_average_dist_data={"Average_Distance_3sec_segments":total_average_dist.tolist()}
-    total_average_dist_data_df=pd.DataFrame(total_average_dist_data)
-    total_average_dist_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1,startcol=2 )
+    # total_average_dist_data={"Average_Distance_3sec_segments":total_average_dist.tolist()}
+    # total_average_dist_data_df=pd.DataFrame(total_average_dist_data)
+    # total_average_dist_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1,startcol=2 )
     
-    SD_dist_3sec_seg_data= {'Average_Distance_SD_3sec_segments':[SD_dist_3sec_seg]}
-    SD_dist_3sec_seg_data_df=pd.DataFrame(SD_dist_3sec_seg_data)
-    SD_dist_3sec_seg_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1,startcol=3 )
+    # SD_dist_3sec_seg_data= {'Average_Distance_SD_3sec_segments':[SD_dist_3sec_seg]}
+    # SD_dist_3sec_seg_data_df=pd.DataFrame(SD_dist_3sec_seg_data)
+    # SD_dist_3sec_seg_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1,startcol=3 )
     
     #12 second span
     #Subset xy coordinates after LED
@@ -1836,73 +1836,73 @@ for f in csv_files:
     total_0_3=pd.Series(total_dist_0_3_tail+total_dist_0_3_body1+total_dist_0_3_body2+total_dist_0_3_body3+total_dist_0_3_head)
     
     #Write to excel
-    av_0_1_data={"Average_Distance_0-1S":av_0_1.tolist()}
-    av_0_1_data_df=pd.DataFrame(av_0_1_data)
-    av_0_1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=4 )
+    # av_0_1_data={"Average_Distance_0-1S":av_0_1.tolist()}
+    # av_0_1_data_df=pd.DataFrame(av_0_1_data)
+    # av_0_1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=4 )
     
-    av_0_2_data={"Average_Distance_1-2S":av_1_2.tolist()}
-    av_0_2_data_df=pd.DataFrame(av_0_2_data)
-    av_0_2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=5 )
+    # av_0_2_data={"Average_Distance_1-2S":av_1_2.tolist()}
+    # av_0_2_data_df=pd.DataFrame(av_0_2_data)
+    # av_0_2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=5 )
     
-    av_0_3_data={"Average_Distance_2-3S":av_2_3.tolist()}
-    av_0_3_data_df=pd.DataFrame(av_0_3_data)
-    av_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=6 )
+    # av_0_3_data={"Average_Distance_2-3S":av_2_3.tolist()}
+    # av_0_3_data_df=pd.DataFrame(av_0_3_data)
+    # av_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=6 )
     
-    av_0_4_data={"Average_Distance_3-4S":av_3_4.tolist()}
-    av_0_4_data_df=pd.DataFrame(av_0_4_data)
-    av_0_4_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=7 )
+    # av_0_4_data={"Average_Distance_3-4S":av_3_4.tolist()}
+    # av_0_4_data_df=pd.DataFrame(av_0_4_data)
+    # av_0_4_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=7 )
     
-    av_0_5_data={"Average_Distance_4-5S":av_4_5.tolist()}
-    av_0_5_data_df=pd.DataFrame(av_0_5_data)
-    av_0_5_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=8 )
+    # av_0_5_data={"Average_Distance_4-5S":av_4_5.tolist()}
+    # av_0_5_data_df=pd.DataFrame(av_0_5_data)
+    # av_0_5_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=8 )
     
-    av_0_6_data={"Average_Distance_5-6S":av_0_6.tolist()}
-    av_0_6_data_df=pd.DataFrame(av_0_6_data)
-    av_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=9 )
+    # av_0_6_data={"Average_Distance_5-6S":av_0_6.tolist()}
+    # av_0_6_data_df=pd.DataFrame(av_0_6_data)
+    # av_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=9 )
     
-    av_0_3_data={"Average_Distance_0-3S":av_0_3.tolist()}
-    av_0_3_data_df=pd.DataFrame(av_0_3_data)
-    av_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=10 )
+    # av_0_3_data={"Average_Distance_0-3S":av_0_3.tolist()}
+    # av_0_3_data_df=pd.DataFrame(av_0_3_data)
+    # av_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=10 )
     
-    av_3_6_data={"Average_Distance_3-6S":av_3_6.tolist()}
-    av_3_6_data_df=pd.DataFrame(av_3_6_data)
-    av_3_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol= 11)
+    # av_3_6_data={"Average_Distance_3-6S":av_3_6.tolist()}
+    # av_3_6_data_df=pd.DataFrame(av_3_6_data)
+    # av_3_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol= 11)
     
-    av_0_6_data={"Average_Distance_0-6S":av_0_6.tolist()}
-    av_0_6_data_df=pd.DataFrame(av_0_6_data)
-    av_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=12 )
+    # av_0_6_data={"Average_Distance_0-6S":av_0_6.tolist()}
+    # av_0_6_data_df=pd.DataFrame(av_0_6_data)
+    # av_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=12 )
     
-    av_minus3_0_data={"Average_Distance_minus3-0S":av_minus3_0.tolist()}
-    av_minus3_0_data_df=pd.DataFrame(av_minus3_0_data)
-    av_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=13)
+    # av_minus3_0_data={"Average_Distance_minus3-0S":av_minus3_0.tolist()}
+    # av_minus3_0_data_df=pd.DataFrame(av_minus3_0_data)
+    # av_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=13)
     
-    av_minus3_minus2_data={"Average_Distance_minus3-minus2S":av_minus3_minus2.tolist()}
-    av_minus3_minus2_data_df=pd.DataFrame(av_minus3_minus2_data)
-    av_minus3_minus2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=14)
+    # av_minus3_minus2_data={"Average_Distance_minus3-minus2S":av_minus3_minus2.tolist()}
+    # av_minus3_minus2_data_df=pd.DataFrame(av_minus3_minus2_data)
+    # av_minus3_minus2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=14)
     
-    av_minus2_minus1_data={"Average_Distance_minus2-minus1S":av_minus2_minus1.tolist()}
-    av_minus2_minus1_data_df=pd.DataFrame(av_minus2_minus1_data)
-    av_minus2_minus1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=15)
+    # av_minus2_minus1_data={"Average_Distance_minus2-minus1S":av_minus2_minus1.tolist()}
+    # av_minus2_minus1_data_df=pd.DataFrame(av_minus2_minus1_data)
+    # av_minus2_minus1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=15)
     
-    av_minus1_0_data={"Average_Distance_minus1-0S":av_minus1_0.tolist()}
-    av_minus1_0_data_df=pd.DataFrame(av_minus1_0_data)
-    av_minus1_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=16)
+    # av_minus1_0_data={"Average_Distance_minus1-0S":av_minus1_0.tolist()}
+    # av_minus1_0_data_df=pd.DataFrame(av_minus1_0_data)
+    # av_minus1_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=16)
     
-    total_minus6_0_data={"Total_Distance_minus6-0S":total_minus6_0.tolist()}
-    total_minus6_0_data_df=pd.DataFrame(total_minus6_0_data)
-    total_minus6_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=17)
+    # total_minus6_0_data={"Total_Distance_minus6-0S":total_minus6_0.tolist()}
+    # total_minus6_0_data_df=pd.DataFrame(total_minus6_0_data)
+    # total_minus6_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=17)
     
-    total_minus3_0_data={"Total_Distance_minus3-0S":total_minus3_0.tolist()}
-    total_minus3_0_data_df=pd.DataFrame(total_minus3_0_data)
-    total_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=18)
+    # total_minus3_0_data={"Total_Distance_minus3-0S":total_minus3_0.tolist()}
+    # total_minus3_0_data_df=pd.DataFrame(total_minus3_0_data)
+    # total_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=18)
     
-    total_0_6_data={"Total_Distance_0-6S":total_0_6.tolist()}
-    total_0_6_data_df=pd.DataFrame(total_0_6_data)
-    total_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=19)
+    # total_0_6_data={"Total_Distance_0-6S":total_0_6.tolist()}
+    # total_0_6_data_df=pd.DataFrame(total_0_6_data)
+    # total_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=19)
     
-    total_0_3_data={"Total_Distance_0-3S":total_0_3.tolist()}
-    total_0_3_data_df=pd.DataFrame(total_0_3_data)
-    total_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=20)
+    # total_0_3_data={"Total_Distance_0-3S":total_0_3.tolist()}
+    # total_0_3_data_df=pd.DataFrame(total_0_3_data)
+    # total_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=20)
     
     
     
@@ -1914,7 +1914,7 @@ for f in csv_files:
              dist_3_6_tail_df_float_inter.squeeze(), dist_3_6_body1_df_float_inter.squeeze(), dist_3_6_body2_df_float_inter.squeeze(),
              dist_3_6_body3_df_float_inter.squeeze(), dist_3_6_head_df_float_inter.squeeze()]
     df_dist_per_frame= (pd.DataFrame(frames_dist_per_frame)).T
-    df_dist_per_frame.to_excel(writer_raw,index=False,sheet_name='Dist_03_36_mm',startrow= 3 )
+    # df_dist_per_frame.to_excel(writer_raw,index=False,sheet_name='Dist_03_36_mm',startrow= 3 )
     
     
     
@@ -1931,17 +1931,17 @@ for f in csv_files:
     SD_vel_3sec_seg= statistics.stdev(vel_3_sec["Av_vel"].tolist())
     
     vel_per_frame= df_dist_per_frame/(1/frame_per_sec)
-    vel_per_frame.to_excel(writer_raw,index=False,sheet_name='Vel_03_36_mm_per_s')
+    # vel_per_frame.to_excel(writer_raw,index=False,sheet_name='Vel_03_36_mm_per_s')
     
     
     vel_3_sec_data= {"Average_Velocity_3sec_segments":[vel_3_sec_v]}
     vel_3_sec_data_df= pd.DataFrame(vel_3_sec_data)
-    vel_3_sec_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=21)
+    # vel_3_sec_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=21)
     
     
     vel_3_sec_data_SD= {"Average_Velocity_SD_3sec_segments":[SD_vel_3sec_seg]}
     vel_3_sec_data_df_SD= pd.DataFrame(vel_3_sec_data_SD)
-    vel_3_sec_data_df_SD.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=22)
+    # vel_3_sec_data_df_SD.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=22)
     
     
     
@@ -1977,61 +1977,61 @@ for f in csv_files:
     av_vel_minus1_0= pd.Series((total_dist_minus1_0_tail/1)+(total_dist_minus1_0_body1/1)+(total_dist_minus1_0_body2/1)+(total_dist_minus1_0_body3/1)+(total_dist_minus1_0_head/1))/5
     
     #Write to excel
-    av_vel_0_1_data={"Average_Velocity_per_sec_0-1S":av_vel_0_1.tolist()}
-    av_vel_0_1_data_df=pd.DataFrame(av_vel_0_1_data)
-    av_vel_0_1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=23 )
+    # av_vel_0_1_data={"Average_Velocity_per_sec_0-1S":av_vel_0_1.tolist()}
+    # av_vel_0_1_data_df=pd.DataFrame(av_vel_0_1_data)
+    # av_vel_0_1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=23 )
     
-    av_vel_1_2_data={"Average_Velocity_per_sec_1-2S":av_vel_1_2.tolist()}
-    av_vel_1_2_data_df=pd.DataFrame(av_vel_1_2_data)
-    av_vel_1_2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=24 )
+    # av_vel_1_2_data={"Average_Velocity_per_sec_1-2S":av_vel_1_2.tolist()}
+    # av_vel_1_2_data_df=pd.DataFrame(av_vel_1_2_data)
+    # av_vel_1_2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=24 )
     
-    av_vel_2_3_data={"Average_Velocity_per_sec_2-3S":av_vel_2_3.tolist()}
-    av_vel_2_3_data_df=pd.DataFrame(av_vel_2_3_data)
-    av_vel_2_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=25 )
+    # av_vel_2_3_data={"Average_Velocity_per_sec_2-3S":av_vel_2_3.tolist()}
+    # av_vel_2_3_data_df=pd.DataFrame(av_vel_2_3_data)
+    # av_vel_2_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=25 )
     
-    av_vel_3_4_data={"Average_Velocity_per_sec_3-4S":av_vel_3_4.tolist()}
-    av_vel_3_4_data_df=pd.DataFrame(av_vel_3_4_data)
-    av_vel_3_4_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=26 )
+    # av_vel_3_4_data={"Average_Velocity_per_sec_3-4S":av_vel_3_4.tolist()}
+    # av_vel_3_4_data_df=pd.DataFrame(av_vel_3_4_data)
+    # av_vel_3_4_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=26 )
     
-    av_vel_4_5_data={"Average_Velocity_per_sec_4-5S":av_vel_4_5.tolist()}
-    av_vel_4_5_data_df=pd.DataFrame(av_vel_4_5_data)
-    av_vel_4_5_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=27 )
+    # av_vel_4_5_data={"Average_Velocity_per_sec_4-5S":av_vel_4_5.tolist()}
+    # av_vel_4_5_data_df=pd.DataFrame(av_vel_4_5_data)
+    # av_vel_4_5_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=27 )
     
-    av_vel_5_6_data={"Average_Velocity_per_sec_5-6S":av_vel_5_6.tolist()}
-    av_vel_5_6_data_df=pd.DataFrame(av_vel_5_6_data)
-    av_vel_5_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=28 )
+    # av_vel_5_6_data={"Average_Velocity_per_sec_5-6S":av_vel_5_6.tolist()}
+    # av_vel_5_6_data_df=pd.DataFrame(av_vel_5_6_data)
+    # av_vel_5_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=28 )
     
-    av_vel_0_3_data={"Average_Velocity_per_sec_0-3S":av_vel_0_3.tolist()}
-    av_vel_0_3_data_df=pd.DataFrame(av_vel_0_3_data)
-    av_vel_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=29 )
+    # av_vel_0_3_data={"Average_Velocity_per_sec_0-3S":av_vel_0_3.tolist()}
+    # av_vel_0_3_data_df=pd.DataFrame(av_vel_0_3_data)
+    # av_vel_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=29 )
     
-    av_vel_3_6_data={"Average_Velocity_per_sec_3-6S":av_vel_3_6.tolist()}
-    av_vel_3_6_data_df=pd.DataFrame(av_vel_3_6_data)
-    av_vel_3_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=30 )
+    # av_vel_3_6_data={"Average_Velocity_per_sec_3-6S":av_vel_3_6.tolist()}
+    # av_vel_3_6_data_df=pd.DataFrame(av_vel_3_6_data)
+    # av_vel_3_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=30 )
     
-    av_vel_0_6_data={"Average_Velocity_per_sec_0-6S":av_vel_0_6.tolist()}
-    av_vel_0_6_data_df=pd.DataFrame(av_vel_0_6_data)
-    av_vel_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=31)
+    # av_vel_0_6_data={"Average_Velocity_per_sec_0-6S":av_vel_0_6.tolist()}
+    # av_vel_0_6_data_df=pd.DataFrame(av_vel_0_6_data)
+    # av_vel_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=31)
     
-    av_vel_3sec_data={"Average_Velocity_per_sec_3sec_Segments":av_vel_3sec.tolist()}
-    av_vel_3sec_data_df=pd.DataFrame(av_vel_3sec_data)
-    av_vel_3sec_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=32)
+    # av_vel_3sec_data={"Average_Velocity_per_sec_3sec_Segments":av_vel_3sec.tolist()}
+    # av_vel_3sec_data_df=pd.DataFrame(av_vel_3sec_data)
+    # av_vel_3sec_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=32)
     
-    av_vel_minus3_0_data={"Average_Velocity_per_sec_minus3-0S":av_vel_minus3_0.tolist()}
-    av_vel_minus3_0_data_df=pd.DataFrame(av_vel_minus3_0_data)
-    av_vel_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=33)
+    # av_vel_minus3_0_data={"Average_Velocity_per_sec_minus3-0S":av_vel_minus3_0.tolist()}
+    # av_vel_minus3_0_data_df=pd.DataFrame(av_vel_minus3_0_data)
+    # av_vel_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=33)
     
-    av_vel_minus3_minus2_data={"Average_Velocity_per_sec_minus3-minus2S":av_vel_minus3_minus2.tolist()}
-    av_vel_minus3_minus2_data_df=pd.DataFrame(av_vel_minus3_minus2_data)
-    av_vel_minus3_minus2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=34 )
+    # av_vel_minus3_minus2_data={"Average_Velocity_per_sec_minus3-minus2S":av_vel_minus3_minus2.tolist()}
+    # av_vel_minus3_minus2_data_df=pd.DataFrame(av_vel_minus3_minus2_data)
+    # av_vel_minus3_minus2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=34 )
     
-    av_vel_minus2_minus1_data={"Average_Velocity_per_sec_minus2-minus1S":av_vel_minus2_minus1.tolist()}
-    av_vel_minus2_minus1_data_df=pd.DataFrame(av_vel_minus2_minus1_data)
-    av_vel_minus2_minus1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=35)
+    # av_vel_minus2_minus1_data={"Average_Velocity_per_sec_minus2-minus1S":av_vel_minus2_minus1.tolist()}
+    # av_vel_minus2_minus1_data_df=pd.DataFrame(av_vel_minus2_minus1_data)
+    # av_vel_minus2_minus1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=35)
     
-    av_vel_minus1_0_data={"Average_Velocity_per_sec_minus1-0S":av_vel_minus1_0.tolist()}
-    av_vel_minus1_0_data_df=pd.DataFrame(av_vel_minus1_0_data)
-    av_vel_minus1_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=36)
+    # av_vel_minus1_0_data={"Average_Velocity_per_sec_minus1-0S":av_vel_minus1_0.tolist()}
+    # av_vel_minus1_0_data_df=pd.DataFrame(av_vel_minus1_0_data)
+    # av_vel_minus1_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=36)
     
     
     
@@ -2161,11 +2161,11 @@ for f in csv_files:
     
     Average_Acceleration_3sec_segments_sd_data= {'Average_Acceleration_3sec_segments':[total_av_ac_mean]}
     Average_Acceleration_3sec_segments_sd_data_df=pd.DataFrame(Average_Acceleration_3sec_segments_sd_data)
-    Average_Acceleration_3sec_segments_sd_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=37)
+    # Average_Acceleration_3sec_segments_sd_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=37)
     
     Average_Acceleration_SD_3sec_segments_data= {'Average_Acceleration_SD_3sec_segments':[total_av_ac_SD]}
     Average_Acceleration_SD_3sec_segments_data_df=pd.DataFrame(Average_Acceleration_SD_3sec_segments_data)
-    Average_Acceleration_SD_3sec_segments_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=38)
+    # Average_Acceleration_SD_3sec_segments_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=38)
     
     #0-1
     ac_0_1_tail=( dist_0_1_tail_df_float_inter.diff())/(1/frame_per_sec)
@@ -2288,91 +2288,93 @@ for f in csv_files:
     #minus1_0
     av_ac_minus1_0=pd.Series(float(ac_minus1_0_tail.sum()/1)+float(ac_minus1_0_body1.sum()/1)+float(ac_minus1_0_body2.sum()/1)+float(ac_minus1_0_body3.sum()/1)+float(ac_minus1_0_head.sum()/1))/5
     
+    print(av_ac_0_1)
+    print(folder)
+    break
+
+    # #Write to excel
+    # av_ac_0_1_data={"Average_Acceleration_per_sec_0-1S":av_ac_0_1.tolist()}
+    # av_ac_0_1_data_df=pd.DataFrame(av_ac_0_1_data)
+    # av_ac_0_1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=39 )
+    
+    # av_ac_1_2_data={"Average_Acceleration_per_sec_1-2S":av_ac_1_2.tolist()}
+    # av_ac_1_2_data_df=pd.DataFrame(av_ac_1_2_data)
+    # av_ac_1_2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=40 )
+    
+    # av_ac_2_3_data={"Average_Acceleration_per_sec_2-3S":av_ac_2_3.tolist()}
+    # av_ac_2_3_data_df=pd.DataFrame(av_ac_2_3_data)
+    # av_ac_2_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=41 )
+    
+    # av_ac_3_4_data={"Average_Acceleration_per_sec_3-4S":av_ac_3_4.tolist()}
+    # av_ac_3_4_data_df=pd.DataFrame(av_ac_3_4_data)
+    # av_ac_3_4_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=42 )
+    
+    # av_ac_4_5_data={"Average_Acceleration_per_sec_4-5S":av_ac_4_5.tolist()}
+    # av_ac_4_5_data_df=pd.DataFrame(av_ac_4_5_data)
+    # av_ac_4_5_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=43 )
+    
+    # av_ac_5_6_data={"Average_Acceleration_per_sec_5-6S":av_ac_5_6.tolist()}
+    # av_ac_5_6_data_df=pd.DataFrame(av_ac_5_6_data)
+    # av_ac_5_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=44 )
+    
+    # av_ac_0_3_data={"Average_Acceleration_per_sec_0-3S":av_ac_0_3.tolist()}
+    # av_ac_0_3_data_df=pd.DataFrame(av_ac_0_3_data)
+    # av_ac_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=45)
+    
+    # av_ac_3_6_data={"Average_Acceleration_per_sec_3-6S":av_ac_3_6.tolist()}
+    # av_ac_3_6_data_df=pd.DataFrame(av_ac_3_6_data)
+    # av_ac_3_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=46)
+    
+    # av_ac_0_6_data={"Average_Acceleration_per_sec_0-6S":av_ac_0_6.tolist()}
+    # av_ac_0_6_data_df=pd.DataFrame(av_ac_0_6_data)
+    # av_ac_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=47)
+    
+    # av_ac_3sec_data={"Average_Acceleration_per_sec_3sec_Segments":total_av_ac_mean.tolist()}
+    # av_ac_3sec_data_df=pd.DataFrame(av_ac_3sec_data)
+    # av_ac_3sec_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=48)
+    
+    # av_ac_minus3_0_data={"Average_Acceleration_per_sec_minus3-0S":av_ac_minus3_0.tolist()}
+    # av_ac_minus3_0_data_df=pd.DataFrame(av_ac_minus3_0_data)
+    # av_ac_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=49)
+    
+    # av_ac_minus3_minus2_data={"Average_Acceleration_per_sec_minus3-minus2S":av_ac_minus3_minus2.tolist()}
+    # av_ac_minus3_minus2_data_df=pd.DataFrame(av_ac_minus3_minus2_data)
+    # av_ac_minus3_minus2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=50)
+    
+    # av_ac_minus2_minus1_data={"Average_Acceleration_per_sec_minus2-minus1S":av_ac_minus2_minus1.tolist()}
+    # av_ac_minus2_minus1_data_df=pd.DataFrame(av_ac_minus2_minus1_data)
+    # av_ac_minus2_minus1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=51)
+    
+    # av_ac_minus1_0_data={"Average_Acceleration_per_sec_minus1-0S":av_ac_minus1_0.tolist()}
+    # av_ac_minus1_0_data_df=pd.DataFrame(av_ac_minus1_0_data)
+    # av_ac_minus1_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=52)
     
     
-    #Write to excel
-    av_ac_0_1_data={"Average_Acceleration_per_sec_0-1S":av_ac_0_1.tolist()}
-    av_ac_0_1_data_df=pd.DataFrame(av_ac_0_1_data)
-    av_ac_0_1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=39 )
-    
-    av_ac_1_2_data={"Average_Acceleration_per_sec_1-2S":av_ac_1_2.tolist()}
-    av_ac_1_2_data_df=pd.DataFrame(av_ac_1_2_data)
-    av_ac_1_2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=40 )
-    
-    av_ac_2_3_data={"Average_Acceleration_per_sec_2-3S":av_ac_2_3.tolist()}
-    av_ac_2_3_data_df=pd.DataFrame(av_ac_2_3_data)
-    av_ac_2_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=41 )
-    
-    av_ac_3_4_data={"Average_Acceleration_per_sec_3-4S":av_ac_3_4.tolist()}
-    av_ac_3_4_data_df=pd.DataFrame(av_ac_3_4_data)
-    av_ac_3_4_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=42 )
-    
-    av_ac_4_5_data={"Average_Acceleration_per_sec_4-5S":av_ac_4_5.tolist()}
-    av_ac_4_5_data_df=pd.DataFrame(av_ac_4_5_data)
-    av_ac_4_5_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=43 )
-    
-    av_ac_5_6_data={"Average_Acceleration_per_sec_5-6S":av_ac_5_6.tolist()}
-    av_ac_5_6_data_df=pd.DataFrame(av_ac_5_6_data)
-    av_ac_5_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=44 )
-    
-    av_ac_0_3_data={"Average_Acceleration_per_sec_0-3S":av_ac_0_3.tolist()}
-    av_ac_0_3_data_df=pd.DataFrame(av_ac_0_3_data)
-    av_ac_0_3_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=45)
-    
-    av_ac_3_6_data={"Average_Acceleration_per_sec_3-6S":av_ac_3_6.tolist()}
-    av_ac_3_6_data_df=pd.DataFrame(av_ac_3_6_data)
-    av_ac_3_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=46)
-    
-    av_ac_0_6_data={"Average_Acceleration_per_sec_0-6S":av_ac_0_6.tolist()}
-    av_ac_0_6_data_df=pd.DataFrame(av_ac_0_6_data)
-    av_ac_0_6_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=47)
-    
-    av_ac_3sec_data={"Average_Acceleration_per_sec_3sec_Segments":total_av_ac_mean.tolist()}
-    av_ac_3sec_data_df=pd.DataFrame(av_ac_3sec_data)
-    av_ac_3sec_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=48)
-    
-    av_ac_minus3_0_data={"Average_Acceleration_per_sec_minus3-0S":av_ac_minus3_0.tolist()}
-    av_ac_minus3_0_data_df=pd.DataFrame(av_ac_minus3_0_data)
-    av_ac_minus3_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=49)
-    
-    av_ac_minus3_minus2_data={"Average_Acceleration_per_sec_minus3-minus2S":av_ac_minus3_minus2.tolist()}
-    av_ac_minus3_minus2_data_df=pd.DataFrame(av_ac_minus3_minus2_data)
-    av_ac_minus3_minus2_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=50)
-    
-    av_ac_minus2_minus1_data={"Average_Acceleration_per_sec_minus2-minus1S":av_ac_minus2_minus1.tolist()}
-    av_ac_minus2_minus1_data_df=pd.DataFrame(av_ac_minus2_minus1_data)
-    av_ac_minus2_minus1_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=51)
-    
-    av_ac_minus1_0_data={"Average_Acceleration_per_sec_minus1-0S":av_ac_minus1_0.tolist()}
-    av_ac_minus1_0_data_df=pd.DataFrame(av_ac_minus1_0_data)
-    av_ac_minus1_0_data_df.to_excel(writer,index=False,header=True,sheet_name= folder,startrow= 1, startcol=52)
     
     
+    # #Print dataframe to Raw_Excel
+    # frames_acceleration_per_frame= [ac_0_1_tail.squeeze(),ac_0_1_body1.squeeze(),ac_0_1_body2.squeeze(),
+    #                                 ac_0_1_body3.squeeze(),ac_0_1_head.squeeze(),
+    #                                 ac_0_3_tail.squeeze(), ac_0_3_body1.squeeze(), ac_0_3_body2.squeeze(),
+    #                                 ac_0_3_body3.squeeze(), ac_0_3_head.squeeze(),
+    #                                 ac_3_6_tail.squeeze(),ac_3_6_body1.squeeze(),ac_3_6_body2.squeeze(),
+    #                                 ac_3_6_body3.squeeze(),ac_3_6_head.squeeze()]
+    
+    # df_acceleration_per_frame= (pd.DataFrame(frames_acceleration_per_frame)).T
+    # df_acceleration_per_frame.columns= ['Acceleration_0_1S_tail','Acceleration_0_1S_body1','Acceleration_0_1S_body2',
+    #                                     'Acceleration_0_1S_body3','Acceleration_0_1S_head',
+    #                                     'Acceleration_0_3S_tail','Acceleration_0_3S_body1','Acceleration_0_3S_body2',
+    #                                     'Acceleration_0_3S_body3','Acceleration_0_3S_head',
+    #                                     'Acceleration_3_6S_tail','Acceleration_3_6S_body1',
+    #                                     'Acceleration_3_6S_body2','Acceleration_3_6S_body3','Acceleration_3_6S_head']
+    
+    # df_acceleration_per_frame.to_excel(writer_raw,index=False,sheet_name='Acc_01_03_36_mm_per_s_per_s')
     
     
-    #Print dataframe to Raw_Excel
-    frames_acceleration_per_frame= [ac_0_1_tail.squeeze(),ac_0_1_body1.squeeze(),ac_0_1_body2.squeeze(),
-                                    ac_0_1_body3.squeeze(),ac_0_1_head.squeeze(),
-                                    ac_0_3_tail.squeeze(), ac_0_3_body1.squeeze(), ac_0_3_body2.squeeze(),
-                                    ac_0_3_body3.squeeze(), ac_0_3_head.squeeze(),
-                                    ac_3_6_tail.squeeze(),ac_3_6_body1.squeeze(),ac_3_6_body2.squeeze(),
-                                    ac_3_6_body3.squeeze(),ac_3_6_head.squeeze()]
+    # #Save both raw and output excel files
+    # writer_raw.save()
     
-    df_acceleration_per_frame= (pd.DataFrame(frames_acceleration_per_frame)).T
-    df_acceleration_per_frame.columns= ['Acceleration_0_1S_tail','Acceleration_0_1S_body1','Acceleration_0_1S_body2',
-                                        'Acceleration_0_1S_body3','Acceleration_0_1S_head',
-                                        'Acceleration_0_3S_tail','Acceleration_0_3S_body1','Acceleration_0_3S_body2',
-                                        'Acceleration_0_3S_body3','Acceleration_0_3S_head',
-                                        'Acceleration_3_6S_tail','Acceleration_3_6S_body1',
-                                        'Acceleration_3_6S_body2','Acceleration_3_6S_body3','Acceleration_3_6S_head']
-    
-    df_acceleration_per_frame.to_excel(writer_raw,index=False,sheet_name='Acc_01_03_36_mm_per_s_per_s')
-    
-    
-    #Save both raw and output excel files
-    writer_raw.save()
-    
-    writer.save()
-    print("Ran:"+name +folder)
+    # writer.save()
+    # print("Ran:"+name +folder)
     
     

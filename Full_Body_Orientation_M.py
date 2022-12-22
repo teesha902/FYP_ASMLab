@@ -48,12 +48,12 @@ for f in csv_files:
     
     #Write to excel
     
-    file_data={'Fish Name':[name+folder],'Median Body Angle (deg)':[med_angle]}
+    # file_data={'Fish Name':[name+folder],'Median Body Angle (deg)':[med_angle]}
     
-    file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
+    # file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
     
-    writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Body_Orientation/'+d48+name+folder+'.xlsx')
-    file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-    writer.save()
-    print("Ran:"+name +folder)
+    # writer = pd.ExcelWriter('/Users/asmlabuser1/KF_SUMMER_2022/KilliFish_Analysis_Output/Output_Melodi/Orientation/Body_Orientation/'+d48+name+folder+'.xlsx')
+    # file_data_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+    # writer.save()
+    # print("Ran:"+name +folder)
     
