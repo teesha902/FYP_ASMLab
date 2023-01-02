@@ -1,6 +1,13 @@
 """
 The if name == main runs the script when called from command line.
 
+Parser is used to take in arguments from command line.
+--vis flag is used to visualise background mask, and current mask while LED is detected. 
+--video_path can be used to provide path to a folder containing videos if not in data/videos. 
+--output_path can be used to provide output path for csv if not data/output
+
+create_mask() creates a mask given the image/frame. it converts frame to LAB color format and applies a small gaussian blur to decrease noise, before applying a threshold on L for luminance(brightness), and the other 2 channels for filtering the red color. 
+
 In the main() function, we use video path to find all video files. 
 LED_times array saves the final result for each video before saving that data in a csv. 
 the for loop is the main code. for each video, a progress bar is initiated. 
@@ -13,14 +20,8 @@ we store all the timestamps at which LED is observed,
 and append the max and the min of this along with the video name to LED_times. 
 After all the videos are processed, this array is saved to a csv in data/output folder.
 
-
-create_mask() creates a mask given the image/frame. it converts frame to LAB color format and applies a small gaussian blur to decrease noise, before applying a threshold on L for luminance(brightness), and the other 2 channels for filtering the red color. 
-
-Parser is used to take in arguments from command line.
---vis flag is used to visualise background mask, and current mask while LED is detected. 
---video_path can be used to provide path to a folder containing videos if not in data/videos. 
---output_path can be used to provide output path for csv if not data/output
-
+There is a small check for the time difference between the first and last LED observation.
+If the difference is more than 7s, the program prints the video name and the time difference.
 Created by: Aritejh
 """
 
@@ -37,7 +38,7 @@ def create_mask(frame):
   mask = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
   return mask
 
-def main(video_path, out_path, vis):
+def main(video_path, vis, debug):
     # Creating the list of videos and initialising arrays
     vid_list = list(video_path.glob("*.mp4"))
     print(f' Videos to be processed are {[i.name for i in vid_list]}')
@@ -63,6 +64,7 @@ def main(video_path, out_path, vis):
             if bg == True:
                 mask_bg = create_mask(frame)
                 bg = False
+                print("bg created") if debug else None
                 if vis == True: 
                     cv2.imshow(f'{video_path.name} bg',mask_bg)
             if ret == True:  
@@ -72,12 +74,11 @@ def main(video_path, out_path, vis):
                 
                 mask_frame = create_mask(frame)
                 mask_bw = mask_frame - mask_bg
-
                 #find number of non-zero pixels and print timestamp and pixels count if nonzero pixels > 2500
                 if np.count_nonzero(mask_bw) > 2500:
                     time_for_video.append(video.get(cv2.CAP_PROP_POS_MSEC))
                     # print timestamp of video frame
-                    # print(video.get(cv2.CAP_PROP_POS_MSEC))
+                    print(min(time_for_video), max(time_for_video)) if debug else None
                     # EXPERIMENT IF ERODE AND DILATE IS NEEDED
                     if vis == True:  
                         mask_dilate = cv2.dilate(mask_bw, None, iterations=3)
@@ -87,9 +88,9 @@ def main(video_path, out_path, vis):
                 # Break the loop
             else: 
                 break
-            
         LED_times.append([str(video_path.name), "{:.2f}".format(min(time_for_video)/1000), "{:.2f}".format(max(time_for_video)/1000)])        
-        
+        print(LED_times) if debug else None
+
         # When everything done, release the video capture object, progress bar, and close frames
         video.release()
         progress_bar.close()
@@ -102,12 +103,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--video_path", default = "./data/videos/", help="the filepath to video files if not default")
     parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not default")
-
+    parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
     parser.add_argument("--vis", action="store_true", default = False, help="visualise (default is false)")
     args = parser.parse_args()
     video_path = Path(args.video_path) 
     out_path = Path(args.output_path) 
     vis = args.vis
-    LED_times = main(video_path, out_path, vis)
-
-    np.savetxt(Path(out_path, "LED_times.csv"),LED_times, delimiter=',', fmt = "%s" )
+    debug = args.debug
+    LED_times = main(video_path, vis, debug)
+    for i in LED_times:
+        if i[2]-i[1] > 7:
+            print(f'problem detected in {i[0]}. time difference is {i[2]-i[1]}')
+    # TODO: verification of output
+    csv_path = Path(out_path, "LED_times.csv")
+    print(f'saving to {csv_path}')
+    np.savetxt(csv_path, LED_times, delimiter=',', fmt = "%s" )
