@@ -1,3 +1,29 @@
+"""
+The if name == main runs the script when called from command line.
+
+In the main() function, we use video path to find all video files. 
+LED_times array saves the final result for each video before saving that data in a csv. 
+the for loop is the main code. for each video, a progress bar is initiated. 
+a capture object is opened to process each frame using opencv. 
+bg flag tracks if a background mask has been created or not, which is done on the first frame. 
+the small bg if loop stores the background mask in bg_mask variable and then turns flag to false. 
+Next, we go through all the frames wherein a mask for the frame is created, 
+after which we subtract background mask from the current frame's mask. 
+we store all the timestamps at which LED is observed, 
+and append the max and the min of this along with the video name to LED_times. 
+After all the videos are processed, this array is saved to a csv in data/output folder.
+
+
+create_mask() creates a mask given the image/frame. it converts frame to LAB color format and applies a small gaussian blur to decrease noise, before applying a threshold on L for luminance(brightness), and the other 2 channels for filtering the red color. 
+
+Parser is used to take in arguments from command line.
+--vis flag is used to visualise background mask, and current mask while LED is detected. 
+--video_path can be used to provide path to a folder containing videos if not in data/videos. 
+--output_path can be used to provide output path for csv if not data/output
+
+Created by: Aritejh
+"""
+
 import numpy as np
 import argparse
 import cv2
