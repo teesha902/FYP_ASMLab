@@ -3,31 +3,22 @@
 import random
 import numpy as np
 import pandas as pd
-import os
 import glob
+import argparse
 from pathlib import Path
+from tqdm import tqdm
 
-#Read in CSV file
-
-# path = input('Input full path name of folder  where the relevant raw CSV files are located (in quotations)')
-# csv_files = glob.glob(os.path.join('.\\data\\csv\\', "*.csv"))[:2]
-path = Path("./data/outputs/")
-p = Path("./data/csv/").glob('*.csv')
-csv_files = [x for x in p if x.is_file()]
-
-for f in csv_files:
+def main(f, debug):
     # read the csv file
     csv = pd.read_csv(f)
-    # full_path = (f.split("\\")[-1])
-    full_path = os.path.basename(f)
-    print(full_path)
+    full_path = (f.split("\\")[-1])
     name=full_path[66:68]
     d77='d77_'
     folder=full_path[68:71]
     print(name + folder)
     exp_time =int(csv.iloc[0,22])
     LED= int(csv.iloc[0,23])
-
+    
     #calculate frame rate/frames per second
     n_row=3
     frame_per_sec = (len(csv)-n_row) / int(exp_time)
@@ -55,16 +46,16 @@ for f in csv_files:
     twelve_span_df = pd.concat(twelve_span, axis=1)
 
     twelve_span_df.columns = ["Frames_bef","Tail_X","Tail_Y",'Tail_L',
-                              'Body1_X','Body1_Y','Body1_L',
-                              'Body2_X','Body2_Y','Body2_L',
-                              'Body3_X','Body3_Y','Body3_L',
-                              'Head_X','Head_Y','Head_L',
+                            'Body1_X','Body1_Y','Body1_L',
+                            'Body2_X','Body2_Y','Body2_L',
+                            'Body3_X','Body3_Y','Body3_L',
+                            'Head_X','Head_Y','Head_L',
 
-                              "Frames_Aft","Tail_X","Tail_Y",'Tail_L',
-                              'Body1_X','Body1_Y','Body1_L',
-                              'Body2_X','Body2_Y','Body2_L',
-                              'Body3_X','Body3_Y','Body3_L',
-                              'Head_X','Head_Y','Head_L']#32 "Frames_bef","Frames_Aft"
+                            "Frames_Aft","Tail_X","Tail_Y",'Tail_L',
+                            'Body1_X','Body1_Y','Body1_L',
+                            'Body2_X','Body2_Y','Body2_L',
+                            'Body3_X','Body3_Y','Body3_L',
+                            'Head_X','Head_Y','Head_L']#32 "Frames_bef","Frames_Aft"
     # To shift cells to top
     frame_bef= twelve_span_df.iloc[:, 0].index.get_loc(twelve_span_df.iloc[:, 0].first_valid_index())
     twelve_span_df.iloc[:, 0] = twelve_span_df.iloc[:, 0].shift(-(frame_bef))
@@ -468,7 +459,23 @@ for f in csv_files:
     #write to new CSV
     three_sec_seg_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_3S.csv')
     print("Ran:"+name +folder)
-    break
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--csv_path", default = "./data/csv/", help="the filepath to DLC and LED csv files if not /data/csv/")
+    parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not /data/output/")
+    parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
+    args = parser.parse_args()
+    csv_path = Path(args.csv_path) 
+    out_path = Path(args.output_path) 
+    debug = args.debug
+
+    csv_files = [f for f in csv_path.glob("**/*.csv")]
+    print(csv_files) if debug else None
+    print(f"Found {len(csv_files)} csv files")
+    for f in csv_files[0:1]:
+        outfile = main(f, debug)
+        # save files
+        
 
 
