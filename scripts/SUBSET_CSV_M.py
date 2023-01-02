@@ -8,34 +8,43 @@ import argparse
 from pathlib import Path
 from tqdm import tqdm
 
-def main(f, debug):
+
+def create_subset(csv, start_frame, end_frame):
+    subset = pd.DataFrame(csv.loc[start_frame:end_frame])
+    return subset
+
+
+def main(csv_filepath, led_video_info,  debug):
     # read the csv file
-    csv = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    name=full_path[66:68]
-    d77='d77_'
-    folder=full_path[68:71]
-    print(name + folder)
-    exp_time =int(csv.iloc[0,22])
-    LED= int(csv.iloc[0,23])
+    name = csv_filepath.name.split("DLC")[0] + ".mp4"
+
+    csv = pd.read_csv(csv_filepath)
+    # full_path = (f.split("\\")[-1])
+    # name=full_path[66:68]
+    # d77='d77_'
+    # folder=full_path[68:71]
+    # print(name + folder)
+    # exp_time =int(csv.iloc[0,22])
+    # LED= int(csv.iloc[0,23])
     
     #calculate frame rate/frames per second
-    n_row=3
-    frame_per_sec = (len(csv)-n_row) / int(exp_time)
-    frame_per_sec_r= round(frame_per_sec)
+    # n_row=3
+    # frame_per_sec = (len(csv)-n_row) / int(exp_time)
+    # frame_per_sec_r= round(frame_per_sec)
 
-    #Find frame where LED light turns on
-    n_column= 1
-    last_column= 16
-    LED_Frame= (int(LED)*frame_per_sec_r)+n_row+1
+    #Find frame where LED light turns on, -1 because DLC outputs first frame as 0
+    LED_start_frame, LED_end_frame, fps = led_video_info[3]-1, led_video_info[4]-1, led_video_info[5]
+    frame_per_sec_r= round(fps)
+    
+    # no of columns in csv file
+    no_of_columns = len(csv.columns)
+
+    df['A'] = df['A'].apply(lambda x: x+1 if isinstance(x, int) else x)
 
     #Subset data frame to extract 6 seconds before LED light turns on (-6 to 0) and 6 seconds after (0 to 6)
-    before_LED = pd.DataFrame(csv.iloc[LED_Frame-(frame_per_sec_r*6):LED_Frame,n_column:last_column])
-    first_bef= before_LED.index.values[0]
-    last_bef=before_LED.index.values[0] + (6*frame_per_sec_r)
-    frame_order_bef = pd.Series(np.arange((first_bef-n_row), (last_bef-n_row), 1))
+    before_LED = pd.DataFrame(csv.loc[LED_start_frame - 6*frame_per_sec_r:LED_start_frame])
 
-    after_LED = pd.DataFrame(csv.iloc[LED_Frame:(LED_Frame+(frame_per_sec_r * 6)),n_column:last_column])
+    after_LED = pd.DataFrame(csv.loc[LED_start_frame - 6*frame_per_sec_r:LED_start_frame])
     first_aft = after_LED.index.values[0]
     last_aft = after_LED.index.values[0] + (6 * frame_per_sec_r)
     frame_order_aft = pd.Series(np.arange((first_aft+n_row), (last_aft+n_row), 1))
@@ -44,7 +53,30 @@ def main(f, debug):
     #Combine the two data frames
     twelve_span=[frame_order_bef,before_LED,frame_order_aft,after_LED]
     twelve_span_df = pd.concat(twelve_span, axis=1)
+    # Create CSV for 12 second span
+    twelve_span_df.columns = ["Frames_bef", "Tail_X", "Tail_Y", "Tail_L",
+                            "Body1_X", "Body1_Y", "Body1_L",
+                            "Body2_X", "Body2_Y", "Body2_L",
+                            "Body3_X", "Body3_Y", "Body3_L",
+                            "Head_X", "Head_Y", "Head_L",
 
+                            "Frames_Aft", "Tail_X", "Tail_Y", "Tail_L",
+                            "Body1_X", "Body1_Y", "Body1_L",
+                            "Body2_X", "Body2_Y", "Body2_L",
+                            "Body3_X", "Body3_Y", "Body3_L",
+                            "Head_X", "Head_Y", "Head_L"] # 32 "Frames_bef","Frames_Aft"
+
+    # Shift cells to top
+    columns = ["Frames_bef", "Tail_X", "Tail_Y", "Tail_L",
+            "Body1_X", "Body1_Y", "Body1_L",
+            "Body2_X", "Body2_Y", "Body2_L",
+            "Body3_X", "Body3_Y", "Body3_,
+            "Head_X", "Head_Y", "Head_L"]
+
+    for column in columns:
+        first_valid_index = twelve_span_df[column].first_valid_index()
+        twelve_span_df[column] = twelve_span_df[column].shift(-(first_valid_index))
+"""
     twelve_span_df.columns = ["Frames_bef","Tail_X","Tail_Y",'Tail_L',
                             'Body1_X','Body1_Y','Body1_L',
                             'Body2_X','Body2_Y','Body2_L',
@@ -152,7 +184,7 @@ def main(f, debug):
 
     a6 = twelve_span_df.iloc[:, 31].index.get_loc(twelve_span_df.iloc[:, 31].first_valid_index())
     twelve_span_df.iloc[:, 31] = twelve_span_df.iloc[:, 31].shift(-(a6))
-
+"""
     # #write to new CSV
     twelve_span_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_12S.csv')#('/Users/saoirselightbourne/Desktop/Cropped_CSV/12_sec/'+big_folder+'/'+big_folder+'-'+folder+'/'+name +folder+ '_12S.csv')
 
@@ -460,21 +492,38 @@ def main(f, debug):
     three_sec_seg_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_3S.csv')
     print("Ran:"+name +folder)
 
+
 if __name__ == '__main__':
+
+    # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv_path", default = "./data/csv/", help="the filepath to DLC and LED csv files if not /data/csv/")
+    parser.add_argument("--csv_path", default = "./data/csv/", help="the filepath to DLC csvs if not /data/csv/")
+    parser.add_argument("--LED_path", default = "./data/output/", help="the filepath to LED_times csv if not /data/output/")
     parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not /data/output/")
     parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
     args = parser.parse_args()
     csv_path = Path(args.csv_path) 
     out_path = Path(args.output_path) 
     debug = args.debug
+    LED_path = Path(args.LED_path)
 
+    # Read in LED times
+    LED_df = pd.read_csv(LED_path / "LED_times.csv")
+
+    # Get all csv files
     csv_files = [f for f in csv_path.glob("**/*.csv")]
     print(csv_files) if debug else None
     print(f"Found {len(csv_files)} csv files")
+
+    # Run main function on each csv file
     for f in csv_files[0:1]:
-        outfile = main(f, debug)
+        name = f.name.split("DLC")[0] + ".mp4"
+
+        led_video_info = LED_df["name"].isin([name])
+        assert led_video_info.any(), f"Could not find LED times for {name}"
+        assert led_video_info.sum() == 6, f"Found multiple LED times for {name}"
+
+        outfile = main(f, led_video_info, debug)
         # save files
         
 

@@ -43,7 +43,9 @@ def main(video_path, vis, debug):
     vid_list = list(video_path.glob("*.mp4"))
     print(f' total videos found are {len(vid_list)}')
     print(f' Videos to be processed are {[i.name for i in vid_list]}') if debug else None
-    LED_times = [["name", "start time(s)", "end time(s)"]]
+    LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame", "fps"]]
+
+    problem_vids = []
     
     #Looping over videos
     for video_path in vid_list:
@@ -54,6 +56,7 @@ def main(video_path, vis, debug):
         progress_bar = tqdm(total=total_frames)
         
         time_for_video=[]
+        frame_for_video=[]
         bg = True
         mask_bg = []
         
@@ -78,8 +81,9 @@ def main(video_path, vis, debug):
                 #find number of non-zero pixels and print timestamp and pixels count if nonzero pixels > 2500
                 if np.count_nonzero(mask_bw) > 2500:
                     time_for_video.append(video.get(cv2.CAP_PROP_POS_MSEC))
+                    frame_for_video.append(video.get(cv2.CAP_PROP_POS_FRAMES))
                     # print timestamp of video frame
-                    print(min(time_for_video), max(time_for_video)) if debug else None
+                    print(min(time_for_video), max(time_for_video), min(frame_for_video), max(frame_for_video)) if debug else None
                     # EXPERIMENT IF ERODE AND DILATE IS NEEDED
                     if vis == True:  
                         mask_dilate = cv2.dilate(mask_bw, None, iterations=3)
@@ -89,14 +93,19 @@ def main(video_path, vis, debug):
                 # Break the loop
             else: 
                 break
-        LED_times.append([str(video_path.name), "{:.2f}".format(min(time_for_video)/1000), "{:.2f}".format(max(time_for_video)/1000)])        
-        print(LED_times) if debug else None
+        try:
+            LED_times.append([str(video_path.name), f"{min(time_for_video)/1000:.2f}", f"{max(time_for_video)/1000:.2f}", min(frame_for_video), max(frame_for_video), cv2.CAP_PROP_FPS ])        
+        except:
+            print(f"LED not found in {video_path.name}")
+            problem_vids.append(video_path.name)
+
 
         # When everything done, release the video capture object, progress bar, and close frames
         video.release()
         progress_bar.close()
+        print(LED_times[-1])
         cv2.destroyAllWindows()
-    return LED_times
+    return problem_vids, LED_times
 
 if __name__ == "__main__":
     
@@ -111,11 +120,18 @@ if __name__ == "__main__":
     out_path = Path(args.output_path) 
     vis = args.vis
     debug = args.debug
-    LED_times = main(video_path, vis, debug)
+
+    #main process
+    problem_vids, LED_times = main(video_path, vis, debug)
+
+    # output verification and error handling
+    if len(problem_vids) > 0:
+        print(f'No LED found in {problem_vids}')
     for i in LED_times:
         if i[2]-i[1] > 7:
             print(f'problem detected in {i[0]}. time difference is {i[2]-i[1]}')
-    # TODO: verification of output
+
+    # saving to csv        
     csv_path = Path(out_path, "LED_times.csv")
     print(f'saving to {csv_path}')
     np.savetxt(csv_path, LED_times, delimiter=',', fmt = "%s" )
