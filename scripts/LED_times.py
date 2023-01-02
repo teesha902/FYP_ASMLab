@@ -41,7 +41,8 @@ def create_mask(frame):
 def main(video_path, vis, debug):
     # Creating the list of videos and initialising arrays
     vid_list = list(video_path.glob("*.mp4"))
-    print(f' Videos to be processed are {[i.name for i in vid_list]}')
+    print(f' total videos found are {len(vid_list)}')
+    print(f' Videos to be processed are {[i.name for i in vid_list]}') if debug else None
     LED_times = [["name", "start time(s)", "end time(s)"]]
     
     #Looping over videos
