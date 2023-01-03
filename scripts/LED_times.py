@@ -50,21 +50,21 @@ def get_timestamps(timestamps, debug):
             first_timestamp = i
         else:
             time_difference += timestamp - timestamps[i - 1]
-            print(f"time difference is {time_difference}") if debug else None
+            # print(f"time difference is {time_difference}") if debug else None
 
             if time_difference > 2500 and time_difference < 6000:
                 last_timestamp = i
-                print(f"replacing last timestamp to {i}") if debug else None
+                # print(f"replacing last timestamp to {i}") if debug else None
 
             elif time_difference >= 6000:
-                print(f"replacing first timestamp with {i}") if debug else None
+                print(f"replacing first timestamp with {i}, appending {first_timestamp, last_timestamp}") if debug else None
                 final_timestamps.append([first_timestamp, last_timestamp])
                 first_timestamp = i
                 time_difference = 0
     
     if time_difference > 2500 and time_difference <6000 and [first_timestamp, last_timestamp] not in final_timestamps:
         final_timestamps.append([first_timestamp, last_timestamp])
-        print("appending final timestamps") if debug else None
+        print(f"appending final timestamps {first_timestamp, last_timestamp}") if debug else None
 
     return final_timestamps
 
@@ -74,7 +74,7 @@ def main(video_path, vis, debug):
     vid_list = list(video_path.glob("*.mp4"))
     print(f' total videos found are {len(vid_list)}')
     print(f' Videos to be processed are {[i.name for i in vid_list]}') if debug else None
-    LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame", "fps"]]
+    LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame"]]
 
     problem_vids = []
     
@@ -124,14 +124,14 @@ def main(video_path, vis, debug):
                 # Break the loop
             else: 
                 break
-
+        
         # When everything done, release the video capture object, progress bar, and close frames
         video.release()
         progress_bar.close()
         cv2.destroyAllWindows()
         
-        print(time_for_video) if debug else None
         #cluster analysis to find the start index and end index of LED
+        print(time_for_video) if debug else None
         final_timestamps = get_timestamps(time_for_video, debug)
         print(final_timestamps) if debug else None
 
@@ -143,13 +143,9 @@ def main(video_path, vis, debug):
         # appends the LED times to the list
         else:
             for i in final_timestamps:
-                LED_times.append([str(video_path.name), f"{time_for_video[i[0]]/1000:.2f}", f"{time_for_video[i[1]]/1000:.2f}", frame_for_video[i[0]], frame_for_video[i[1]], cv2.CAP_PROP_FPS]) 
+                LED_times.append([str(video_path.name), f"{time_for_video[i[0]]/1000:.2f}", f"{time_for_video[i[1]]/1000:.2f}", frame_for_video[i[0]], frame_for_video[i[1]]]) 
                 print(LED_times[-1])
-            # try:
-            #     LED_times.append([str(video_path.name), f"{min(time_for_video)/1000:.2f}", f"{max(time_for_video)/1000:.2f}", min(frame_for_video), max(frame_for_video), cv2.CAP_PROP_FPS ])        
-            # except:
-            #     print(f"\n LED not found in {video_path.name}")
-            #     problem_vids.append(video_path.name)
+
 
     return problem_vids, LED_times
 
