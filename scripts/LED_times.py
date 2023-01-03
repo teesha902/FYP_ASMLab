@@ -8,6 +8,8 @@ Parser is used to take in arguments from command line.
 
 create_mask() creates a mask given the image/frame. it converts frame to LAB color format and applies a small gaussian blur to decrease noise, before applying a threshold on L for luminance(brightness), and the other 2 channels for filtering the red color. 
 
+get_timestamps() takes in a list of timestamps and returns a list of timestamps where the LED is observed.
+
 In the main() function, we use video path to find all video files. 
 LED_times array saves the final result for each video before saving that data in a csv. 
 the for loop is the main code. for each video, a progress bar is initiated. 
@@ -32,11 +34,40 @@ from pathlib import Path
 from tqdm import tqdm
 
 def create_mask(frame):
-  frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
-  lower_threshold = (27*2.55, 25+128, -20+128)
-  upper_threshold = (100*2.55, 128+128, 40+128)
-  mask = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
-  return mask
+    frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
+    lower_threshold = (27*2.55, 25+128, -20+128)
+    upper_threshold = (100*2.55, 128+128, 40+128)
+    mask = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
+    return mask
+
+def get_timestamps(timestamps, debug):
+    first_timestamp = None
+    last_timestamp = None
+    time_difference = 0
+    final_timestamps = []
+    for i, timestamp in enumerate(timestamps):
+        if i == 0:
+            first_timestamp = i
+        else:
+            time_difference += timestamp - timestamps[i - 1]
+            print(f"time difference is {time_difference}") if debug else None
+
+            if time_difference > 2500 and time_difference < 6000:
+                last_timestamp = i
+                print(f"replacing last timestamp to {i}") if debug else None
+
+            elif time_difference >= 6000:
+                print(f"replacing first timestamp with {i}") if debug else None
+                final_timestamps.append([first_timestamp, last_timestamp])
+                first_timestamp = i
+                time_difference = 0
+    
+    if time_difference > 2500 and time_difference <6000 and [first_timestamp, last_timestamp] not in final_timestamps:
+        final_timestamps.append([first_timestamp, last_timestamp])
+        print("appending final timestamps") if debug else None
+
+    return final_timestamps
+
 
 def main(video_path, vis, debug):
     # Creating the list of videos and initialising arrays
@@ -68,7 +99,7 @@ def main(video_path, vis, debug):
             if bg == True:
                 mask_bg = create_mask(frame)
                 bg = False
-                print("bg created") if debug else None
+                print("\n bg created") if debug else None
                 if vis == True: 
                     cv2.imshow(f'{video_path.name} bg',mask_bg)
             if ret == True:  
@@ -82,8 +113,8 @@ def main(video_path, vis, debug):
                 if np.count_nonzero(mask_bw) > 2500:
                     time_for_video.append(video.get(cv2.CAP_PROP_POS_MSEC))
                     frame_for_video.append(video.get(cv2.CAP_PROP_POS_FRAMES))
-                    # print timestamp of video frame
-                    print(min(time_for_video), max(time_for_video), min(frame_for_video), max(frame_for_video)) if debug else None
+                    # print timestamp of video frame for debugging
+                    # print(min(time_for_video), max(time_for_video), min(frame_for_video), max(frame_for_video)) if debug else None
                     # EXPERIMENT IF ERODE AND DILATE IS NEEDED
                     if vis == True:  
                         mask_dilate = cv2.dilate(mask_bw, None, iterations=3)
@@ -93,18 +124,33 @@ def main(video_path, vis, debug):
                 # Break the loop
             else: 
                 break
-        try:
-            LED_times.append([str(video_path.name), f"{min(time_for_video)/1000:.2f}", f"{max(time_for_video)/1000:.2f}", min(frame_for_video), max(frame_for_video), cv2.CAP_PROP_FPS ])        
-        except:
-            print(f"LED not found in {video_path.name}")
-            problem_vids.append(video_path.name)
-
 
         # When everything done, release the video capture object, progress bar, and close frames
         video.release()
         progress_bar.close()
-        print(LED_times[-1])
         cv2.destroyAllWindows()
+        
+        print(time_for_video) if debug else None
+        #cluster analysis to find the start index and end index of LED
+        final_timestamps = get_timestamps(time_for_video, debug)
+        print(final_timestamps) if debug else None
+
+        # output verification
+        if any(item is None for item in final_timestamps):
+            problem_vids.append(video_path.name)
+            print(f"\n LED timing not figured out in {video_path.name}")
+        
+        # appends the LED times to the list
+        else:
+            for i in final_timestamps:
+                LED_times.append([str(video_path.name), f"{time_for_video[i[0]]/1000:.2f}", f"{time_for_video[i[1]]/1000:.2f}", frame_for_video[i[0]], frame_for_video[i[1]], cv2.CAP_PROP_FPS]) 
+                print(LED_times[-1])
+            # try:
+            #     LED_times.append([str(video_path.name), f"{min(time_for_video)/1000:.2f}", f"{max(time_for_video)/1000:.2f}", min(frame_for_video), max(frame_for_video), cv2.CAP_PROP_FPS ])        
+            # except:
+            #     print(f"\n LED not found in {video_path.name}")
+            #     problem_vids.append(video_path.name)
+
     return problem_vids, LED_times
 
 if __name__ == "__main__":
@@ -126,11 +172,8 @@ if __name__ == "__main__":
 
     # output verification and error handling
     if len(problem_vids) > 0:
-        print(f'No LED found in {problem_vids}')
-    for i in LED_times:
-        if i[2]-i[1] > 7:
-            print(f'problem detected in {i[0]}. time difference is {i[2]-i[1]}')
-
+        print(f'problems found in {problem_vids}')
+    
     # saving to csv        
     csv_path = Path(out_path, "LED_times.csv")
     print(f'saving to {csv_path}')
