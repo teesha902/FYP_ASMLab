@@ -184,7 +184,7 @@ def main(csv_filepath, led_video_info,  debug):
 
     a6 = twelve_span_df.iloc[:, 31].index.get_loc(twelve_span_df.iloc[:, 31].first_valid_index())
     twelve_span_df.iloc[:, 31] = twelve_span_df.iloc[:, 31].shift(-(a6))
-"""
+
     # #write to new CSV
     twelve_span_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_12S.csv')#('/Users/saoirselightbourne/Desktop/Cropped_CSV/12_sec/'+big_folder+'/'+big_folder+'-'+folder+'/'+name +folder+ '_12S.csv')
 
@@ -491,7 +491,7 @@ def main(csv_filepath, led_video_info,  debug):
     #write to new CSV
     three_sec_seg_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_3S.csv')
     print("Ran:"+name +folder)
-
+"""
 
 if __name__ == '__main__':
 
