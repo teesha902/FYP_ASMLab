@@ -36,12 +36,14 @@ import argparse
 import cv2
 from pathlib import Path
 from tqdm import tqdm
+import json
 
-def create_mask(frame):
+def create_mask(frame, sensitive):
     frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
-    lower_threshold = (35*2.55, 25+128, -20+128) #changed from 27 to 35 as brightly lit videos were too sensitive
+    lower_threshold = (35*2.55, 25+128, -20+128) if not sensitive else (25*2.55, 25+128, -20+128) #changed from 27 to 35 as brightly lit videos were too sensitive
     upper_threshold = (100*2.55, 128+128, 40+128)
     mask = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
+    # print(f'sensitive analysis, lower threshold set to {lower_threshold}') if sensitive else None 
     return mask
 
 def get_timestamps(timestamps, debug):
@@ -60,7 +62,7 @@ def get_timestamps(timestamps, debug):
                 last_timestamp = i
                 # print(f"replacing last timestamp to {timestamps[i]}") if debug else None
 
-            elif time_difference >= 6000:
+            elif time_difference >= 6000 and last_timestamp != None:
                 if last_timestamp > first_timestamp:
                     print(f"replacing first timestamp with {timestamps[i]}, appending {timestamps[first_timestamp], timestamps[last_timestamp]}") if debug else None
                     final_timestamps.append([first_timestamp, last_timestamp])
@@ -73,7 +75,7 @@ def get_timestamps(timestamps, debug):
 
     return final_timestamps
 
-def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids):
+def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sensitive = False):
     video = cv2.VideoCapture(str(video_path))
     print(video_path.name)
         
@@ -85,13 +87,13 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids):
     bg = True
     mask_bg = []
         
-        # Read until video is completed
+    # Read until video is completed
     while(video.isOpened()):
-            # Capture frame-by-frame
+        # Capture frame-by-frame
         ret, frame = video.read()
 
         if bg == True and video.get(cv2.CAP_PROP_POS_MSEC) > 5000:
-            mask_bg = create_mask(frame)
+            mask_bg = create_mask(frame, sensitive)
             bg = False
             print("\n bg created") if debug else None
             if vis == True: 
@@ -101,7 +103,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids):
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
                 
-            mask_frame = create_mask(frame)
+            mask_frame = create_mask(frame, sensitive)
             mask_bw = mask_frame - mask_bg
                 #find number of non-zero pixels and print timestamp and pixels count if nonzero pixels > 2500
             if np.count_nonzero(mask_bw) > 2500:
@@ -125,7 +127,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids):
     progress_bar.close()
     cv2.destroyAllWindows()
         
-        #cluster analysis to find the start index and end index of LED
+    #cluster analysis to find the start index and end index of LED
     print(time_for_video) if debug else None
     final_timestamps = get_timestamps(time_for_video, debug)
     print(final_timestamps) if debug else None
@@ -134,14 +136,17 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids):
     if len(time_for_video) == 0 or len(final_timestamps) == 0 :
         problem_vids['LED not observed'].append(video_path.name)
         print(f"\n LED not observed in {video_path.name}")
+        return False
     elif len(final_timestamps) > max_LED:
         problem_vids['Too many LED events'].append(video_path.name)
         print(f"\n Too many LED events in {video_path.name}")
         # appends the LED times to the list
+        return False
     else:
         for i in final_timestamps:
             LED_times.append([str(video_path.name), f"{time_for_video[i[0]]/1000:.2f}", f"{time_for_video[i[1]]/1000:.2f}", frame_for_video[i[0]], frame_for_video[i[1]]]) 
             print(LED_times[-1])
+        return True
 
 
 def main(video_path, vis, debug, max_LED):
@@ -182,10 +187,23 @@ if __name__ == "__main__":
     problem_vids, LED_times = main(video_path, vis, debug, max_LED)
 
     # output verification and error handling
-    if len(problem_vids.values) > 0:
-        print(f'problems found in {problem_vids.values}')
+    if sum(len(x for x in problem_vids.values()))  > 0:
+        print(f'problems found in {problem_vids}')
+        for i in problem_vids['LED not observed']:
+            print(f'running reduced threshold analysis for {i}')
+            attempt = process_video(Path(video_path / i), vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
+            if attempt == False:
+                print(f'failed to process {i}')
+            else:
+                print(f'successfully processed {i}')
+                problem_vids['LED not observed'].remove(i)
+        print(f'problems found in {problem_vids}, after running reduced threshold analysis')
     
     # saving to csv        
     csv_path = Path(out_path, "LED_times.csv")
+    problem_vids_path = Path(out_path, "problem_vids.txt")
     print(f'saving to {csv_path}')
     np.savetxt(csv_path, LED_times, delimiter=',', fmt = "%s" )
+    # save problem vids to out_path/problem_vids.txt
+    with open(problem_vids_path, 'w') as fp:
+        fp.write(json.dumps(problem_vids))
