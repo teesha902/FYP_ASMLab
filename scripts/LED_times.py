@@ -58,18 +58,18 @@ def get_timestamps(timestamps, debug):
             time_difference += timestamp - timestamps[i - 1]
             # print(f"time difference is {time_difference}") if debug else None
 
-            if time_difference > 2500 and time_difference < 6000:
+            if time_difference > 2500 and time_difference < 6500:
                 last_timestamp = i
                 # print(f"replacing last timestamp to {timestamps[i]}") if debug else None
 
-            elif time_difference >= 6000 and last_timestamp != None:
+            elif time_difference >= 6500 and last_timestamp != None:
                 if last_timestamp > first_timestamp:
                     print(f"replacing first timestamp with {timestamps[i]}, appending {timestamps[first_timestamp], timestamps[last_timestamp]}") if debug else None
                     final_timestamps.append([first_timestamp, last_timestamp])
                 first_timestamp = i
                 time_difference = 0
     
-    if time_difference > 2500 and time_difference <6000 and [first_timestamp, last_timestamp] not in final_timestamps:
+    if time_difference > 2500 and time_difference <6500 and [first_timestamp, last_timestamp] not in final_timestamps:
         final_timestamps.append([first_timestamp, last_timestamp])
         print(f"appending final timestamps {first_timestamp, last_timestamp}") if debug else None
 
@@ -135,11 +135,11 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
         # output verification
     if len(time_for_video) == 0 or len(final_timestamps) == 0 :
         problem_vids['LED not observed'].append(video_path.name)
-        print(f"\n LED not observed in {video_path.name}")
+        print(f"LED not observed in {video_path.name}")
         return False
     elif len(final_timestamps) > max_LED:
         problem_vids['Too many LED events'].append(video_path.name)
-        print(f"\n Too many LED events in {video_path.name}")
+        print(f"Too many LED events in {video_path.name}")
         # appends the LED times to the list
         return False
     else:
@@ -159,7 +159,7 @@ def main(video_path, vis, debug, max_LED):
     problem_vids = {'Too many LED events': [], 'LED not observed': []}
     
     #Looping over videos
-    for video_path in vid_list:
+    for video_path in vid_list[:1]:
         process_video(video_path, vis, debug, max_LED, LED_times, problem_vids)
 
     # add processing for problem vids to go for lower threshold
@@ -185,13 +185,17 @@ if __name__ == "__main__":
 
     #main process
     problem_vids, LED_times = main(video_path, vis, debug, max_LED)
-
+    # problem_vids = {"Too many LED events": [], "LED not observed": ["146_M.mp4"]}
+    # LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame"]]
     # output verification and error handling
-    if sum(len(x for x in problem_vids.values()))  > 0:
+    if sum(len(x) for x in problem_vids.values())  > 0:
+        print("trigger") if debug else None
         print(f'problems found in {problem_vids}')
-        for i in problem_vids['LED not observed']:
+        re_analyse = problem_vids['LED not observed']
+        for i in re_analyse:
             print(f'running reduced threshold analysis for {i}')
             attempt = process_video(Path(video_path / i), vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
+            # attempt = False
             if attempt == False:
                 print(f'failed to process {i}')
             else:
