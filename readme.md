@@ -18,6 +18,7 @@
 
 # Additions
 **main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository.
+
 **LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos.
 
 ## new file structure
