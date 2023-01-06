@@ -21,6 +21,7 @@
 **LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos.
 
 ## new file structure
+```
 ASM_Killifish_repo/
 ├── data/
 │   ├── output (used to store outputs from the scripts)
@@ -31,6 +32,7 @@ ASM_Killifish_repo/
 ├── readme.md (BUT READ THIS FIRST!)
 ├── requirements.txt (keep track of packages used)
 └── .gitignore (hidden)
+```
 
 ## Previous Workflow: 
 ### video ingestion
