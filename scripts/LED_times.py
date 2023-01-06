@@ -1,33 +1,44 @@
 """
-The if name == main runs the script when called from command line.
+The if name == main runs the script when called from command line. This part calls all the other functions.
+This is used so that we can import the script without running it. 
 
 Parser is used to take in arguments from command line.
 --vis flag is used to visualise background mask, and current mask while LED is detected. 
 --video_path can be used to provide path to a folder containing videos if not in data/videos. 
 --output_path can be used to provide output path for csv if not data/output
+--vis allows us to observe the background and the subtracted mask (default is false). 
+--max_led allows to allow for multiple led events. If the folder may contain videos with 2 or more LED 
+events, this can be used. Default is 2.
 
 create_mask() creates a mask given the image/frame. It converts frame to LAB color format and applies a 
 small gaussian blur to decrease noise, before applying a threshold on L for luminance(brightness), and 
 the other 2 channels for filtering the red color. 
+Sensitive variable is used to reduce threshold of brightness. This is necessary as we need to filter out
+ the higher brightness videos first by using a higher threshold (35) first, and then run the remaining 
+ videos where no led was observed through the reduced brightness threshold(25).
 
 get_timestamps() takes in a list of timestamps and returns a list of timestamps where the LED is observed.
 It uses clustering to find the start and end of LED observation. the cluster limits are 2.5s to 6s.
 If the time difference between 2 timestamps is more than 6s, it is considered as a new observation.
 
-In the main() function, we use video path to find all video files. 
-LED_times array saves the final result for each video before saving that data in a csv. 
-the for loop is the main code. for each video, a progress bar is initiated. 
-a capture object is opened to process each frame using opencv. 
-bg flag tracks if a background mask has been created or not, which is done on the first frame. 
-the small bg if loop stores the background mask in bg_mask variable and then turns flag to false. 
-Next, we go through all the frames wherein a mask for the frame is created, 
-after which we subtract background mask from the current frame's mask. 
-we store all the timestamps at which LED is observed, 
-and append the max and the min of this along with the video name to LED_times. 
-After all the videos are processed, this array is saved to a csv in data/output folder.
+In the main() function, we use video path to find all video files. LED_times array saves the final result 
+for each video before saving that data in a csv. The for loop is the main code. for each video, a progress bar
+is initiated. A capture object is opened to process each frame using opencv. 
 
-There is a small check for the time difference between the first and last LED observation.
-If the difference is more than 7s, the program prints the video name and the time difference.
+bg flag tracks if a background mask has been created or not, which is done on the frame after **5s**. 
+This is done to eliminate effect of shaking at the start of the videos. the small bg if loop stores 
+the background mask in bg_mask variable and then turns flag to false.
+
+Next, we go through all the frames wherein a mask for the frame is created, after which we subtract 
+background mask from the current frame's mask. we store all the timestamps at which LED is observed.
+Next, cluster analysis is used to find the start and end time for the LED event. If no led event or 
+more than max_led events are observed, the error is printed and the video is appended to problem_vids, 
+otherwise the timings are added to LED_times. 
+
+For the videos from problem videos with no LED event, we re-analyse with a lower "sensitive" threshold
+to check if detection works. The videos with problems are printed and saved to problem_vids.txt 
+and the LED_times is saved to LED_times.csv to the out_path, by default the data/output folder.
+
 Created by: Aritejh
 """
 
@@ -40,39 +51,37 @@ import json
 
 def create_mask(frame, sensitive):
     frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
-    lower_threshold = (35*2.55, 25+128, -20+128) if not sensitive else (25*2.55, 25+128, -20+128) #changed from 27 to 35 as brightly lit videos were too sensitive
+    lower_threshold = (35*2.55, 25+128, -20+128) if not sensitive else (25*2.55, 25+128, -20+128) # changed from 27 to 35 as brightly lit videos were too sensitive
     upper_threshold = (100*2.55, 128+128, 40+128)
     mask = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
     # print(f'sensitive analysis, lower threshold set to {lower_threshold}') if sensitive else None 
     return mask
 
 def get_timestamps(timestamps, debug):
-    first_timestamp = None
-    last_timestamp = None
-    time_difference = 0
     final_timestamps = []
     for i, timestamp in enumerate(timestamps):
         if i == 0:
             first_timestamp = i
+            last_timestamp = i
+            time_difference = 0
         else:
             time_difference += timestamp - timestamps[i - 1]
             # print(f"time difference is {time_difference}") if debug else None
 
-            if time_difference > 2500 and time_difference < 6500:
+            if 2500 < time_difference < 6500:
                 last_timestamp = i
                 # print(f"replacing last timestamp to {timestamps[i]}") if debug else None
 
-            elif time_difference >= 6500 and last_timestamp != None:
+            elif time_difference >= 6500:
                 if last_timestamp > first_timestamp:
                     print(f"replacing first timestamp with {timestamps[i]}, appending {timestamps[first_timestamp], timestamps[last_timestamp]}") if debug else None
                     final_timestamps.append([first_timestamp, last_timestamp])
                 first_timestamp = i
                 time_difference = 0
     
-    if time_difference > 2500 and time_difference <6500 and [first_timestamp, last_timestamp] not in final_timestamps:
+    if 2500 < time_difference < 6500 and [first_timestamp, last_timestamp] not in final_timestamps:
         final_timestamps.append([first_timestamp, last_timestamp])
         print(f"appending final timestamps {first_timestamp, last_timestamp}") if debug else None
-
     return final_timestamps
 
 def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sensitive = False):
@@ -161,13 +170,9 @@ def main(video_path, vis, debug, max_LED):
     #Looping over videos
     for video_path in vid_list[:1]:
         process_video(video_path, vis, debug, max_LED, LED_times, problem_vids)
-
-    # add processing for problem vids to go for lower threshold
-
     return problem_vids, LED_times
 
 if __name__ == "__main__":
-    
     # Parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--video_path", default = "./data/videos/", help="the filepath to video files if not default")
@@ -185,17 +190,16 @@ if __name__ == "__main__":
 
     #main process
     problem_vids, LED_times = main(video_path, vis, debug, max_LED)
-    # problem_vids = {"Too many LED events": [], "LED not observed": ["146_M.mp4"]}
-    # LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame"]]
     # output verification and error handling
     if sum(len(x) for x in problem_vids.values())  > 0:
         print("trigger") if debug else None
         print(f'problems found in {problem_vids}')
+
+        # Re-analyse no LED videos with a lower threshold
         re_analyse = problem_vids['LED not observed']
         for i in re_analyse:
             print(f'running reduced threshold analysis for {i}')
             attempt = process_video(Path(video_path / i), vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
-            # attempt = False
             if attempt == False:
                 print(f'failed to process {i}')
             else:

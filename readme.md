@@ -1,20 +1,38 @@
 # killifish python scripts
 
 ## TODO:
-- find and stabilize package and python versions, upgrade if neccessary
-- reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
-- turn hardcoded variables into passable variables
-- reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface) (POC testing done, verification + full dataset + proper tqdm left, but can be done with refactoring?)
-- build an LED detector (POC done @ led_tracker.ipynb)
-- python file for DLC (POC for refine tracklets done)
+- ~~find and stabilize package and python versions, upgrade if neccessary~~ (created requirements.txt)
+- streamline / refactor 
+    - reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib) (POC done with LED_times.py)
+    - turn hardcoded variables into passable variables
+    - reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface) (POC testing done, verification + full dataset + proper tqdm left)
+    - refactor to reduce code length 
+    - create a notebook for final implementation for ease for running (main.ipynb)
+- ~~build an LED detector~~ (done LED_times.py)
 
 #### stage 2?
-- refactor code
 - multiprocessing to improve performance
-- use notebook for ease of use. May still continue with the scripts format, but use notebook for interfacing instead of terminal 
+- python file for DLC (POC for refine tracklets done)
 
 
-## Workflow: 
+
+# Additions
+**main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository.
+**LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos.
+
+## new file structure
+ASM_Killifish_repo/
+├── data/
+│   ├── output (used to store outputs from the scripts)
+│   ├── csv (used to contain DLC output csvs)
+│   └── videos (original videos)
+├── scripts (contains the python scripts used)
+├── main.ipynb (USE THIS!)
+├── readme.md (BUT READ THIS FIRST!)
+├── requirements.txt (keep track of packages used)
+└── .gitignore (hidden)
+
+## Previous Workflow: 
 ### video ingestion
 Rename videos --> record in data.xlsx --> videos in same folder
 
