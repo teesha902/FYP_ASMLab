@@ -159,7 +159,7 @@ def main(video_path, vis, debug, max_LED):
     problem_vids = {'Too many LED events': [], 'LED not observed': []}
     
     #Looping over videos
-    for video_path in vid_list[:1]:
+    for video_path in vid_list:
         process_video(video_path, vis, debug, max_LED, LED_times, problem_vids)
 
     # add processing for problem vids to go for lower threshold
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     if sum(len(x) for x in problem_vids.values())  > 0:
         print("trigger") if debug else None
         print(f'problems found in {problem_vids}')
-        re_analyse = problem_vids['LED not observed']
+        re_analyse = [i for i in problem_vids['LED not observed']]
         for i in re_analyse:
             print(f'running reduced threshold analysis for {i}')
             attempt = process_video(Path(video_path / i), vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
