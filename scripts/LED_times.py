@@ -59,6 +59,7 @@ def create_mask(frame, sensitive):
 
 def get_timestamps(timestamps, debug):
     final_timestamps = []
+    time_difference = 0
     for i, timestamp in enumerate(timestamps):
         if i == 0:
             first_timestamp = i
@@ -143,7 +144,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
 
         # output verification
     if len(time_for_video) == 0 or len(final_timestamps) == 0 :
-        problem_vids['LED not observed'].append(video_path.name)
+        problem_vids['LED not observed'].append(video_path.name) if video_path.name not in problem_vids['LED not observed'] else None
         print(f"LED not observed in {video_path.name}")
         return False
     elif len(final_timestamps) > max_LED:
