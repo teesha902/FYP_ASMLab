@@ -13,8 +13,8 @@
 
 #### stage 2?
 
-- multiprocessing to improve performance
-- python file for DLC (POC for refine tracklets done)
+- [ ] multiprocessing to improve performance
+- [ ] python file for DLC (POC for refine tracklets done)
 
 # Additions
 
@@ -39,11 +39,13 @@ ASM_Killifish_repo/
 
 ## Previous Workflow:
 
+More info can be found in basecamp/nbox README.
+
 ### video ingestion
 
 Rename videos --> record in data.xlsx --> videos in same folder
 
-Video naming: `<killifish age and number><exp day>``<trial number for the day>`
+Video naming: ``<killifish age and number> <exp day> <trial number for the day>``
 
 ### DeepLabCut
 
