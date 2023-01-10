@@ -2,14 +2,14 @@
 
 ## TODO:
 
-- ~~find and stabilize package and python versions, upgrade if neccessary~~ (created requirements.txt)
-- streamline / refactor
-  - reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib) (POC done with LED_times.py)
-  - turn hardcoded variables into passable variables
-  - reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface) (POC testing done, verification + full dataset + proper tqdm left)
-  - refactor to reduce code length
-  - create a notebook for final implementation for ease for running (main.ipynb)
-- ~~build an LED detector~~ (done LED_times.py)
+- [X] find and stabilize package and python versions, upgrade if neccessary (created requirements.txt)
+- [ ] streamline / refactor
+  - [ ] reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib) (POC done with LED_times.py)
+  - [ ] turn hardcoded variables into passable variables
+  - [ ] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface) (POC testing done, verification + full dataset + proper tqdm left)
+  - [ ] refactor to reduce code length
+  - [ ] create a notebook for final implementation for ease for running (main.ipynb)
+- [X] build an LED detector (done LED_times.py)
 
 #### stage 2?
 
