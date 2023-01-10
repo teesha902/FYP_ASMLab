@@ -130,9 +130,8 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
         elif ret == False: 
             break
         progress_bar.update(1)
-
-        
-        # When everything done, release the video capture object, progress bar, and close frames
+   
+    # When everything done, release the video capture object, progress bar, and close frames
     video.release()
     progress_bar.close()
     cv2.destroyAllWindows()
