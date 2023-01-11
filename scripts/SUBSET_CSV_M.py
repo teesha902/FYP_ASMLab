@@ -1,6 +1,3 @@
-#subset 12 second span: 6 seconds before and after the LED light turns on
-#subset 6 randomly generated 3 second spans, may be overlapping
-import random
 import numpy as np
 import pandas as pd
 import os
@@ -11,7 +8,6 @@ import ast
 
 
 def main(f, led, out_path, subset_times, debug):
-
     # read the csv file
     csv = pd.read_csv(f, skiprows= 4, header=None)
     print(csv.head(5)) if debug else None
