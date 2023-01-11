@@ -3,528 +3,112 @@
 import random
 import numpy as np
 import pandas as pd
+import os
 import glob
-import argparse
 from pathlib import Path
-from tqdm import tqdm
+import argparse
+import ast
 
 
-def create_subset(csv, start_frame, end_frame):
-    subset = pd.DataFrame(csv.loc[start_frame:end_frame])
-    return subset
+def main(f, led, out_path, subset_times, debug):
 
-
-def main(csv_filepath, led_video_info,  debug):
     # read the csv file
-    name = csv_filepath.name.split("DLC")[0] + ".mp4"
-
-    csv = pd.read_csv(csv_filepath)
-    # full_path = (f.split("\\")[-1])
-    # name=full_path[66:68]
-    # d77='d77_'
-    # folder=full_path[68:71]
-    # print(name + folder)
-    # exp_time =int(csv.iloc[0,22])
-    # LED= int(csv.iloc[0,23])
-    
-    #calculate frame rate/frames per second
-    # n_row=3
-    # frame_per_sec = (len(csv)-n_row) / int(exp_time)
-    # frame_per_sec_r= round(frame_per_sec)
-
-    #Find frame where LED light turns on, -1 because DLC outputs first frame as 0
-    LED_start_frame, LED_end_frame, fps = led_video_info[3]-1, led_video_info[4]-1, led_video_info[5]
-    frame_per_sec_r= round(fps)
-    
-    # no of columns in csv file
-    no_of_columns = len(csv.columns)
-
-    df['A'] = df['A'].apply(lambda x: x+1 if isinstance(x, int) else x)
-
-    #Subset data frame to extract 6 seconds before LED light turns on (-6 to 0) and 6 seconds after (0 to 6)
-    before_LED = pd.DataFrame(csv.loc[LED_start_frame - 6*frame_per_sec_r:LED_start_frame])
-
-    after_LED = pd.DataFrame(csv.loc[LED_start_frame - 6*frame_per_sec_r:LED_start_frame])
-    first_aft = after_LED.index.values[0]
-    last_aft = after_LED.index.values[0] + (6 * frame_per_sec_r)
-    frame_order_aft = pd.Series(np.arange((first_aft+n_row), (last_aft+n_row), 1))
-
-    #create CSV for 12 second span
-    #Combine the two data frames
-    twelve_span=[frame_order_bef,before_LED,frame_order_aft,after_LED]
-    twelve_span_df = pd.concat(twelve_span, axis=1)
-    # Create CSV for 12 second span
-    twelve_span_df.columns = ["Frames_bef", "Tail_X", "Tail_Y", "Tail_L",
-                            "Body1_X", "Body1_Y", "Body1_L",
-                            "Body2_X", "Body2_Y", "Body2_L",
-                            "Body3_X", "Body3_Y", "Body3_L",
-                            "Head_X", "Head_Y", "Head_L",
-
-                            "Frames_Aft", "Tail_X", "Tail_Y", "Tail_L",
-                            "Body1_X", "Body1_Y", "Body1_L",
-                            "Body2_X", "Body2_Y", "Body2_L",
-                            "Body3_X", "Body3_Y", "Body3_L",
-                            "Head_X", "Head_Y", "Head_L"] # 32 "Frames_bef","Frames_Aft"
-
-    # Shift cells to top
-    columns = ["Frames_bef", "Tail_X", "Tail_Y", "Tail_L",
-            "Body1_X", "Body1_Y", "Body1_L",
-            "Body2_X", "Body2_Y", "Body2_L",
-            "Body3_X", "Body3_Y", "Body3_,
-            "Head_X", "Head_Y", "Head_L"]
-
-    for column in columns:
-        first_valid_index = twelve_span_df[column].first_valid_index()
-        twelve_span_df[column] = twelve_span_df[column].shift(-(first_valid_index))
-"""
-    twelve_span_df.columns = ["Frames_bef","Tail_X","Tail_Y",'Tail_L',
-                            'Body1_X','Body1_Y','Body1_L',
-                            'Body2_X','Body2_Y','Body2_L',
-                            'Body3_X','Body3_Y','Body3_L',
-                            'Head_X','Head_Y','Head_L',
-
-                            "Frames_Aft","Tail_X","Tail_Y",'Tail_L',
-                            'Body1_X','Body1_Y','Body1_L',
-                            'Body2_X','Body2_Y','Body2_L',
-                            'Body3_X','Body3_Y','Body3_L',
-                            'Head_X','Head_Y','Head_L']#32 "Frames_bef","Frames_Aft"
-    # To shift cells to top
-    frame_bef= twelve_span_df.iloc[:, 0].index.get_loc(twelve_span_df.iloc[:, 0].first_valid_index())
-    twelve_span_df.iloc[:, 0] = twelve_span_df.iloc[:, 0].shift(-(frame_bef))
-
-    a = twelve_span_df.iloc[:, 1].index.get_loc(twelve_span_df.iloc[:, 1].first_valid_index())
-    twelve_span_df.iloc[:, 1] = twelve_span_df.iloc[:, 1].shift(-(a))
-
-    b = twelve_span_df.iloc[:, 2].index.get_loc(twelve_span_df.iloc[:, 2].first_valid_index())
-    twelve_span_df.iloc[:, 2] = twelve_span_df.iloc[:, 2].shift(-(b))
-
-    c = twelve_span_df.iloc[:, 3].index.get_loc(twelve_span_df.iloc[:, 3].first_valid_index())
-    twelve_span_df.iloc[:, 3] = twelve_span_df.iloc[:, 3].shift(-(c))
-
-    d= twelve_span_df.iloc[:, 4].index.get_loc(twelve_span_df.iloc[:, 4].first_valid_index())
-    twelve_span_df.iloc[:, 4] = twelve_span_df.iloc[:, 4].shift(-(d))
-
-    e = twelve_span_df.iloc[:, 5].index.get_loc(twelve_span_df.iloc[:, 5].first_valid_index())
-    twelve_span_df.iloc[:, 5] = twelve_span_df.iloc[:, 5].shift(-(e))
-
-    f = twelve_span_df.iloc[:, 6].index.get_loc(twelve_span_df.iloc[:, 6].first_valid_index())
-    twelve_span_df.iloc[:, 6] = twelve_span_df.iloc[:, 6].shift(-(f))
-
-    g = twelve_span_df.iloc[:, 7].index.get_loc(twelve_span_df.iloc[:, 7].first_valid_index())
-    twelve_span_df.iloc[:, 7] = twelve_span_df.iloc[:, 7].shift(-(g))
-
-    h = twelve_span_df.iloc[:, 8].index.get_loc(twelve_span_df.iloc[:, 8].first_valid_index())
-    twelve_span_df.iloc[:, 8] = twelve_span_df.iloc[:, 8].shift(-(h))
-
-    i= twelve_span_df.iloc[:, 9].index.get_loc(twelve_span_df.iloc[:, 9].first_valid_index())
-    twelve_span_df.iloc[:, 9] = twelve_span_df.iloc[:, 9].shift(-(i))
-
-    j= twelve_span_df.iloc[:, 10].index.get_loc(twelve_span_df.iloc[:, 10].first_valid_index())
-    twelve_span_df.iloc[:, 10] = twelve_span_df.iloc[:, 10].shift(-(j))
-
-    k = twelve_span_df.iloc[:, 11].index.get_loc(twelve_span_df.iloc[:, 11].first_valid_index())
-    twelve_span_df.iloc[:, 11] = twelve_span_df.iloc[:, 11].shift(-(k))
-
-    l = twelve_span_df.iloc[:, 12].index.get_loc(twelve_span_df.iloc[:, 12].first_valid_index())
-    twelve_span_df.iloc[:, 12] = twelve_span_df.iloc[:, 12].shift(-(l))
-
-    m = twelve_span_df.iloc[:, 13].index.get_loc(twelve_span_df.iloc[:, 13].first_valid_index())
-    twelve_span_df.iloc[:, 13] = twelve_span_df.iloc[:, 13].shift(-(m))
-
-    n = twelve_span_df.iloc[:, 14].index.get_loc(twelve_span_df.iloc[:, 14].first_valid_index())
-    twelve_span_df.iloc[:, 14] = twelve_span_df.iloc[:, 14].shift(-(n))
-
-    o = twelve_span_df.iloc[:, 15].index.get_loc(twelve_span_df.iloc[:, 15].first_valid_index())
-    twelve_span_df.iloc[:, 15] = twelve_span_df.iloc[:, 15].shift(-(o))
-
-    p = twelve_span_df.iloc[:, 16].index.get_loc(twelve_span_df.iloc[:, 16].first_valid_index())
-    twelve_span_df.iloc[:, 16] = twelve_span_df.iloc[:, 16].shift(-(p))
-
-    q= twelve_span_df.iloc[:, 17].index.get_loc(twelve_span_df.iloc[:, 17].first_valid_index())
-    twelve_span_df.iloc[:, 17] = twelve_span_df.iloc[:, 17].shift(-(q))
-
-    r = twelve_span_df.iloc[:, 18].index.get_loc(twelve_span_df.iloc[:, 18].first_valid_index())
-    twelve_span_df.iloc[:, 18] = twelve_span_df.iloc[:, 18].shift(-(r))
-
-    s = twelve_span_df.iloc[:, 19].index.get_loc(twelve_span_df.iloc[:, 19].first_valid_index())
-    twelve_span_df.iloc[:, 19] = twelve_span_df.iloc[:, 19].shift(-(s))
-
-    t = twelve_span_df.iloc[:, 20].index.get_loc(twelve_span_df.iloc[:, 20].first_valid_index())
-    twelve_span_df.iloc[:, 20] = twelve_span_df.iloc[:, 20].shift(-(t))
-
-    u = twelve_span_df.iloc[:, 21].index.get_loc(twelve_span_df.iloc[:, 21].first_valid_index())
-    twelve_span_df.iloc[:, 21] = twelve_span_df.iloc[:, 21].shift(-(u))
-
-    v = twelve_span_df.iloc[:, 22].index.get_loc(twelve_span_df.iloc[:, 22].first_valid_index())
-    twelve_span_df.iloc[:, 22] = twelve_span_df.iloc[:, 22].shift(-(v))
-
-    x = twelve_span_df.iloc[:, 23].index.get_loc(twelve_span_df.iloc[:, 23].first_valid_index())
-    twelve_span_df.iloc[:, 23] = twelve_span_df.iloc[:, 23].shift(-(x))
-
-    y = twelve_span_df.iloc[:, 24].index.get_loc(twelve_span_df.iloc[:, 24].first_valid_index())
-    twelve_span_df.iloc[:, 24] = twelve_span_df.iloc[:, 24].shift(-(y))
-
-    z = twelve_span_df.iloc[:, 25].index.get_loc(twelve_span_df.iloc[:, 25].first_valid_index())
-    twelve_span_df.iloc[:, 25] = twelve_span_df.iloc[:, 25].shift(-(z))
-
-    a1 = twelve_span_df.iloc[:, 26].index.get_loc(twelve_span_df.iloc[:, 26].first_valid_index())
-    twelve_span_df.iloc[:, 26] = twelve_span_df.iloc[:, 26].shift(-(a1))
-
-    a2 = twelve_span_df.iloc[:, 27].index.get_loc(twelve_span_df.iloc[:, 27].first_valid_index())
-    twelve_span_df.iloc[:, 27] = twelve_span_df.iloc[:, 27].shift(-(a2))
-
-    a3 = twelve_span_df.iloc[:, 28].index.get_loc(twelve_span_df.iloc[:, 28].first_valid_index())
-    twelve_span_df.iloc[:, 28] = twelve_span_df.iloc[:, 28].shift(-(a3))
-
-    a4 = twelve_span_df.iloc[:, 29].index.get_loc(twelve_span_df.iloc[:, 29].first_valid_index())
-    twelve_span_df.iloc[:, 29] = twelve_span_df.iloc[:, 29].shift(-(a4))
-
-    a5 = twelve_span_df.iloc[:, 30].index.get_loc(twelve_span_df.iloc[:, 30].first_valid_index())
-    twelve_span_df.iloc[:, 30] = twelve_span_df.iloc[:, 30].shift(-(a5))
-
-    a6 = twelve_span_df.iloc[:, 31].index.get_loc(twelve_span_df.iloc[:, 31].first_valid_index())
-    twelve_span_df.iloc[:, 31] = twelve_span_df.iloc[:, 31].shift(-(a6))
-
-    # #write to new CSV
-    twelve_span_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_12S.csv')#('/Users/saoirselightbourne/Desktop/Cropped_CSV/12_sec/'+big_folder+'/'+big_folder+'-'+folder+'/'+name +folder+ '_12S.csv')
-
-
-    # #Subset random 3 second segments
-
-    #create a data frame of data from which you wish to create the random 3 second segments
-    start_time= 1
-    end_time=(LED)
-    subset_time_span= pd.DataFrame(csv.iloc[((start_time*frame_per_sec_r)-n_row):((end_time*frame_per_sec_r)-n_row),n_column:last_column])
-    step= int(3*frame_per_sec_r)
-
-    #generate 6 randomly generated non overlapping 3 second segmets
-    randomlist = set()
-    sampleSize = 6
-    answerSize = 0
-
-    while answerSize < sampleSize:
-        r = random.randrange(start_time, end_time)
-        if r not in randomlist:
-            answerSize += 1
-            randomlist.add(r)
-
-    randomlist= list(randomlist)
-    #randomlist= list(random.sample(range(start_time, end_time),6))#list(random.sample(range(start_time, end_time,6),6))
-
-
-    #subset the data frame for 6 randomly generated 3 second segments
-
-    first_3s = pd.DataFrame(subset_time_span.iloc[(randomlist[0]-1):(randomlist[0]+step-1),[0,1,3,4,6,7 ,9,10,12,13]])
-    second_3s = pd.DataFrame(subset_time_span.iloc[(randomlist[1]-1):(randomlist[1]+step-1),[0,1,3,4,6,7 ,9,10,12,13]])
-    third_3s = pd.DataFrame(subset_time_span.iloc[(randomlist[2]-1):(randomlist[2]+step-1),[0,1,3,4,6,7 ,9,10,12,13]])
-    fourth_3s = pd.DataFrame(subset_time_span.iloc[(randomlist[3]-1):(randomlist[3]+step-1),[0,1,3,4,6,7 ,9,10,12,13]])
-    fifth_3s = pd.DataFrame(subset_time_span.iloc[(randomlist[4]-1):(randomlist[4]+step-1),[0,1,3,4,6,7 ,9,10,12,13]])
-    sixth_3s = pd.DataFrame(subset_time_span.iloc[(randomlist[5]-1):(randomlist[5]+step-1),[0,1,3,4,6,7 ,9,10,12,13]])
-
-    # Create CSV for the 6 3 second segments
-
-    #extract frame numbers
-    frame_oder_1 = pd.Series(np.arange((randomlist[0]), (randomlist[0]+step), 1))
-    frame_oder_2 = pd.Series(np.arange((randomlist[1]), (randomlist[1]+step), 1))
-    frame_oder_3 = pd.Series(np.arange((randomlist[2]), (randomlist[2]+step), 1))
-    frame_oder_4 = pd.Series(np.arange((randomlist[3]), (randomlist[3]+step), 1))
-    frame_oder_5 = pd.Series(np.arange((randomlist[4]), (randomlist[4]+step), 1))
-    frame_oder_6 = pd.Series(np.arange((randomlist[5]), (randomlist[5]+step), 1))
-
-    # calculate average velocity across the 3 seconds
-
-    #calculate distance travelled in the 3 seconds
-    #first 3 sec
-    tail_x_y_1= pd.DataFrame(first_3s.iloc[:,[0,1]])
-    tail_x_y_1.columns= ["X","Y"]
-    tail_x_y_1["X"] = pd.to_numeric(tail_x_y_1["X"], downcast="float")
-    tail_x_y_1["Y"] = pd.to_numeric(tail_x_y_1["Y"], downcast="float")
-
-
-    body1_x_y_1= pd.DataFrame(first_3s.iloc[:,[2,3]])
-    body1_x_y_1.columns= ["X","Y"]
-    body1_x_y_1["X"] = pd.to_numeric(body1_x_y_1["X"], downcast="float")
-    body1_x_y_1["Y"] = pd.to_numeric(body1_x_y_1["Y"], downcast="float")
-
-
-    body2_x_y_1= pd.DataFrame(first_3s.iloc[:,[4,5]])
-    body2_x_y_1.columns= ["X","Y"]
-    body2_x_y_1["X"] = pd.to_numeric(body2_x_y_1["X"], downcast="float")
-    body2_x_y_1["Y"] = pd.to_numeric(body2_x_y_1["Y"], downcast="float")
-
-
-    body3_x_y_1= pd.DataFrame(first_3s.iloc[:,[6,7]])
-    body3_x_y_1.columns= ["X","Y"]
-    body3_x_y_1["X"] = pd.to_numeric(body3_x_y_1["X"], downcast="float")
-    body3_x_y_1["Y"] = pd.to_numeric(body3_x_y_1["Y"], downcast="float")
-
-
-    head_x_y_1= pd.DataFrame(first_3s.iloc[:,[8,9]])
-    head_x_y_1.columns= ["X","Y"]
-    head_x_y_1["X"] = pd.to_numeric(body3_x_y_1["X"], downcast="float")
-    head_x_y_1["Y"] = pd.to_numeric(body3_x_y_1["Y"], downcast="float")
-
-
-
-    #second 3 sec
-
-    tail_x_y_2= pd.DataFrame(second_3s.iloc[:,[0,1]])
-    tail_x_y_2.columns= ["X","Y"]
-    tail_x_y_2["X"] = pd.to_numeric(tail_x_y_2["X"], downcast="float")
-    tail_x_y_2["Y"] = pd.to_numeric(tail_x_y_2["Y"], downcast="float")
-
-
-
-    body1_x_y_2= pd.DataFrame(second_3s.iloc[:,[2,3]])
-    body1_x_y_2.columns= ["X","Y"]
-    body1_x_y_2["X"] = pd.to_numeric(body1_x_y_2["X"], downcast="float")
-    body1_x_y_2["Y"] = pd.to_numeric(body1_x_y_2["Y"], downcast="float")
-
-
-    body2_x_y_2= pd.DataFrame(second_3s.iloc[:,[4,5]])
-    body2_x_y_2.columns= ["X","Y"]
-    body2_x_y_2["X"] = pd.to_numeric(body2_x_y_2["X"], downcast="float")
-    body2_x_y_2["Y"] = pd.to_numeric(body2_x_y_2["Y"], downcast="float")
-
-
-    body3_x_y_2= pd.DataFrame(second_3s.iloc[:,[6,7]])
-    body3_x_y_2.columns= ["X","Y"]
-    body3_x_y_2["X"] = pd.to_numeric(body3_x_y_2["X"], downcast="float")
-    body3_x_y_2["Y"] = pd.to_numeric(body3_x_y_2["Y"], downcast="float")
-
-
-    head_x_y_2= pd.DataFrame(second_3s.iloc[:,[8,9]])
-    head_x_y_2.columns= ["X","Y"]
-    head_x_y_2["X"] = pd.to_numeric(body3_x_y_2["X"], downcast="float")
-    head_x_y_2["Y"] = pd.to_numeric(body3_x_y_2["Y"], downcast="float")
-
-
-    #third 3 sec
-
-    tail_x_y_3= pd.DataFrame(third_3s.iloc[:,[0,1]])
-    tail_x_y_3.columns= ["X","Y"]
-    tail_x_y_3["X"] = pd.to_numeric(tail_x_y_3["X"], downcast="float")
-    tail_x_y_3["Y"] = pd.to_numeric(tail_x_y_3["Y"], downcast="float")
-
-
-
-    body1_x_y_3= pd.DataFrame(third_3s.iloc[:,[2,3]])
-    body1_x_y_3.columns= ["X","Y"]
-    body1_x_y_3["X"] = pd.to_numeric(body1_x_y_3["X"], downcast="float")
-    body1_x_y_3["Y"] = pd.to_numeric(body1_x_y_3["Y"], downcast="float")
-
-
-    body2_x_y_3= pd.DataFrame(third_3s.iloc[:,[4,5]])
-    body2_x_y_3.columns= ["X","Y"]
-    body2_x_y_3["X"] = pd.to_numeric(body2_x_y_3["X"], downcast="float")
-    body2_x_y_3["Y"] = pd.to_numeric(body2_x_y_3["Y"], downcast="float")
-
-
-    body3_x_y_3= pd.DataFrame(third_3s.iloc[:,[6,7]])
-    body3_x_y_3.columns= ["X","Y"]
-    body3_x_y_3["X"] = pd.to_numeric(body3_x_y_3["X"], downcast="float")
-    body3_x_y_3["Y"] = pd.to_numeric(body3_x_y_3["Y"], downcast="float")
-
-
-    head_x_y_3= pd.DataFrame(third_3s.iloc[:,[8,9]])
-    head_x_y_3.columns= ["X","Y"]
-    head_x_y_3["X"] = pd.to_numeric(body3_x_y_3["X"], downcast="float")
-    head_x_y_3["Y"] = pd.to_numeric(body3_x_y_3["Y"], downcast="float")
-
-
-    #fourth 3 sec
-
-    tail_x_y_4= pd.DataFrame(fourth_3s.iloc[:,[0,1]])
-    tail_x_y_4.columns= ["X","Y"]
-    tail_x_y_4["X"] = pd.to_numeric(tail_x_y_4["X"], downcast="float")
-    tail_x_y_4["Y"] = pd.to_numeric(tail_x_y_4["Y"], downcast="float")
-
-
-
-    body1_x_y_4= pd.DataFrame(fourth_3s.iloc[:,[2,3]])
-    body1_x_y_4.columns= ["X","Y"]
-    body1_x_y_4["X"] = pd.to_numeric(body1_x_y_4["X"], downcast="float")
-    body1_x_y_4["Y"] = pd.to_numeric(body1_x_y_4["Y"], downcast="float")
-
-
-    body2_x_y_4= pd.DataFrame(fourth_3s.iloc[:,[4,5]])
-    body2_x_y_4.columns= ["X","Y"]
-    body2_x_y_4["X"] = pd.to_numeric(body2_x_y_4["X"], downcast="float")
-    body2_x_y_4["Y"] = pd.to_numeric(body2_x_y_4["Y"], downcast="float")
-
-
-    body3_x_y_4= pd.DataFrame(fourth_3s.iloc[:,[6,7]])
-    body3_x_y_4.columns= ["X","Y"]
-    body3_x_y_4["X"] = pd.to_numeric(body3_x_y_4["X"], downcast="float")
-    body3_x_y_4["Y"] = pd.to_numeric(body3_x_y_4["Y"], downcast="float")
-
-
-    head_x_y_4= pd.DataFrame(fourth_3s.iloc[:,[8,9]])
-    head_x_y_4.columns= ["X","Y"]
-    head_x_y_4["X"] = pd.to_numeric(body3_x_y_4["X"], downcast="float")
-    head_x_y_4["Y"] = pd.to_numeric(body3_x_y_4["Y"], downcast="float")
-
-
-
-
-    #fifth 3 sec
-
-
-    tail_x_y_5= pd.DataFrame(fifth_3s.iloc[:,[0,1]])
-    tail_x_y_5.columns= ["X","Y"]
-    tail_x_y_5["X"] = pd.to_numeric(tail_x_y_5["X"], downcast="float")
-    tail_x_y_5["Y"] = pd.to_numeric(tail_x_y_5["Y"], downcast="float")
-
-
-    body1_x_y_5= pd.DataFrame(fifth_3s.iloc[:,[2,3]])
-    body1_x_y_5.columns= ["X","Y"]
-    body1_x_y_5["X"] = pd.to_numeric(body1_x_y_5["X"], downcast="float")
-    body1_x_y_5["Y"] = pd.to_numeric(body1_x_y_5["Y"], downcast="float")
-
-
-    body2_x_y_5= pd.DataFrame(fifth_3s.iloc[:,[4,5]])
-    body2_x_y_5.columns= ["X","Y"]
-    body2_x_y_5["X"] = pd.to_numeric(body2_x_y_5["X"], downcast="float")
-    body2_x_y_5["Y"] = pd.to_numeric(body2_x_y_5["Y"], downcast="float")
-
-
-    body3_x_y_5= pd.DataFrame(fifth_3s.iloc[:,[6,7]])
-    body3_x_y_5.columns= ["X","Y"]
-    body3_x_y_5["X"] = pd.to_numeric(body3_x_y_5["X"], downcast="float")
-    body3_x_y_5["Y"] = pd.to_numeric(body3_x_y_5["Y"], downcast="float")
-
-
-    head_x_y_5= pd.DataFrame(fifth_3s.iloc[:,[8,9]])
-    head_x_y_5.columns= ["X","Y"]
-    head_x_y_5["X"] = pd.to_numeric(body3_x_y_5["X"], downcast="float")
-    head_x_y_5["Y"] = pd.to_numeric(body3_x_y_5["Y"], downcast="float")
-
-
-    #sixth 3 sec
-
-    tail_x_y_6= pd.DataFrame(sixth_3s.iloc[:,[0,1]])
-    tail_x_y_6.columns= ["X","Y"]
-    tail_x_y_6["X"] = pd.to_numeric(tail_x_y_6["X"], downcast="float")
-    tail_x_y_6["Y"] = pd.to_numeric(tail_x_y_6["Y"], downcast="float")
-
-
-
-    body1_x_y_6= pd.DataFrame(sixth_3s.iloc[:,[2,3]])
-    body1_x_y_6.columns= ["X","Y"]
-    body1_x_y_6["X"] = pd.to_numeric(body1_x_y_6["X"], downcast="float")
-    body1_x_y_6["Y"] = pd.to_numeric(body1_x_y_6["Y"], downcast="float")
-
-
-    body2_x_y_6= pd.DataFrame(sixth_3s.iloc[:,[4,5]])
-    body2_x_y_6.columns= ["X","Y"]
-    body2_x_y_6["X"] = pd.to_numeric(body2_x_y_6["X"], downcast="float")
-    body2_x_y_6["Y"] = pd.to_numeric(body2_x_y_6["Y"], downcast="float")
-
-
-    body3_x_y_6= pd.DataFrame(sixth_3s.iloc[:,[6,7]])
-    body3_x_y_6.columns= ["X","Y"]
-    body3_x_y_6["X"] = pd.to_numeric(body3_x_y_6["X"], downcast="float")
-    body3_x_y_6["Y"] = pd.to_numeric(body3_x_y_6["Y"], downcast="float")
-
-
-    head_x_y_6= pd.DataFrame(sixth_3s.iloc[:,[8,9]])
-    head_x_y_6.columns= ["X","Y"]
-    head_x_y_6["X"] = pd.to_numeric(body3_x_y_6["X"], downcast="float")
-    head_x_y_6["Y"] = pd.to_numeric(body3_x_y_6["Y"], downcast="float")
-
-
-    #Combine the data frames
-
-
-    three_sec_seg= [frame_oder_1,first_3s,
-                    frame_oder_2,second_3s,
-                    frame_oder_3,third_3s,
-                    frame_oder_4,fourth_3s,
-                    frame_oder_5,fifth_3s,
-                    frame_oder_6,sixth_3s]
-    three_sec_seg_df = pd.concat(three_sec_seg, axis=1)
-    three_sec_seg_df.columns = ["Frames","first_3_tail_X","first_3_tail_Y","first_3_body1_X","first_3_body1_Y",
-                                "first_3_body2_X","first_3_body2_Y","first_3_body3_X","first_3_body3_Y","first_3_head_X","first_3_head_Y",
-
-
-                                "Frames","second_tail_3_X","second_tail_3_Y","second_3_body1_X","second__3_body1_Y",
-                                "second__3_body2_X","second__3_body2_Y","second__3_body3_X","second__3_body3_Y","second__3_head_X","second__3_head_Y",
-
-
-                                "Frames","third_tail_3_X","third_tail_3_Y","third_3_body1_X","third_3_body1_Y",
-                                "third_3_body2_X","third_3_body2_Y","third_3_body3_X","third_3_body3_Y","third_3_head_X","third_3_head_Y",
-
-
-                                "Frames","fourth_tail_3_X","fourth_tail_3_Y","fourth_3_body1_X","fourth_3_body1_Y",
-                                "fourth_3_body2_X","fourth_3_body2_Y","fourth_3_body3_X","fourth_3_body3_Y","fourth_3_head_X","fourth_3_head_Y",
-
-
-                                "Frames","fifth_tail_3_X","fifth_tail_3_Y","fifth_3_body1_X","fifth_3_body1_Y",
-                                "fifth_3_body2_X","fifth_3_body2_Y","fifth_3_body3_X","fifth_3_body3_Y","fifth_3_head_X","fifth_3_head_Y",
-
-
-                                "Frames","sixth_tail_3_X","sixth_tail_3_Y","sixth_3_body1_X","sixth_3_body1_Y",
-                                "sixth_3_body2_X","sixth_3_body2_Y","sixth_3_body3_X","sixth_3_body3_Y","sixth_3_head_X","sixth_3_head_Y"]
-
-
-    #Shift cells up
-    aa= three_sec_seg_df.iloc[:, 1].index.get_loc(three_sec_seg_df.iloc[:, 1].first_valid_index())
-    three_sec_seg_df.iloc[:, 1:11] = three_sec_seg_df.iloc[:, 1:11].shift(-(aa))
-
-    ab= three_sec_seg_df.iloc[:, 12].index.get_loc(three_sec_seg_df.iloc[:, 12].first_valid_index())
-    three_sec_seg_df.iloc[:, 12:22] = three_sec_seg_df.iloc[:, 12:22].shift(-(ab))
-
-
-    ac= three_sec_seg_df.iloc[:, 23].index.get_loc(three_sec_seg_df.iloc[:, 23].first_valid_index())
-    three_sec_seg_df.iloc[:, 23:33] = three_sec_seg_df.iloc[:, 23:33].shift(-(ac))
-
-    ad= three_sec_seg_df.iloc[:, 34].index.get_loc(three_sec_seg_df.iloc[:, 34].first_valid_index())
-    three_sec_seg_df.iloc[:, 34:44] = three_sec_seg_df.iloc[:, 34:44].shift(-(ad))
-
-    ae= three_sec_seg_df.iloc[:, 45].index.get_loc(three_sec_seg_df.iloc[:, 45].first_valid_index())
-    three_sec_seg_df.iloc[:, 45:55] = three_sec_seg_df.iloc[:, 45:55].shift(-(ae))
-
-    af= three_sec_seg_df.iloc[:, 56].index.get_loc(three_sec_seg_df.iloc[:, 56].first_valid_index())
-    three_sec_seg_df.iloc[:, 56:66] = three_sec_seg_df.iloc[:, 56:66].shift(-(af))
-
-
-    #write to new CSV
-    three_sec_seg_df.to_csv(path+'/Cropped_CSV_d77/'+d77+name +folder+ '_3S.csv')
-    print("Ran:"+name +folder)
-"""
-
-if __name__ == '__main__':
-
-    # Parse command line arguments
+    csv = pd.read_csv(f, skiprows= 4, header=None)
+    print(csv.head(5)) if debug else None
+
+    # calculate the frame rate
+    frame_per_sec_r = (led[4]-led[3])/(led[2]-led[1])
+    print(frame_per_sec_r) if debug else None
+
+    # set columns for the subsetted csv
+    columns = ["Frames","Tail_X","Tail_Y",'Tail_L',
+                'Body1_X','Body1_Y','Body1_L',
+                'Body2_X','Body2_Y','Body2_L',
+                'Body3_X','Body3_Y','Body3_L',
+                'Head_X','Head_Y','Head_L']
+
+
+    for i, subset_time in enumerate(subset_times):
+
+        # calculate start and end frames
+        start_frame =  int(subset_time[0] * frame_per_sec_r) + 1
+        end_frame = int(subset_time[1] * frame_per_sec_r) + 1
+        print(start_frame, end_frame) if debug else None
+
+        # slice dataframe and set columns
+        subset_df = pd.DataFrame(csv.iloc[start_frame:end_frame,:])
+        subset_df.columns = columns
+        print(subset_df.head(5)) if debug else None
+        
+        # save to csv: format is out_path/<animal id>/<animal id and day>_<subset number>.csv
+        os.makedirs(out_path / f.stem[:3], exist_ok=True)
+        subset_df.to_csv(out_path / f.stem[:3]/ (f.stem+f"_{i}.csv"), index=False)
+        print(f"Ran: {f}, saved to {out_path / f.stem[:3]/ (f.stem+f'_{i}.csv')}")
+
+def subset_parser(led, subsets):
+    subsets_timed = []
+    led_start, led_end = led[1], led[2]
+
+    for subset in subsets:
+        # subset = (-6,-3)
+        subset_parsed = []
+        for index, time in enumerate(subset):
+            if type(time) == int:
+                if time < 0:
+                    subset_parsed.insert(index, led_start + time) # this is + because i itself is negative
+                else:
+                    #i > 0
+                    subset_parsed.insert(index,led_end + time)
+            else:
+                # i is a string
+                if time == "start":
+                    subset_parsed.insert(index,led_start)
+                elif time == "end":
+                    subset_parsed.insert(index,led_end)
+                else: 
+                    raise ValueError("Invalid subset value")
+        subsets_timed.append(subset_parsed)
+    return subsets_timed
+
+
+if __name__ == "__main__":
+    # Parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("--csv_path", default = "./data/csv/", help="the filepath to DLC csvs if not /data/csv/")
-    parser.add_argument("--LED_path", default = "./data/output/", help="the filepath to LED_times csv if not /data/output/")
-    parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not /data/output/")
+    parser.add_argument("--csv_path", default = "./data/csv/", help="the filepath to csv files if not default")
+    parser.add_argument("--led_path", default = "./data/output/LED_times.csv", help="the filepath to LED files if not default")
+    parser.add_argument("--output_path", default = "./data/output/subset", help="the filepath to output csv if not default")
     parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
+    parser.add_argument("--subsets", required= True, help = "subsets to divide the data into. Use [(-6, -3), (-3, 'start'), ('start', 'end'), ('end', 3)].")
+
     args = parser.parse_args()
     csv_path = Path(args.csv_path) 
+    led_path = Path(args.led_path)
     out_path = Path(args.output_path) 
     debug = args.debug
-    LED_path = Path(args.LED_path)
+    subsets = ast.literal_eval(args.subsets)
+    led_csv = pd.read_csv(led_path)
 
-    # Read in LED times
-    LED_df = pd.read_csv(LED_path / "LED_times.csv")
-
-    # Get all csv files
-    csv_files = [f for f in csv_path.glob("**/*.csv")]
+    # get all csv files
+    csv_files = list(csv_path.glob("**/*.csv"))
+    print (f'found csv files: {len(csv_files)}')
     print(csv_files) if debug else None
-    print(f"Found {len(csv_files)} csv files")
 
-    # Run main function on each csv file
-    for f in csv_files[0:1]:
-        name = f.name.split("DLC")[0] + ".mp4"
+    problem_files = []
 
-        led_video_info = LED_df["name"].isin([name])
-        assert led_video_info.any(), f"Could not find LED times for {name}"
-        assert led_video_info.sum() == 6, f"Found multiple LED times for {name}"
+    for f in csv_files:
+        # for each csv file, find the corresponding LED time
+        led = led_csv.loc[led_csv['name'] == f.with_suffix(".mp4").name].to_numpy()
+        print(led) if debug else None
 
-        outfile = main(f, led_video_info, debug)
-        # save files
-        
-
-
+        # if there is a corresponding LED time, run the main function
+        if led.size > 0:
+            led = led[0] # only using the first LED event for now
+            subsets_timed = subset_parser(led, subsets)
+            print(subsets_timed) if debug else None
+            main(f, led, out_path, subsets_timed, debug)
+        else:
+            print(f"no LED data for {f}")
+            problem_files.append(f.stem)
+    
+    print(f"Subset CSVs created for {len(list(csv_files)) - len(problem_files)} files")
+    print(f"{len(problem_files)} files with no LED data: {problem_files}")

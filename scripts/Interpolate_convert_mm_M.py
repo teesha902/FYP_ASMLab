@@ -3,10 +3,30 @@ import glob
 import pandas as pd
 import numpy as np
 import random
+import argparse
+from pathlib import Path
 
-path_raw = input('Input full path name of folder  where the relevant raw CSV files are located (in quotations)')#('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d77')
-csv_files_raw = glob.glob(os.path.join(path_raw, "*.csv"))
 
+def main(csv_path, out_path, debug):
+    # Read csv
+    df = pd.read_csv(csv_file)
+
+    # Convert to float
+    df = df.astype('float')
+
+    # Interpolate to fix missing data
+    df = df.interpolate()
+
+    # Convert to mm
+    df = df * 0.28
+
+    # Write to CSV
+    df.to_csv(output_path / csv_file.name, index=False)
+    print("Ran:", csv_file.name)
+
+
+
+'''
 for f in csv_files_raw:
     # read the csv file
     csv_raw = pd.read_csv(f)
@@ -194,5 +214,27 @@ for f in csv_files_12:
     df_float_interpolate_12.to_csv(path_raw+'/Cropped_CSV_d77/'+d77+twelve_name+twelve_folder+'_12S_INTER_MM.csv')
     
     print("Ran:"+twelve_name +twelve_folder)
+    '''
 
+if __name__ == "__main__":
+    # Parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--csv_path", default = "./data/output/subset/", help="the filepath to subset csv files if not ./data/output/subset/")
+    parser.add_argument("--output_path", default = "./data/output/inter_mm", help="the filepath to output csv if not ./data/output/inter_mm")
+    parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
+    
+    args = parser.parse_args()
+    csv_path = Path(args.csv_path)
+    output_path = Path(args.output_path)
+    debug = args.debug
+
+    # Create output path if not exist
+    os.makedirs(output_path, exist_ok=True)
+
+    # Get all csv files
+    csv_files = list(csv_path.glob("**/*.csv"))
+
+    # Iterate through all csv files
+    for csv_file in csv_files:
+        main(csv_file, output_path, debug)
 
