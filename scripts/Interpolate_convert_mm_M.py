@@ -7,214 +7,37 @@ import argparse
 from pathlib import Path
 
 
-def main(csv_path, out_path, debug):
+def main(csv_file, out_path, debug):
     # Read csv
     df = pd.read_csv(csv_file)
 
     # Convert to float
     df = df.astype('float')
 
+    # define X and Y columns to apply the different conversion
+    x_columns = ['Tail_X','Body1_X','Body2_X', "Body3_X","Head_X"]
+    y_columns = ['Tail_Y','Body1_Y','Body2_Y', "Body3_Y","Head_Y"]
+
+    print(df.head(5)) if debug else None
+
+    # TODO: do something with likelihood, and maybe only interpolate specific columns??
+
     # Interpolate to fix missing data
     df = df.interpolate()
 
     # Convert to mm
-    df = df * 0.28
+    for column in x_columns:
+        df[column] = df[column] * 0.28
+
+    for column in y_columns:
+        df[column] = df[column] * -0.304
 
     # Write to CSV
-    df.to_csv(output_path / csv_file.name, index=False)
-    print("Ran:", csv_file.name)
+    os.makedirs(out_path / csv_file.stem[:3], exist_ok=True)
+    df.to_csv(out_path / csv_file.stem[:3] / (csv_file.stem + "_INTER_MM.csv"), index=False)
+    print(df.head(5)) if debug else None
 
-
-
-'''
-for f in csv_files_raw:
-    # read the csv file
-    csv_raw = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    raw_name=full_path[66:68]
-    raw_folder=full_path[68:71]
-    d77='d77_'
-    
-
-    last_row= csv_raw.iloc[:,1].index.get_loc(csv_raw.iloc[:, 1].last_valid_index())
-    csv_raw= csv_raw.iloc[:(last_row+1),:]
-
-    # Convert to float
-    csv_float_raw = csv_raw.iloc[3:,[1,2,4,5,7,8,10,11,13,14]].astype('float')
-    # Interpolate to fix missing data
-    df_float_interpolate_raw= csv_float_raw.interpolate()
-    df_float_interpolate_raw.columns= ['Tail_X','Tail_Y','Body1_X','Body1_Y','Body2_X','Body2_Y',
-                                       "Body3_X","Body3_Y","Head_X","Head_Y"]
-
-    #Convert to mm
-    df_float_interpolate_raw["Tail_X"]=df_float_interpolate_raw ["Tail_X"]*0.28
-    df_float_interpolate_raw["Body1_X"]=df_float_interpolate_raw ["Body1_X"]*0.28
-    df_float_interpolate_raw["Body2_X"]=df_float_interpolate_raw ["Body2_X"]*0.28
-    df_float_interpolate_raw["Body3_X"]=df_float_interpolate_raw ["Body3_X"]*0.28
-    df_float_interpolate_raw["Head_X"]=df_float_interpolate_raw ["Head_X"]*0.28
-
-    df_float_interpolate_raw["Tail_Y"]=df_float_interpolate_raw ["Tail_Y"]* -0.304
-    df_float_interpolate_raw["Body1_Y"]=df_float_interpolate_raw ["Body1_Y"]* -0.304
-    df_float_interpolate_raw["Body2_Y"]=df_float_interpolate_raw ["Body2_Y"]* -0.304
-    df_float_interpolate_raw["Body3_Y"]=df_float_interpolate_raw ["Body3_Y"]* -0.304
-    df_float_interpolate_raw["Head_Y"]=df_float_interpolate_raw ["Head_Y"]* -0.304
-
-   # Write to excel
-    df_float_interpolate_raw.to_csv(path_raw+'/Cropped_CSV_d77/'+d77+raw_name+raw_folder+'_Raw_INTER_MM.csv')
-
-path = (path_raw+'/Cropped_CSV_d77')
-csv_files_3 = glob.glob(os.path.join(path, "*_3S.csv"))
-
-for f in csv_files_3:
-        # read the csv file
-    csv_3 = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    
-    three_name = full_path[82:84]
-    three_folder = full_path[84:87]
-
-
-
-    last_row= csv_3.iloc[:,1].index.get_loc(csv_3.iloc[:, 1].last_valid_index())
-    csv_3= csv_3.iloc[:(last_row+1),:]
-
-    # Convert to float
-    csv_float_3 = csv_3.astype('float')
-    # Interpolate to fix missing data
-    df_float_interpolate_3= csv_float_3.interpolate()
-    df_float_interpolate_3=df_float_interpolate_3.iloc[:,1:]
-
-
-    #3 SEC
-    #1st
-    df_float_interpolate_3 ["first_3_tail_X"]=df_float_interpolate_3 ["first_3_tail_X"]*0.28
-    df_float_interpolate_3 ["first_3_body1_X"]=df_float_interpolate_3 ["first_3_body1_X"]*0.28
-    df_float_interpolate_3 ["first_3_body2_X"]=df_float_interpolate_3 ["first_3_body2_X"]*0.28
-    df_float_interpolate_3 ["first_3_body3_X"]=df_float_interpolate_3 ["first_3_body3_X"]*0.28
-    df_float_interpolate_3 ["first_3_head_X"]=df_float_interpolate_3 ["first_3_head_X"]*0.28
-
-    df_float_interpolate_3 ["first_3_tail_Y"]=df_float_interpolate_3 ["first_3_tail_Y"]* -0.304
-    df_float_interpolate_3 ["first_3_body1_Y"]=df_float_interpolate_3 ["first_3_body1_Y"]* -0.304
-    df_float_interpolate_3 ["first_3_body2_Y"]=df_float_interpolate_3 ["first_3_body2_Y"]* -0.304
-    df_float_interpolate_3 ["first_3_body3_Y"]=df_float_interpolate_3 ["first_3_body3_Y"]* -0.304
-    df_float_interpolate_3 ["first_3_head_Y"]=df_float_interpolate_3 ["first_3_head_Y"]* -0.304
-
-    #2nd
-    df_float_interpolate_3 ["second_tail_3_X"]=df_float_interpolate_3 ["second_tail_3_X"]*0.28
-    df_float_interpolate_3 ["second_3_body1_X"]=df_float_interpolate_3 ["second_3_body1_X"]*0.28
-    df_float_interpolate_3 ["second__3_body2_X"]=df_float_interpolate_3 ["second__3_body2_X"]*0.28
-    df_float_interpolate_3 ["second__3_body3_X"]=df_float_interpolate_3 ["second__3_body3_X"]*0.28
-    df_float_interpolate_3 ["second__3_head_X"]=df_float_interpolate_3 ["second__3_head_X"]*0.28
-
-    df_float_interpolate_3 ["second_tail_3_Y"]=df_float_interpolate_3 ["second_tail_3_Y"]* -0.304
-    df_float_interpolate_3 ["second__3_body1_Y"]=df_float_interpolate_3 ["second__3_body1_Y"]* -0.304
-    df_float_interpolate_3 ["second__3_body2_Y"]=df_float_interpolate_3 ["second__3_body2_Y"]* -0.304
-    df_float_interpolate_3 ["second__3_body3_Y"]=df_float_interpolate_3 ["second__3_body3_Y"]* -0.304
-    df_float_interpolate_3 ["second__3_head_Y"]=df_float_interpolate_3 ["second__3_head_Y"]* -0.304
-
-    #3rd
-    df_float_interpolate_3 ["third_tail_3_X"]=df_float_interpolate_3 ["third_tail_3_X"]*0.28
-    df_float_interpolate_3 ["third_3_body1_X"]=df_float_interpolate_3 ["third_3_body1_X"]*0.28
-    df_float_interpolate_3 ["third_3_body2_X"]=df_float_interpolate_3 ["third_3_body2_X"]*0.28
-    df_float_interpolate_3 ["third_3_body3_X"]=df_float_interpolate_3 ["third_3_body3_X"]*0.28
-    df_float_interpolate_3 ["third_3_head_X"]=df_float_interpolate_3 ["third_3_head_X"]*0.28
-
-    df_float_interpolate_3 ["third_tail_3_Y"]=df_float_interpolate_3 ["third_tail_3_Y"]* -0.304
-    df_float_interpolate_3 ["third_3_body1_Y"]=df_float_interpolate_3 ["third_3_body1_Y"]* -0.304
-    df_float_interpolate_3 ["third_3_body2_Y"]=df_float_interpolate_3 ["third_3_body2_Y"]* -0.304
-    df_float_interpolate_3 ["third_3_body3_Y"]=df_float_interpolate_3 ["third_3_body3_Y"]* -0.304
-    df_float_interpolate_3 ["third_3_head_Y"]=df_float_interpolate_3 ["third_3_head_Y"]* -0.304
-
-    #4th
-    df_float_interpolate_3 ["fourth_tail_3_X"]=df_float_interpolate_3 ["fourth_tail_3_X"]*0.28
-    df_float_interpolate_3 ["fourth_3_body1_X"]=df_float_interpolate_3 ["fourth_3_body1_X"]*0.28
-    df_float_interpolate_3 ["fourth_3_body2_X"]=df_float_interpolate_3 ["fourth_3_body2_X"]*0.28
-    df_float_interpolate_3 ["fourth_3_body3_X"]=df_float_interpolate_3 ["fourth_3_body3_X"]*0.28
-    df_float_interpolate_3 ["fourth_3_head_X"]=df_float_interpolate_3 ["fourth_3_head_X"]*0.28
-
-    df_float_interpolate_3 ["fourth_tail_3_Y"]=df_float_interpolate_3 ["fourth_tail_3_Y"]* -0.304
-    df_float_interpolate_3 ["fourth_3_body1_Y"]=df_float_interpolate_3 ["fourth_3_body1_Y"]* -0.304
-    df_float_interpolate_3 ["fourth_3_body2_Y"]=df_float_interpolate_3 ["fourth_3_body2_Y"]* -0.304
-    df_float_interpolate_3 ["fourth_3_body3_Y"]=df_float_interpolate_3 ["fourth_3_body3_Y"]* -0.304
-    df_float_interpolate_3 ["fourth_3_head_Y"]=df_float_interpolate_3 ["fourth_3_head_Y"]* -0.304
-
-    #5th
-    df_float_interpolate_3 ["fifth_tail_3_X"]=df_float_interpolate_3 ["fifth_tail_3_X"]*0.28
-    df_float_interpolate_3 ["fifth_3_body1_X"]=df_float_interpolate_3 ["fifth_3_body1_X"]*0.28
-    df_float_interpolate_3 ["fifth_3_body2_X"]=df_float_interpolate_3 ["fifth_3_body2_X"]*0.28
-    df_float_interpolate_3 ["fifth_3_body3_X"]=df_float_interpolate_3 ["fifth_3_body3_X"]*0.28
-    df_float_interpolate_3 ["fifth_3_head_X"]=df_float_interpolate_3 ["fifth_3_head_X"]*0.28
-
-    df_float_interpolate_3 ["fifth_tail_3_Y"]=df_float_interpolate_3 ["fifth_tail_3_Y"]* -0.304
-    df_float_interpolate_3 ["fifth_3_body1_Y"]=df_float_interpolate_3 ["fifth_3_body1_Y"]* -0.304
-    df_float_interpolate_3 ["fifth_3_body2_Y"]=df_float_interpolate_3 ["fifth_3_body2_Y"]* -0.304
-    df_float_interpolate_3 ["fifth_3_body3_Y"]=df_float_interpolate_3 ["fifth_3_body3_Y"]* -0.304
-    df_float_interpolate_3 ["fifth_3_head_Y"]=df_float_interpolate_3 ["fifth_3_head_Y"]* -0.304
-
-    #6th
-    df_float_interpolate_3 ["sixth_tail_3_X"]=df_float_interpolate_3 ["sixth_tail_3_X"]*0.28
-    df_float_interpolate_3 ["sixth_3_body1_X"]=df_float_interpolate_3 ["sixth_3_body1_X"]*0.28
-    df_float_interpolate_3 ["sixth_3_body2_X"]=df_float_interpolate_3 ["sixth_3_body2_X"]*0.28
-    df_float_interpolate_3 ["sixth_3_body3_X"]=df_float_interpolate_3 ["sixth_3_body3_X"]*0.28
-    df_float_interpolate_3 ["sixth_3_head_X"]=df_float_interpolate_3 ["sixth_3_head_X"]*0.28
-
-    df_float_interpolate_3 ["sixth_tail_3_Y"]=df_float_interpolate_3 ["sixth_tail_3_Y"]* -0.304
-    df_float_interpolate_3 ["sixth_3_body1_Y"]=df_float_interpolate_3 ["sixth_3_body1_Y"]* -0.304
-    df_float_interpolate_3 ["sixth_3_body2_Y"]=df_float_interpolate_3 ["sixth_3_body2_Y"]* -0.304
-    df_float_interpolate_3 ["sixth_3_body3_Y"]=df_float_interpolate_3 ["sixth_3_body3_Y"]* -0.304
-    df_float_interpolate_3 ["sixth_3_head_Y"]=df_float_interpolate_3 ["sixth_3_head_Y"]* -0.304
-
-    #3 sec
-    df_float_interpolate_3.to_csv(path_raw+'/Cropped_CSV_d77/'+d77+three_name+three_folder+'_3S_INTER_MM.csv')
-
-path = (path_raw+'/Cropped_CSV_d77')
-csv_files_12 = glob.glob(os.path.join(path, "*_12S.csv"))
-
-for f in csv_files_12:
-    csv_12 = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    twelve_name = full_path[82:84]
-    twelve_folder = full_path[84:87]
-    last_row_12= csv_12.iloc[:,1].index.get_loc(csv_12.iloc[:, 1].last_valid_index())
-    csv_12= csv_12.iloc[:(last_row_12+1),:]
-
-    # Convert to float
-    csv_float_12 = csv_12.astype('float')
-    # Interpolate to fix missing data
-    df_float_interpolate_12= csv_float_12.interpolate()
-    df_float_interpolate_12=df_float_interpolate_12.iloc[:,1:]
-
-
-    #convert to mm
-    #12 SEC
-    df_float_interpolate_12 ["Tail_X"]=df_float_interpolate_12 ["Tail_X"]*0.28
-    df_float_interpolate_12 ["Body1_X"]=df_float_interpolate_12 ["Body1_X"]*0.28
-    df_float_interpolate_12 ["Body2_X"]=df_float_interpolate_12 ["Body2_X"]*0.28
-    df_float_interpolate_12 ["Body3_X"]=df_float_interpolate_12 ["Body3_X"]*0.28
-    df_float_interpolate_12 ["Head_X"]=df_float_interpolate_12 ["Head_X"]*0.28
-    df_float_interpolate_12 ["Tail_X.1"]=df_float_interpolate_12 ["Tail_X.1"]*0.28
-    df_float_interpolate_12 ["Body1_X.1"]=df_float_interpolate_12 ["Body1_X.1"]*0.28
-    df_float_interpolate_12 ["Body2_X.1"]=df_float_interpolate_12 ["Body2_X.1"]*0.28
-    df_float_interpolate_12 ["Body3_X.1"]=df_float_interpolate_12 ["Body3_X.1"]*0.28
-    df_float_interpolate_12 ["Head_X.1"]=df_float_interpolate_12 ["Head_X.1"]*0.28
-
-    df_float_interpolate_12 ["Tail_Y"]=df_float_interpolate_12 ["Tail_Y"]* -0.304
-    df_float_interpolate_12 ["Body1_Y"]=df_float_interpolate_12 ["Body1_Y"]* -0.304
-    df_float_interpolate_12 ["Body2_Y"]=df_float_interpolate_12 ["Body2_Y"]* -0.304
-    df_float_interpolate_12 ["Body3_Y"]=df_float_interpolate_12 ["Body3_Y"]* -0.304
-    df_float_interpolate_12 ["Head_Y"]=df_float_interpolate_12 ["Head_Y"]* -0.304
-    df_float_interpolate_12 ["Tail_Y.1"]=df_float_interpolate_12 ["Tail_Y.1"]* -0.304
-    df_float_interpolate_12 ["Body1_Y.1"]=df_float_interpolate_12 ["Body1_Y.1"]* -0.304
-    df_float_interpolate_12 ["Body2_Y.1"]=df_float_interpolate_12 ["Body2_Y.1"]* -0.304
-    df_float_interpolate_12 ["Body3_Y.1"]=df_float_interpolate_12 ["Body3_Y.1"]* -0.304
-    df_float_interpolate_12 ["Head_Y.1"]=df_float_interpolate_12 ["Head_Y.1"]* -0.304
-
-    # Write to CSV
-    # 12 sec
-    df_float_interpolate_12.to_csv(path_raw+'/Cropped_CSV_d77/'+d77+twelve_name+twelve_folder+'_12S_INTER_MM.csv')
-    
-    print("Ran:"+twelve_name +twelve_folder)
-    '''
+    print(f"Ran: {csv_file}, saved to {out_path / csv_file.stem[:3]/ (csv_file.stem+'_INTER_MM.csv')}")
 
 if __name__ == "__main__":
     # Parser
@@ -233,6 +56,9 @@ if __name__ == "__main__":
 
     # Get all csv files
     csv_files = list(csv_path.glob("**/*.csv"))
+
+    # print csv files
+    print(len(csv_files), "csv files found")
 
     # Iterate through all csv files
     for csv_file in csv_files:

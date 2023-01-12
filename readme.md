@@ -4,11 +4,13 @@
 
 - [X] find and stabilize package and python versions, upgrade if neccessary (created requirements.txt)
 - [ ] streamline / refactor
-  - [ ] reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib) (POC done with LED_times.py)
+  - [ ] reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
   - [ ] turn hardcoded variables into passable variables
-  - [ ] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface) (POC testing done, verification + full dataset + proper tqdm left)
+  - [ ] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
   - [ ] refactor to reduce code length
   - [ ] create a notebook for final implementation for ease for running (main.ipynb)
+  - [ ] Create a random SUBSET_CSV also?
+  - [ ] missing data analysis/likelihood analysis
 - [X] build an LED detector (done LED_times.py)
 
 #### stage 2?
@@ -18,19 +20,25 @@
 
 # Additions
 
-**main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository.
+**main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository. 
 
 **LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos. More info available in the readme in scripts folder, and in the script itself.
+
+**SUBSET_CSV_M.py** - script for creating MANUAL subsets. Contains subset parsing and creating individual csvs for each subset for each original DLC csv. Input is DLC csvs path, output path, and the subsets needed. Subsets are given as "[(-6, -3)...(-3, 'start'), ('start','end'), ('end', 3)....(4,6)]", in which 'start' and 'end' denote LED event. Currently, only the first led event in the video is used. Subsets can be designed completely arbitrarily by the user. 
+
+**Interpolate_convert_mm_M.py** - just a refactored version of the same script as before. This script loads the subset csv, interpolates for missing values, and converts to mm using the * 0.28 for x-axis and *-0.304 for y-axis. saves the new csv in data/output/inter_mm unless specified otherwise.
 
 ## New file structure
 
 ```
 ASM_Killifish_repo/
-├── data/
-│   ├── output (used to store outputs from the scripts)
-│   ├── csv (used to contain DLC output csvs)
-│   └── videos (original videos)
-├── scripts (contains the python scripts used)
+└── data/
+│   └── output/
+│   │    ├── subset (output from SUBSET_CSV_M.py)
+│   │    └── inter_mm (output from interpolate_convert_mm_M.py)
+│   ├── csv/ (used to contain DLC output csvs)
+│   └── videos/ (original videos)
+├── scripts/ (contains the python scripts used)
 ├── main.ipynb (USE THIS!)
 ├── readme.md (BUT READ THIS FIRST!)
 ├── requirements.txt (keep track of packages used)

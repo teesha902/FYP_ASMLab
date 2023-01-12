@@ -25,3 +25,40 @@ A folder of videos is taken, and each video is processed. The process contains f
 5. We check the output to check how many LED events are observed. If too many events (determined by `max_LED` flag) or no LED events are observed, we store the video name in `problem_vids` dictionary for processing later. Otherwise, timestamps and frame number is appended to `final_timestamps` array and returned.
 6. At this point, we re-run this analysis **once** if there are videos with no LED events to check if there are events observed using the lower threshold, using the `sensitive` flag.
 7. After the re-analysis is finished, the outputs are saved to output path defined earlier as problem_vids.txt and final timestamps to LED_times.csv .
+
+
+## SUBSET_CSV_M.py
+
+SUBSET_CSV_M takes in the following arguments:
+
+1. `--csv_path <path to DLC csvs>` can be used to provide path to a folder containing DLC csvs if not in `data/csv/`.
+2. `--led_path <path to LED_times.csv>` can be used to provid path for LED_times.csv if not `data/output/`
+3. `--output_path <path to output>` can be used to provide output path for csv if not `data/output/subset`
+4. `--debug` flag is used to get debug printouts with default set to false.
+5. `--subset "<subsets list>"` input is **REQUIRED**. This flag defines the _custom_ subsets which are inputted by the user to subset the main DLC csv. This follows the following rules
+   * The general pattern is "[(start_time, end_time) , ...]". An example is "[(-6, -3), (-3, 'start'), ('start', 'end'), ('end', 3)]"
+   * Here, 'start' and 'end' refer to starting and ending time of the LED event. A negative integer refers to time before the start of LED, and a positive integer refers to time after LED event is finished.
+   * It must always be a a tuple () containing 2 values inside a list [], which is passed as a string "" to the argument. This is crucial to it being interpreted correctly.
+
+Currently, only the first led event is used. Furthermore, output saving is done by `output_path/<animal number>/<animal number>_<day>_<subset number>` .
+
+The columns are set as shown below.
+
+```
+    columns = ["Frames","Tail_X","Tail_Y",'Tail_L',
+                'Body1_X','Body1_Y','Body1_L',
+                'Body2_X','Body2_Y','Body2_L',
+                'Body3_X','Body3_Y','Body3_L',
+                'Head_X','Head_Y','Head_L']
+```
+
+
+## interpolate_convert_mm_M.py
+
+interpolate_convert_mm_M takes in the following arguments:
+
+1. `--csv_path <path to subset csvs>` can be used to provide path to a folder containing subset csvs if not in `data/output/subset/`.
+2. `--output_path <path to output>` can be used to provide output path for csv if not `data/output/inter_mm`
+3. `--debug` flag is used to get debug printouts with default set to false.
+
+💡 This script is mainly just a refactoring, but has POTENTIAL for further filtering for missing data levels and analysis. This may move this to before subset_csv as we should only subset after data analysis is completed?
