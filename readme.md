@@ -13,6 +13,7 @@
   - [ ] missing data analysis/likelihood analysis
 - [X] build an LED detector (done LED_times.py)
   - [ ] use histogram to set thethreshold dynamically?
+- [ ] Use interpolate convert before Subset + do data analysis for better interpolation and data rejection?
   
 #### stage 2?
 
