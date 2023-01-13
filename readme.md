@@ -12,7 +12,8 @@
   - [ ] Create a random SUBSET_CSV also?
   - [ ] missing data analysis/likelihood analysis
 - [X] build an LED detector (done LED_times.py)
-
+  - [ ] use histogram to set thethreshold dynamically?
+  
 #### stage 2?
 
 - [ ] multiprocessing to improve performance
