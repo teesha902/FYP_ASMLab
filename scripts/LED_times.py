@@ -160,7 +160,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
 
 def main(video_path, vis, debug, max_LED):
     # Creating the list of videos and initialising arrays
-    vid_list = list(video_path.glob("*.mp4"))
+    vid_list = list(video_path.glob("**/*.mp4"))
     print(f' total videos found are {len(vid_list)}')
     print(f' Videos to be processed are {[i.name for i in vid_list]}') if debug else None
     LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame"]]
@@ -197,7 +197,11 @@ if __name__ == "__main__":
         re_analyse = [i for i in problem_vids['LED not observed']]
         for i in re_analyse:
             print(f'running reduced threshold analysis for {i}')
-            attempt = process_video(Path(video_path / i), vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
+
+            # find video path again and run process_video again
+            
+            video_path = list(video_path.glob(f'**/{i}'))[0]
+            attempt = process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
             if attempt == False:
                 print(f'failed to process {i}')
             else:
