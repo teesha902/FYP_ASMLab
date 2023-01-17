@@ -49,13 +49,39 @@ from pathlib import Path
 from tqdm import tqdm
 import json
 
-def create_mask(frame, sensitive):
+def create_mask(frame, thresh):
     frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
-    lower_threshold = (35*2.55, 25+128, -20+128) if not sensitive else (25*2.55, 25+128, -20+128) # changed from 27 to 35 as brightly lit videos were too sensitive
+    lower_threshold = (thresh, 25+128, -20+128)
     upper_threshold = (100*2.55, 128+128, 40+128)
     mask = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
     # print(f'sensitive analysis, lower threshold set to {lower_threshold}') if sensitive else None 
     return mask
+
+def get_thresh(frame, sensitive, hist_thresh, debug):
+    frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
+    # print(sensitive, hist_thresh)
+
+    if hist_thresh:
+        # Create mask for color only
+        lower_threshold = (0, 25+128, -20+128)
+        upper_threshold = (100*2.55, 128+128, 40+128)
+        mask_color = cv2.inRange(frame_LAB, lower_threshold, upper_threshold)
+
+        # Calculate histogram of Luminance of LAB frame
+        hist = cv2.calcHist([frame_LAB], [0], mask_color, [256], [0,256])
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(hist)
+        # print(max_loc) if debug else None
+
+        # determine threshold based on histogram if its lower than the base set for non sensitive and sensitive analysis
+        if sensitive:
+            threshold = max_loc[-1] if 1 < max_loc[-1] < 20*2.55 else 20*2.55 # defaults to 20 if max_loc is higher than 20
+        else:
+            # print("correct threshold loop") if debug else None
+            threshold = max_loc[-1] if 1 < max_loc[-1] < 35*2.55 else 35*2.55 # defaults to 35 if max_loc is higher than 35
+    else: 
+        threshold = 35*2.55 if not sensitive else 20*2.55
+    print(f"threshold is {threshold/2.55}") if debug else None
+    return threshold
 
 def get_timestamps(timestamps, debug):
     final_timestamps = []
@@ -85,7 +111,7 @@ def get_timestamps(timestamps, debug):
         print(f"appending final timestamps {first_timestamp, last_timestamp}") if debug else None
     return final_timestamps
 
-def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sensitive = False):
+def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids,hist_thresh, sensitive = False ):
     video = cv2.VideoCapture(str(video_path))
     print(video_path.name)
         
@@ -96,6 +122,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
     frame_for_video=[]
     bg = True
     mask_bg = []
+    thresh = 0
         
     # Read until video is completed
     while(video.isOpened()):
@@ -103,7 +130,8 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
         ret, frame = video.read()
 
         if bg == True and video.get(cv2.CAP_PROP_POS_MSEC) > 5000:
-            mask_bg = create_mask(frame, sensitive)
+            thresh = get_thresh(frame, sensitive, hist_thresh, debug)
+            mask_bg = create_mask(frame, thresh)
             bg = False
             print("\n bg created") if debug else None
             if vis == True: 
@@ -113,7 +141,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
             if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
                 
-            mask_frame = create_mask(frame, sensitive)
+            mask_frame = create_mask(frame, thresh)
             mask_bw = mask_frame - mask_bg
                 #find number of non-zero pixels and print timestamp and pixels count if nonzero pixels > 2500
             if np.count_nonzero(mask_bw) > 2500:
@@ -158,7 +186,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sens
         return True
 
 
-def main(video_path, vis, debug, max_LED):
+def main(video_path, vis, debug, max_LED, hist_thresh):
     # Creating the list of videos and initialising arrays
     vid_list = list(video_path.glob("**/*.mp4"))
     print(f' total videos found are {len(vid_list)}')
@@ -169,7 +197,7 @@ def main(video_path, vis, debug, max_LED):
     
     #Looping over videos
     for video_path in vid_list:
-        process_video(video_path, vis, debug, max_LED, LED_times, problem_vids)
+        process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, hist_thresh, sensitive = False)
     return problem_vids, LED_times
 
 if __name__ == "__main__":
@@ -179,17 +207,19 @@ if __name__ == "__main__":
     parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not default")
     parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
     parser.add_argument("--vis", action="store_true", default = False, help="visualise (default is false)")
+    parser.add_argument("--hist_thresh", action="store_false", default = True, help=" Use histogram based thresholding (default is true)")
     parser.add_argument("--max_led", default = 2, help="max number of LED events allowed (default is 2)")
 
     args = parser.parse_args()
     video_path = Path(args.video_path) 
     out_path = Path(args.output_path) 
     vis = args.vis
+    hist_thresh = args.hist_thresh
     debug = args.debug
     max_LED = args.max_led
 
     #main process
-    problem_vids, LED_times = main(video_path, vis, debug, max_LED)
+    problem_vids, LED_times = main(video_path, vis, debug, max_LED, hist_thresh)
     # output verification and error handling
     if sum(len(x) for x in problem_vids.values())  > 0:
         print("trigger") if debug else None
@@ -200,8 +230,8 @@ if __name__ == "__main__":
 
             # find video path again and run process_video again
             
-            video_path = list(video_path.glob(f'**/{i}'))[0]
-            attempt = process_video(video_path, vis, debug, max_LED, LED_times, problem_vids, sensitive = True)
+            problem_vid_path = list(video_path.glob(f'**/{i}'))[0]
+            attempt = process_video(problem_vid_path, vis, debug, max_LED, LED_times, problem_vids, hist_thresh, sensitive = True)
             if attempt == False:
                 print(f'failed to process {i}')
             else:
