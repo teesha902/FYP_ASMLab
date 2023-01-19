@@ -48,6 +48,7 @@ import cv2
 from pathlib import Path
 from tqdm import tqdm
 import json
+import os
 
 def create_mask(frame, thresh):
     frame_LAB = cv2.cvtColor(cv2.GaussianBlur(frame,(5,5),0), cv2.COLOR_BGR2Lab)
@@ -74,13 +75,14 @@ def get_thresh(frame, sensitive, hist_thresh, debug):
 
         # determine threshold based on histogram if its lower than the base set for non sensitive and sensitive analysis
         if sensitive:
-            threshold = max_loc[-1] if 1 < max_loc[-1] < 20*2.55 else 20*2.55 # defaults to 20 if max_loc is higher than 20
+            threshold = max_loc[-1] if 17*2.55 < max_loc[-1] < 22*2.55 else 22*2.55 # defaults to 20 if max_loc is higher than 20
         else:
             # print("correct threshold loop") if debug else None
-            threshold = max_loc[-1] if 1 < max_loc[-1] < 35*2.55 else 35*2.55 # defaults to 35 if max_loc is higher than 35
+            threshold = max_loc[-1] if 17*2.55 < max_loc[-1] < 35*2.55 else 35*2.55 # defaults to 35 if max_loc is higher than 35
+        print(f"histogram threshold is {threshold/2.55}") if debug else None
     else: 
-        threshold = 35*2.55 if not sensitive else 20*2.55
-    print(f"threshold is {threshold/2.55}") if debug else None
+        threshold = 35*2.55 if not sensitive else 25*2.55
+        print(f"non histogram threshold is {threshold/2.55}") if debug else None
     return threshold
 
 def get_timestamps(timestamps, debug):
@@ -207,14 +209,14 @@ if __name__ == "__main__":
     parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not default")
     parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
     parser.add_argument("--vis", action="store_true", default = False, help="visualise (default is false)")
-    parser.add_argument("--hist_thresh", action="store_false", default = True, help=" Use histogram based thresholding (default is true)")
+    parser.add_argument("--no_hist_thresh", action="store_false", default = True, help=" Not use histogram based thresholding (default is true)")
     parser.add_argument("--max_led", default = 2, help="max number of LED events allowed (default is 2)")
 
     args = parser.parse_args()
     video_path = Path(args.video_path) 
     out_path = Path(args.output_path) 
     vis = args.vis
-    hist_thresh = args.hist_thresh
+    hist_thresh = args.no_hist_thresh
     debug = args.debug
     max_LED = args.max_led
 
@@ -239,6 +241,7 @@ if __name__ == "__main__":
                 problem_vids['LED not observed'].remove(i)
         print(f'problems found in {problem_vids}, after running reduced threshold analysis')
     
+    os.makedirs(out_path, exist_ok=True)
     # saving to csv        
     csv_path = Path(out_path, "LED_times.csv")
     problem_vids_path = Path(out_path, "problem_vids.txt")
