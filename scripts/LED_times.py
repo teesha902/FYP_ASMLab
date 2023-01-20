@@ -209,7 +209,7 @@ if __name__ == "__main__":
     parser.add_argument("--output_path", default = "./data/output/", help="the filepath to output csv if not default")
     parser.add_argument("--debug", action="store_true", default = False, help="debug mode (default is false)")
     parser.add_argument("--vis", action="store_true", default = False, help="visualise (default is false)")
-    parser.add_argument("--no_hist_thresh", action="store_false", default = True, help=" Not use histogram based thresholding (default is true)")
+    parser.add_argument("--no_hist_thresh", action="store_false", default = True, help=" use histogram based thresholding (default is true)")
     parser.add_argument("--max_led", default = 2, help="max number of LED events allowed (default is 2)")
 
     args = parser.parse_args()
