@@ -20,6 +20,8 @@ import pandas as pd
 import numpy as np
 import glob
 import os
+from math import sqrt
+from scipy.spatial.distance import pdist
 
 def check_overall(df, threshold, debug = False):
     """
@@ -62,19 +64,76 @@ def get_invalids(df, threshold, debug = False):
         # Combine the two lists
         part_missing = list(np.unique(np.sort(np.concatenate((missing_values, low_likelihood)))))
         blanks.append(part_missing) 
+    print()
     return blanks
 
-def jittery_moves(df, threshold):
+def jittery_frames(df, threshold, debug):
     """
-    Checks for jittery moves in the dataframe by comparing distance travelled between frames
-    to threshold. Returns a list of jittery frames
+    Checks for jittery moves in the dataframe by checking fish length .
+    Fish length is calculated using avg distance between pointsReturns a list of jittery frames
     """
-    # Get the distance travelled between frames
-    distance = df.diff()
-    # Get the frames where the distance travelled is greater than the threshold
-    jittery_frames = distance[distance > threshold].index.tolist()
-    return jittery_frames
+    # drop frame and likelihood columns
+    coords_df = df.drop(df.columns[[0,3,6,9,12,15]], axis=1)
+    # drop the first two rows
+    coords_df.drop([0,1], inplace=True)
+    print(coords_df.head(5)) if debug else None
 
-# df = pd.read_csv("data/csv/test_csv.csv", header=None)
-# print(df.head(5))
-# print(long_blanks(df, 10))
+    # convert the dataframe to float values
+    coords_df = coords_df.astype(float)
+    # initialize problem frames and fish length list
+    problem_frames = []
+    fish_length = []
+    # iterate through rows to extract info
+    for row in coords_df.itertuples():
+        x = [row[i] for i in range(1,10,2)]
+        y = [row[i] for i in range(2,11,2)]
+        points = np.array([[x[i], y[i]] for i in range(0, len(x))])
+        distances = np.round(pdist(points, metric='euclidean'),2)
+        if sum(distances)/len(distances):
+            fish_length.append(sum(distances)/len(distances)) # this metric may be inaccurate, as high distance can also be points missing in the middle
+    # check if fish length list is not empty
+    if len(fish_length) > 0:
+        # remove nan values from fish length list
+        fish_length = [x for x in fish_length if str(x) != 'nan']
+        # calculate the histogram of fish length
+        hist, bin_edges = np.histogram(fish_length, range = (0, max(fish_length)), bins = 100)
+        # find the first bin that has zero values
+        for i, prob in enumerate(hist):
+            if prob == 0 and i >10:
+                break
+        print(bin_edges[i])
+        threshold = bin_edges[i]
+        # add frames with fish length greater than threshold to problem frames list
+        [problem_frames.append(i) for frame, fish_length in enumerate(fish_length) if fish_length > threshold]
+    return problem_frames
+
+
+def jittery_frames(df, threshold, debug):
+    """
+    Checks for jittery moves in the dataframe by checking fish length. Returns a list of jittery frames
+    """
+    coords_df = df.drop(df.columns[[0,3,6,9,12,15]], axis=1) # drop frame and likelihood columns
+    coords_df.drop([0,1], inplace=True)
+    print(coords_df.head(5)) if debug else None
+
+    coords_df = coords_df.astype(float)
+    problem_frames = []
+    fish_length = []
+    #iterate through rows to extract info
+    for row in coords_df.itertuples():
+        x = [row[i] for i in range(1,10,2)]
+        y = [row[i] for i in range(2,11,2)]
+        points = np.array([[x[i], y[i]] for i in range(0, len(x))])
+        distances = np.round(pdist(points, metric='euclidean'),2)
+        if sum(distances)/len(distances):
+            fish_length.append(sum(distances)/len(distances))
+    if len(fish_length) > 0:
+        fish_length = [x for x in fish_length if str(x) != 'nan'] #remove nan values
+        hist, bin_edges = np.histogram(fish_length, range = (0, max(fish_length)), bins = 100)
+        for i, prob in enumerate(hist):
+            if prob == 0 and i >10:
+                break
+        print(bin_edges[i])
+        threshold = bin_edges[i]
+        [problem_frames.append(i) for frame, fish_length in enumerate(fish_length) if fish_length > threshold]
+    return problem_frames

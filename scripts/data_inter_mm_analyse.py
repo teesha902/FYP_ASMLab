@@ -5,8 +5,8 @@ import os
 import argparse
 from pathlib import Path
 
-from data_integrity import check_overall, get_invalids, jittery_moves
-from Interpolate_convert_mm_M import convert_mm
+from scripts.data_integrity import check_overall, get_invalids, jittery_frames
+# from Interpolate_convert_mm_M import convert_mm
 
 def convert_mm(name, df, debug):
     # Convert to float
@@ -41,32 +41,37 @@ def main(csv_path, output_path, debug):
     for csv_file in csv_files:
         # Read csv
         df = pd.read_csv(csv_file, header = None)
+        print(csv_file.name)
+        df.drop([0,1], inplace=True)
+        df.reset_index(drop=True, inplace=True)
 
+        print(df.head(5)) if debug else None
         #check overall data integrity
         percent_missing = check_overall(df, 0.5, debug)
         print(f"{percent_missing}% missing data")
         
-        if percent_missing > 10:
-            print("Too much missing data, skipping")
-            problems_csv.append(csv_file.name)
-            continue
+        # if percent_missing > 10:
+        #     print("Too much missing data, skipping")
+        #     problems_csv.append(csv_file.name)
+        #     continue
         
+        print("checking for invalid frames") if debug else None
         #check for invalid frames
         invalids = get_invalids(df, 0.5, debug)
 
-        # do smth
-
-        #check for jittery moves
-        jittery = jittery_moves(df, 0.5, debug)
+        print("checking for jittery frames") if debug else None
+        #check for jittery frames
+        jittery = jittery_frames(df, 0.5, debug)
 
         # interpolate
-        df.interpolate(axis=1, ,limit = inter_limit, limit_area = 'inside', inplace=True)
+        # df.interpolate(axis=1,limit = inter_limit, limit_area = 'inside', inplace=True)
 
         # Convert to mm
-        convert_mm(csv_file.name, df, debug)
+        # convert_mm(csv_file.name, df, debug)
+
 
         # Save to output path
-        df.to_csv(output_path / csv_file.name, index = False, header = False)
+        # df.to_csv(output_path / csv_file.name, index = False, header = False)
 
 if __name__ == "__main__":
     # Parser
@@ -79,3 +84,5 @@ if __name__ == "__main__":
     csv_path = Path(args.csv_path)
     output_path = Path(args.output_path)
     debug = args.debug
+
+    main(csv_path, output_path, debug)
