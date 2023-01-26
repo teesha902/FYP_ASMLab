@@ -51,9 +51,9 @@ def get_invalids(df, threshold, debug = False):
     blanks = []
     no_cols = len(df.columns)
     #choose 3 columns to check for missing data 
-    for i in range(1, no_cols, 3): 
-        part_df = df.iloc[:, i:i+3]
-        print(part_df.head(5)) if debug else None
+    for i in range(1, no_cols, 3): # remove the frame column
+        part_df = df.iloc[:, i:i+3] # get the 3 columns for each body part
+        print(part_df.head(5)) if debug else None 
         # Get the list of rows with missing values in any column
         missing_values = part_df[part_df.isnull().any(axis=1)].index.tolist()
         print(missing_values) if debug else None
@@ -63,8 +63,8 @@ def get_invalids(df, threshold, debug = False):
         print(low_likelihood) if debug else None
         # Combine the two lists
         part_missing = list(np.unique(np.sort(np.concatenate((missing_values, low_likelihood)))))
-        blanks.append(part_missing) 
-    print()
+        blanks.append(part_missing)
+    # print the percentage of invalid frames on average
     return blanks
 
 def jittery_frames(df, threshold, debug):
@@ -101,39 +101,9 @@ def jittery_frames(df, threshold, debug):
         for i, prob in enumerate(hist):
             if prob == 0 and i >10:
                 break
-        print(bin_edges[i])
+        print(bin_edges[i]) if debug else None
         threshold = bin_edges[i]
         # add frames with fish length greater than threshold to problem frames list
         [problem_frames.append(i) for frame, fish_length in enumerate(fish_length) if fish_length > threshold]
-    return problem_frames
-
-
-def jittery_frames(df, threshold, debug):
-    """
-    Checks for jittery moves in the dataframe by checking fish length. Returns a list of jittery frames
-    """
-    coords_df = df.drop(df.columns[[0,3,6,9,12,15]], axis=1) # drop frame and likelihood columns
-    coords_df.drop([0,1], inplace=True)
-    print(coords_df.head(5)) if debug else None
-
-    coords_df = coords_df.astype(float)
-    problem_frames = []
-    fish_length = []
-    #iterate through rows to extract info
-    for row in coords_df.itertuples():
-        x = [row[i] for i in range(1,10,2)]
-        y = [row[i] for i in range(2,11,2)]
-        points = np.array([[x[i], y[i]] for i in range(0, len(x))])
-        distances = np.round(pdist(points, metric='euclidean'),2)
-        if sum(distances)/len(distances):
-            fish_length.append(sum(distances)/len(distances))
-    if len(fish_length) > 0:
-        fish_length = [x for x in fish_length if str(x) != 'nan'] #remove nan values
-        hist, bin_edges = np.histogram(fish_length, range = (0, max(fish_length)), bins = 100)
-        for i, prob in enumerate(hist):
-            if prob == 0 and i >10:
-                break
-        print(bin_edges[i])
-        threshold = bin_edges[i]
-        [problem_frames.append(i) for frame, fish_length in enumerate(fish_length) if fish_length > threshold]
+    print(f"{len(problem_frames)*100/len(fish_length):.2f}% of frames are jittery")
     return problem_frames

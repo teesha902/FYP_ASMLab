@@ -48,7 +48,7 @@ def main(csv_path, output_path, debug):
         print(df.head(5)) if debug else None
         #check overall data integrity
         percent_missing = check_overall(df, 0.5, debug)
-        print(f"{percent_missing}% missing data")
+        print(f"{percent_missing:.2f}% missing data")
         
         # if percent_missing > 10:
         #     print("Too much missing data, skipping")
