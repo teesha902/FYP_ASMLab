@@ -3,9 +3,8 @@ Defines data check functions which will be used by the main integrity_inter_mm_a
 
 Sample dataframe for dlc csv files (the df should be passed in this format to the functions):
 
-bodyparts Tail  Tail Tail       Body1 Body1 Body1 ...
-coords    x     y    likelihood x     y     likelihood ...
-0         187.0 10.0 0.681      228.0 99.6  0.2879999 ...
+bodyparts_coords Tail_x  Tail_y Tail_likelihood ...
+0                187.0   10.0   0.681      ...
 
 
 Functions:
@@ -32,9 +31,9 @@ def check_overall(df, threshold, debug = False):
     missing_values_count = sum(df.isnull().sum()) 
     print(missing_values_count, "missing values") if debug else None
     # Total number of cells in the dataframe
-    total_cells = np.product(df.iloc[2:, 1:].shape) #exclude headers and frame column
+    total_cells = np.product(df.iloc[:, 1:].shape) #exclude headers and frame column
     # low likelihood count
-    low_likelihood_count_df = df.iloc[2:, 3::3].astype(float)
+    low_likelihood_count_df = df.iloc[:, 3::3].astype(float)
     low_likelihood_count = sum(low_likelihood_count_df[low_likelihood_count_df <= threshold].count())
     print(low_likelihood_count, "low likelihood values") if debug else None
     # Total number of missing values
@@ -58,7 +57,7 @@ def get_invalids(df, threshold, debug = False):
         missing_values = part_df[part_df.isnull().any(axis=1)].index.tolist()
         print(missing_values) if debug else None
         # Get the list of low likelihood values in each column
-        part_likelihood = part_df.iloc[2:,-1].astype(float)
+        part_likelihood = part_df.iloc[:, -1].astype(float)
         low_likelihood = part_likelihood.index[part_likelihood <= threshold].tolist()
         print(low_likelihood) if debug else None
         # Combine the two lists
@@ -74,8 +73,6 @@ def jittery_frames(df, threshold, debug):
     """
     # drop frame and likelihood columns
     coords_df = df.drop(df.columns[[0,3,6,9,12,15]], axis=1)
-    # drop the first two rows
-    coords_df.drop([0,1], inplace=True)
     print(coords_df.head(5)) if debug else None
 
     # convert the dataframe to float values
