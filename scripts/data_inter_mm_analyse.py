@@ -4,28 +4,28 @@ import glob
 import os
 import argparse
 from pathlib import Path
+from scripts.dist_vel_acc import dist_vel_acc, distance
 
 from scripts.data_integrity import check_overall, get_invalids, jittery_frames
 # from Interpolate_convert_mm_M import convert_mm
 
 def convert_mm(name, df, debug):
     # Convert to float
-    df = df.astype('float')
+    # df = df.astype('float')
 
     # define X and Y columns to apply the different conversion
-    x_columns = ['Tail_X','Body1_X','Body2_X', "Body3_X","Head_X"]
-    y_columns = ['Tail_Y','Body1_Y','Body2_Y', "Body3_Y","Head_Y"]
+    x_columns = ["Tail_x", "Body1_x", "Body2_x", "Body3_x", "Head_x"]
+    y_columns = ["Tail_y", "Body1_y", "Body2_y", "Body3_y", "Head_y"]
 
     print(df.head(5)) if debug else None
 
     # Convert to mm
-    for column in x_columns:
-        df[column] = df[column] * 0.28
+    df[x_columns] = df[x_columns].astype(float)* 0.28
 
-    for column in y_columns:
-        df[column] = df[column] * -0.304
+    df[y_columns] = df[y_columns].astype(float) * -0.304
 
-    print(f"Converted: {name} to mm')")
+    print(f"Converted: {name} to mm")
+    return df
 
 
 def main(csv_path, output_path, debug):
@@ -37,15 +37,17 @@ def main(csv_path, output_path, debug):
     print(len(csv_files), "csv files found")
     print(csv_files) if debug else None
 
+    fps = 30
     # Iterate through all csv files
     for csv_file in csv_files:
         # Read csv
         df = pd.read_csv(csv_file, header = None)
         print(csv_file.name)
-        df.drop([0,1], inplace=True)
+        df.columns = df.iloc[2] + "_" + df.iloc[3]
+        df.drop([0,1,2,3], inplace=True) # remove the model name and row that just said individual
         df.reset_index(drop=True, inplace=True)
-
         print(df.head(5)) if debug else None
+        
         #check overall data integrity
         percent_missing = check_overall(df, 0.5, debug)
         print(f"{percent_missing:.2f}% missing data")
@@ -67,7 +69,11 @@ def main(csv_path, output_path, debug):
         # df.interpolate(axis=1,limit = inter_limit, limit_area = 'inside', inplace=True)
 
         # Convert to mm
-        # convert_mm(csv_file.name, df, debug)
+        df = convert_mm(csv_file.name, df, debug)
+        print(df.head(5)) if debug else None
+
+        # do further analysis on the data
+        df = dist_vel_acc(df, fps, debug)
 
 
         # Save to output path
