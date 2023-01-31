@@ -2,6 +2,7 @@ numpy
 scipy
 opencv-python
 imageio
+jupyterlab
 ipython
 matplotlib
 pandas
@@ -9,3 +10,4 @@ openpyxl
 pyyaml
 tqdm
 xlsxwriter
+seaborn

@@ -8,8 +8,8 @@ bodyparts_coords Tail_x  Tail_y Tail_likelihood ...
 
 
 Functions:
-check_blanks checks for an overall percentage of missing data and low likelihood data in the dataframe
-long_blanks checks for a long period of missing data or low likelihood in the dataframe
+check_overall checks for an overall percentage of missing data and low likelihood data in the dataframe.
+get_invalids returns list of invalid frames for a missing data or low likelihood in the dataframe, uses threshold for likelihood. Replaced with direct replacement in data_mm_analyse.py.
 jittery_moves checks for jittery moves in the dataframe by comparing distance travelled between frames to threshold
 
 Created by: Aritejh
@@ -45,7 +45,8 @@ def check_overall(df, threshold, debug = False):
 def get_invalids(df, threshold, debug = False):
     """
     Checks for a missing data or low likelihood in the dataframe, uses threshold for likelihood.
-    returns a list of the invalid frames for each body part
+    returns a list of the invalid frames for each body part. [[...],[...],[...],[...],[...]]
+    NOT USED ANYMORE BUT KEPT FOR FUTURE USE
     """
     blanks = []
     no_cols = len(df.columns)
@@ -66,10 +67,11 @@ def get_invalids(df, threshold, debug = False):
     # print the percentage of invalid frames on average
     return blanks
 
-def jittery_frames(df, threshold, debug):
+def jittery_frames(df, debug):
     """
     Checks for jittery moves in the dataframe by checking fish length .
-    Fish length is calculated using avg distance between pointsReturns a list of jittery frames
+    Fish length is calculated using avg distance between points. 
+    Returns a list of jittery frames
     """
     # drop frame and likelihood columns
     coords_df = df.drop(df.columns[[0,3,6,9,12,15]], axis=1)
@@ -88,6 +90,7 @@ def jittery_frames(df, threshold, debug):
         distances = np.round(pdist(points, metric='euclidean'),2)
         if sum(distances)/len(distances):
             fish_length.append(sum(distances)/len(distances)) # this metric may be inaccurate, as high distance can also be points missing in the middle
+    
     # check if fish length list is not empty
     if len(fish_length) > 0:
         # remove nan values from fish length list

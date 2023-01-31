@@ -9,6 +9,7 @@ Parser is used to take in arguments from command line.
 --vis allows us to observe the background and the subtracted mask (default is false). 
 --max_led allows to allow for multiple led events. If the folder may contain videos with 2 or more LED 
 events, this can be used. Default is 2.
+--no_hist_thresh allows to use the base threshold of 35 and 25 for brightness of LED instead of using histogram.
 
 create_mask() creates a mask given the image/frame. It converts frame to LAB color format and applies a 
 small gaussian blur to decrease noise, before applying a threshold on L for luminance(brightness), and 
@@ -20,6 +21,11 @@ Sensitive variable is used to reduce threshold of brightness. This is necessary 
 get_timestamps() takes in a list of timestamps and returns a list of timestamps where the LED is observed.
 It uses clustering to find the start and end of LED observation. the cluster limits are 2.5s to 6s.
 If the time difference between 2 timestamps is more than 6s, it is considered as a new observation.
+
+get_thresh() is used to get the threshold for the brightness of the LED. It uses histogram to find the
+brightness of the LED. If the histogram threshold is lower than the base threshold, it uses the histogram
+threshold. If the histogram threshold is higher than the base threshold, it uses the base threshold.
+If the --no_hist_thresh flag is used, it uses the base threshold of 35 and 25.
 
 In the main() function, we use video path to find all video files. LED_times array saves the final result 
 for each video before saving that data in a csv. The for loop is the main code. for each video, a progress bar

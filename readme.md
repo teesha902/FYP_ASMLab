@@ -11,6 +11,7 @@
   - [X] create a notebook for final implementation for ease for running (main.ipynb)
   - [ ] Create a random SUBSET_CSV also?
   - [X] missing data analysis/likelihood analysis - done in data_integrity.py
+  - [ ] Save according to the subfolder it was found in
 - [X] build an LED detector (done LED_times.py)
   - [X] use histogram to set thethreshold dynamically? tried but does not work as well, will look at it again in stage 2.
 - [X] Use interpolate convert before Subset + do data analysis for better interpolation and data rejection? - using interpolate with subset only if needed, current implementation does data integrity analysis + instantaneous analysis before subset.
@@ -32,18 +33,18 @@
 
 **data_integrity.py** - Contains code used by `data_mm_analyse.py` for data integrity checks, mainly for checking overall missing data, and calculating jittery frames.
 
-**dist_vel_acc.py** - Contains code used by `data_mm_analyse.py` for converting mm to distance travelled, speed and acceleration per frame respectively. 
+**dist_vel_acc.py** - Contains code used by `data_mm_analyse.py` for converting mm to distance travelled, speed and acceleration per frame respectively.
 
 **SUBSET_CSV_M.py** - script for creating MANUAL subsets. Contains subset parsing and creating individual csvs for each subset for each original DLC csv. Input is DLC csvs path, output path, and the subsets needed. Subsets are given as "[(-6, -3)...(-3, 'start'), ('start','end'), ('end', 3)....(4,6)]", in which 'start' and 'end' denote LED event. Currently, only the first led event in the video is used. Subsets can be designed completely arbitrarily by the user.
 
-## New file structure
+## New folder structure
 
 ```
 ASM_Killifish_repo/
 └── data/
 │   └── output/
 │   │    ├── subset (output from SUBSET_CSV_M.py)
-│   │    └── inter_mm (output from interpolate_convert_mm_M.py)
+│   │    └── mm_analyse (output from data_mm_analyse.py)
 │   ├── csv/ (used to contain DLC output csvs)
 │   └── videos/ (original videos)
 ├── scripts/ (contains the python scripts used)
@@ -53,13 +54,56 @@ ASM_Killifish_repo/
 └── .gitignore (hidden)
 ```
 
-## Setup (TODO)
+## Setup 
 
-install anaconda
+These commands can be run in the command prompt (windows) or terminal (Mac) to get the setup going.
 
-create virtual env with python + jupyter + requirements.txt
+### Git Clone
 
-go to jupyter env and start running
+To clone a repository, use the `git clone` command followed by the repository URL. For example:
+
+```
+git clone https://github.com/mechunderlyingbehavior/killifish.git
+```
+
+### Conda Installation
+
+Conda can be installed by following the instructions provided on the [Conda website](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#).
+
+### Create Conda Environment
+
+To create a new conda environment called "killifish" with Python, use the following command:
+
+```
+conda create --name killifish python
+```
+
+By default, Python 3 is installed.
+
+### Activate environment
+
+```
+conda activate killifish
+```
+
+### Install Requirements
+
+To install the packages listed in the `requirements.txt` file, use the following command:
+
+```
+cd killifish
+pip install -r requirements.txt
+```
+
+This command should be run within the conda environment you created (in this example, "killifish"). This should be the case as we activated the environment earlier
+
+### launch jupyterlab
+
+Launch jupyterlab using the command below. This should open up the browser in the jupyterlab environment opened in the folder killifish.
+
+```
+jupyterlab
+```
 
 ## Previous Workflow:
 

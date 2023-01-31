@@ -35,9 +35,9 @@ def dist_vel_acc(df, fps, debug):
         if column.startswith('dist_'):
             # calculate the velocity using distance columns
             # split column name to get the body part name
-            df[f'vel_{column.split("_")[-1]}'] = df[column].diff() / time_per_frame
+            df[f'{column.split("_")[-1]}_vel'] = df[column].diff() / time_per_frame
             # calculate the acceleration using velocity columns
-            df[f'acc_{column.split("_")[-1]}'] = df[f'vel_{column.split("_")[-1]}'].diff() / time_per_frame
+            df[f'{column.split("_")[-1]}_acc'] = df[f'{column.split("_")[-1]}_vel'].diff() / time_per_frame
 
     print(df.head(5)) if debug else None
     return df
