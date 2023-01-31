@@ -4,7 +4,7 @@ import glob
 import os
 import argparse
 from pathlib import Path
-from scripts.dist_vel_acc import dist_vel_acc, distance
+from scripts.dist_vel_acc import vel_acc, distance
 
 from scripts.data_integrity import check_overall, jittery_frames
 
@@ -12,8 +12,6 @@ def convert_mm(name, df, debug):
     # define X and Y columns to apply the different conversion
     x_columns = ["Tail_x", "Body1_x", "Body2_x", "Body3_x", "Head_x"]
     y_columns = ["Tail_y", "Body1_y", "Body2_y", "Body3_y", "Head_y"]
-
-    print(df.head(5)) if debug else None
 
     # Convert to mm
     df[x_columns] = df[x_columns].astype(float)* 0.28
@@ -44,6 +42,10 @@ def main(csv_path, percent_missing_thresh, invalid_thresh, output_path, debug):
         df.reset_index(drop=True, inplace=True) # resets the row index
         print(df.head(5)) if debug else None
         
+        # Convert to mm
+        df = convert_mm(csv_file.name, df, debug)
+        print(df.head(5)) if debug else None
+
         #check overall data integrity
         percent_missing = check_overall(df, invalid_thresh, debug)
         print(f"{percent_missing:.2f}% missing data")
@@ -53,23 +55,23 @@ def main(csv_path, percent_missing_thresh, invalid_thresh, output_path, debug):
             problems_csv.append((csv_file.name, percent_missing))
         
         print("checking for invalid frames") if debug else None
-        #replace <bbodypart>_likelihood with 0 or 1 depending on if it is invalid or not.
+        # replace <bodypart>_likelihood with 0 depending on if it is invalid or not.
         # invalid frames are frames where the likelihood is less than the invalid_thresh or null
         likelihood_columns = [col for col in df.columns if "likelihood" in col]
-        df[likelihood_columns] = df[likelihood_columns].apply(lambda x:  x.where(x.astype(float) >= invalid_thresh, 0).fillna(0))
+        df[likelihood_columns] = df[likelihood_columns].apply(lambda x: x.where(x.astype(float) >= invalid_thresh, 0).fillna(0))
         
+        print("calculating distance travelled") if debug else None
+        # need distance travelled to do jitter analysis
+        df = distance(df, debug)
+
         print("checking for jittery frames") if debug else None
         #check for jittery frames
         jittery = jittery_frames(df, debug)
         df["jittery"] = 0 # add a jittery column
         df.loc[jittery, "jittery"] = 1
 
-        # Convert to mm
-        df = convert_mm(csv_file.name, df, debug)
-        print(df.head(5)) if debug else None
-
         # do further analysis on the data
-        df = dist_vel_acc(df, fps, debug)
+        df = vel_acc(df, fps, debug)
         
         print(df.head(5)) if debug else None
 
