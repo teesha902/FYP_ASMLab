@@ -105,5 +105,15 @@ def jittery_frames(df, debug):
         threshold = bin_edges[i]
         # add frames with fish length greater than threshold to problem frames list
         [problem_frames.append(i) for frame, fish_length in enumerate(fish_length) if fish_length > threshold]
+    
+    # check for frames with distance greater than 88.44 which is 2SD
+    for col in df.columns:
+        if "dist" in col:
+            problem_frames.extend(list(np.where(df[col] > 88.44)[0]))
+    
+    # remove duplicates
+    problem_frames = list(np.unique(problem_frames))
+    
+    print(problem_frames) if debug else None
     print(f"{len(problem_frames)*100/len(fish_length):.2f}% of frames are jittery")
     return problem_frames
