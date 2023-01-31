@@ -4,31 +4,37 @@
 
 - [X] find and stabilize package and python versions, upgrade if neccessary (created requirements.txt)
 - [ ] streamline / refactor
-  - [ ] reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
-  - [ ] turn hardcoded variables into passable variables
-  - [ ] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
-  - [ ] refactor to reduce code length
-  - [ ] create a notebook for final implementation for ease for running (main.ipynb)
+  - [X] reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
+  - [X] turn hardcoded variables into passable variables
+  - [X] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
+  - [X] refactor to reduce code length
+  - [X] create a notebook for final implementation for ease for running (main.ipynb)
   - [ ] Create a random SUBSET_CSV also?
-  - [ ] missing data analysis/likelihood analysis
+  - [X] missing data analysis/likelihood analysis - done in data_integrity.py
 - [X] build an LED detector (done LED_times.py)
-  - [ ] use histogram to set thethreshold dynamically?
-- [ ] Use interpolate convert before Subset + do data analysis for better interpolation and data rejection?
-  
+  - [X] use histogram to set thethreshold dynamically? tried but does not work as well, will look at it again in stage 2.
+- [X] Use interpolate convert before Subset + do data analysis for better interpolation and data rejection? - using interpolate with subset only if needed, current implementation does data integrity analysis + instantaneous analysis before subset.
+
 #### stage 2?
 
 - [ ] multiprocessing to improve performance
 - [ ] python file for DLC (POC for refine tracklets done)
+- [ ] imrpove dynamic threshold?
+- [ ] improve jitter detection?
 
 # Additions
 
-**main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository. 
+**main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository.
 
 **LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos. More info available in the readme in scripts folder, and in the script itself.
 
-**SUBSET_CSV_M.py** - script for creating MANUAL subsets. Contains subset parsing and creating individual csvs for each subset for each original DLC csv. Input is DLC csvs path, output path, and the subsets needed. Subsets are given as "[(-6, -3)...(-3, 'start'), ('start','end'), ('end', 3)....(4,6)]", in which 'start' and 'end' denote LED event. Currently, only the first led event in the video is used. Subsets can be designed completely arbitrarily by the user. 
+**data_mm_analyse.py** - Script for running data integrity checks like null/low likelihood and jittery frames, converting pixels to mm, and running the instantaneous analysis such as calculating distance travelled, speed and acceleration.
 
-**Interpolate_convert_mm_M.py** - just a refactored version of the same script as before. This script loads the subset csv, interpolates for missing values, and converts to mm using the * 0.28 for x-axis and *-0.304 for y-axis. saves the new csv in data/output/inter_mm unless specified otherwise.
+**data_integrity.py** - Contains code used by `data_mm_analyse.py` for data integrity checks, mainly for checking overall missing data, and calculating jittery frames.
+
+**dist_vel_acc.py** - Contains code used by `data_mm_analyse.py` for converting mm to distance travelled, speed and acceleration per frame respectively. 
+
+**SUBSET_CSV_M.py** - script for creating MANUAL subsets. Contains subset parsing and creating individual csvs for each subset for each original DLC csv. Input is DLC csvs path, output path, and the subsets needed. Subsets are given as "[(-6, -3)...(-3, 'start'), ('start','end'), ('end', 3)....(4,6)]", in which 'start' and 'end' denote LED event. Currently, only the first led event in the video is used. Subsets can be designed completely arbitrarily by the user.
 
 ## New file structure
 
@@ -46,6 +52,14 @@ ASM_Killifish_repo/
 ├── requirements.txt (keep track of packages used)
 └── .gitignore (hidden)
 ```
+
+## Setup (TODO)
+
+install anaconda
+
+create virtual env with python + jupyter + requirements.txt
+
+go to jupyter env and start running
 
 ## Previous Workflow:
 

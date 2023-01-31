@@ -9,6 +9,7 @@ LED_times takes in the following arguments:
 3. `--debug` flag is used to get debug printouts with default set to false.
 4. `--vis` flag is used to visualise background mask, and current mask while LED is detected. This will show up while the video is being processed, great for debugging the mask itself.
 5. `--max_led <max number of LED events>` allows to allow for multiple led events. If the folder may contain videos with 2 or more LED events, this can be used. Default is 2.
+6. `--no_hist_thresh` allows us to disable dynamic histogram thresholding. It is currently used as histogram threshold is not a mature feature.
 
 This script only runs when run from command line/jupyter notebook. The different functions can be imported to run in other scripts if necessary.
 
@@ -27,6 +28,28 @@ A folder of videos is taken, and each video is processed. The process contains f
 7. After the re-analysis is finished, the outputs are saved to output path defined earlier as problem_vids.txt and final timestamps to LED_times.csv .
 
 
+## data_mm_analyse.py (+ data_integrity.py + dist_vel_acc.py)
+
+data_mm_analyse takes in the following arguments:
+
+1. `--csv_path <path to subset csvs>` can be used to provide path to a folder containing subset csvs if not in `data/output/subset/`.
+2. `--output_path <path to output>` can be used to provide output path for csv if not `data/output/mm_analyse`
+3. `--invalid_thresh <threshold>` is used to define the likelihood threshold for a frame to be considered invalid. currently set to 0.25
+4. `--percent_missing <threshold>` is used to define at what percentage a csv is considered to be problematic and saved to problem_csv.txt along with the output CSV. default is 15%.
+5. `--debug` flag is used to get debug printouts with default set to false.
+
+This script incorporates the usage of data_integrity and dist_vel_acc as well. Currently, the script checks an overall level of data missing, and if the missing percentage is higher than the threshold set, it is considered "problematic".
+
+Next, all the invalid frames are marked with a 0 in the likelihood column, allowing for filtering during subset. Furthermore, we check for jitter by creating a histogram of average distance between points on the body of the fish. Using the first empty bin in the histogram after excluding the first few bins, we can set a threshold and find frames where this average distance is higher, possibly indicating jitter.
+
+Now, the pixel coordinates are converted to mm values by multiplying 0.28 for x-axis and -0.304 for y-axis. After this, instantaneous analysis is done to get distance, velocity and acceleration of the fish in that frame. dist_vel_acc.py is used to calculate that.
+
+The output df has the following columns
+
+```
+bodyparts_coords,Tail_x,Tail_y,Tail_likelihood,Body1_x,Body1_y,Body1_likelihood,Body2_x,Body2_y,Body2_likelihood,Body3_x,Body3_y,Body3_likelihood,Head_x,Head_y,Head_likelihood,jittery,dist_Tail,dist_Body1,dist_Body2,dist_Body3,dist_Head,Tail_vel,Tail_acc,Body1_vel,Body1_acc,Body2_vel,Body2_acc,Body3_vel,Body3_acc,Head_vel,Head_acc
+```
+
 ## SUBSET_CSV_M.py
 
 SUBSET_CSV_M takes in the following arguments:
@@ -42,7 +65,7 @@ SUBSET_CSV_M takes in the following arguments:
 
 Currently, only the first led event is used. Furthermore, output saving is done by `output_path/<animal number>/<animal number>_<day>_<subset number>` .
 
-The columns are set as shown below.
+The columns are set as shown below. (OUTDATED)
 
 ```
     columns = ["Frames","Tail_X","Tail_Y",'Tail_L',
@@ -51,14 +74,3 @@ The columns are set as shown below.
                 'Body3_X','Body3_Y','Body3_L',
                 'Head_X','Head_Y','Head_L']
 ```
-
-
-## interpolate_convert_mm_M.py
-
-interpolate_convert_mm_M takes in the following arguments:
-
-1. `--csv_path <path to subset csvs>` can be used to provide path to a folder containing subset csvs if not in `data/output/subset/`.
-2. `--output_path <path to output>` can be used to provide output path for csv if not `data/output/inter_mm`
-3. `--debug` flag is used to get debug printouts with default set to false.
-
-💡 This script is mainly just a refactoring, but has POTENTIAL for further filtering for missing data levels and analysis. This may move this to before subset_csv as we should only subset after data analysis is completed?
