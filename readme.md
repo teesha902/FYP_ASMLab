@@ -11,10 +11,13 @@
   - [X] create a notebook for final implementation for ease for running (main.ipynb)
   - [ ] Create a random SUBSET_CSV also?
   - [X] missing data analysis/likelihood analysis - done in data_integrity.py
-  - [ ] Save according to the subfolder it was found in
+  - [X] Save according to the subfolder it was found in
 - [X] build an LED detector (done LED_times.py)
   - [X] use histogram to set thethreshold dynamically? tried but does not work as well, will look at it again in stage 2.
 - [X] Use interpolate convert before Subset + do data analysis for better interpolation and data rejection? - using interpolate with subset only if needed, current implementation does data integrity analysis + instantaneous analysis before subset.
+- [X] weighted average for distance
+- [X] separate missing and low likelihood for considering a csv "problematic"
+- [ ] check if missing/low likelihood is during LED timing
 
 #### stage 2?
 
@@ -54,7 +57,7 @@ ASM_Killifish_repo/
 └── .gitignore (hidden)
 ```
 
-## Setup 
+## Setup
 
 These commands can be run in the command prompt (windows) or terminal (Mac) to get the setup going.
 
