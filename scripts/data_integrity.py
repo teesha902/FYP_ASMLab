@@ -31,16 +31,17 @@ def check_overall(df, threshold, debug = False):
     missing_values_count = sum(df.isnull().sum()) 
     print(missing_values_count, "missing values") if debug else None
     # Total number of cells in the dataframe
-    total_cells = np.product(df.iloc[:, 1:].shape) #exclude headers and frame column
+    total_cells = np.product(df.iloc[:, 1:].shape) #exclude frame column
     # low likelihood count
-    low_likelihood_count_df = df.iloc[:, 3::3].astype(float)
+    low_likelihood_count_df = df.iloc[:, 3::3] #.astype(float)
     low_likelihood_count = sum(low_likelihood_count_df[low_likelihood_count_df <= threshold].count())
     print(low_likelihood_count, "low likelihood values") if debug else None
     # Total number of missing values
-    total_missing = missing_values_count + low_likelihood_count*3 #multiply by 3 because there are 3 columns per body part
+    # total_missing = missing_values_count + low_likelihood_count*3 #multiply by 3 because there are 3 columns per body part
     # Percentage of missing values
-    percent_missing = (total_missing/total_cells) * 100
-    return percent_missing
+    percent_missing = missing_values_count/total_cells * 100
+    percent_low_likelihood = low_likelihood_count*3/total_cells * 100
+    return percent_missing, percent_low_likelihood
 
 def get_invalids(df, threshold, debug = False):
     """
@@ -58,7 +59,7 @@ def get_invalids(df, threshold, debug = False):
         missing_values = part_df[part_df.isnull().any(axis=1)].index.tolist()
         print(missing_values) if debug else None
         # Get the list of low likelihood values in each column
-        part_likelihood = part_df.iloc[:, -1].astype(float)
+        part_likelihood = part_df.iloc[:, -1] #.astype(float)
         low_likelihood = part_likelihood.index[part_likelihood <= threshold].tolist()
         print(low_likelihood) if debug else None
         # Combine the two lists
@@ -67,18 +68,20 @@ def get_invalids(df, threshold, debug = False):
     # print the percentage of invalid frames on average
     return blanks
 
-def jittery_frames(df, debug):
+def jittery_frames(df, sd_threshold, debug):
     """
     Checks for jittery moves in the dataframe by checking fish length .
     Fish length is calculated using avg distance between points. 
     Returns a list of jittery frames
     """
+    print("Checking for jittery frames...") if debug else None
+
     # drop frame and likelihood columns
     coords_df = df.drop(df.columns[[0,3,6,9,12,15]], axis=1)
     print(coords_df.head(5)) if debug else None
 
     # convert the dataframe to float values
-    coords_df = coords_df.astype(float)
+    coords_df = coords_df #.astype(float)
     # initialize problem frames and fish length list
     problem_frames = []
     fish_length = []
@@ -109,11 +112,16 @@ def jittery_frames(df, debug):
     # check for frames with distance greater than 88.44 which is 2SD
     for col in df.columns:
         if "dist" in col:
-            problem_frames.extend(list(np.where(df[col] > 88.44)[0]))
+            problem_frames.extend(list(np.where(df[col] > sd_threshold)[0]))
     
     # remove duplicates
     problem_frames = list(np.unique(problem_frames))
     
     print(problem_frames) if debug else None
     print(f"{len(problem_frames)*100/len(fish_length):.2f}% of frames are jittery")
-    return problem_frames
+    df["jittery"] = 0 # add a jittery column
+    df.loc[problem_frames, "jittery"] = 1
+
+    print(df.head(5)) if debug else None
+
+    return df
