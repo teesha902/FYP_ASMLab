@@ -111,7 +111,7 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
         output_csv_path = output_path / csv_file.relative_to(csv_path)
         os.makedirs(output_csv_path.parent, exist_ok=True)
         df.to_csv(output_csv_path, index=False)
-        print(f"Saved to {output_csv_path}")
+        print(f"Saved to ./{output_csv_path}")
 
     print("Done")
     unique_csv = np.unique([i[0] for i in problems_csv])
