@@ -17,7 +17,9 @@
 - [X] Use interpolate convert before Subset + do data analysis for better interpolation and data rejection? - using interpolate with subset only if needed, current implementation does data integrity analysis + instantaneous analysis before subset.
 - [X] weighted average for distance
 - [X] separate missing and low likelihood for considering a csv "problematic"
-- [ ] check if missing/low likelihood is during LED timing
+- [X] check if missing/low likelihood is during LED timing
+- [ ] verify conda setup and kernel/env setup using pure jupyterlab
+- [ ] find sd of fish length for jitter check
 
 #### stage 2?
 

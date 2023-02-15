@@ -4,7 +4,7 @@ import glob
 import os
 import argparse
 from pathlib import Path
-from scripts.dist_vel_acc import distance_vel, acc
+from scripts.analysis import distance_vel, acc, angle, distance_surface
 
 from scripts.data_integrity import check_overall, jittery_frames
 
@@ -88,24 +88,31 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
 
         # check for invalid/jittery frames in LED timing
         if not led_absent:
+            print("checking for invalid frames in LED timing") if debug else None
             # check for invalid/jittery frames in LED timing
             mask_low_likelihood = df.loc[start_frame:end_frame, likelihood_columns] < invalid_thresh
             mask_absent = df.loc[start_frame:end_frame, likelihood_columns].isnull()
             combined = mask_low_likelihood | mask_absent
             print (combined.head(5)) if debug else None
-            mask = combined.sum(axis=1) >= 3 # if more than 2 columns have low likelihood or absent
+            mask = combined.sum(axis=1) >= 4 # if more than 2 columns have low likelihood or absent
             print(mask.head(5)) if debug else None
-            if len(combined.index[mask].tolist())/(end_frame-start_frame) > 0.2:
-                print(f"{csv_file.name} contains > {20}% invalid frames in LED timing")
-                problems_csv.append([csv_file.name, "invalid frames", combined.index[mask].tolist()])
+            if len(combined.index[mask].tolist())/(end_frame-start_frame) > led_absent_thresh:
+                print(f"{csv_file.name} contains > {led_absent_thresh * 100}% invalid frames in LED timing")
+                problems_csv.append([csv_file.name, "invalid frames during LED", combined.index[mask].tolist()])
 
             mask_jitter = df.loc[start_frame:end_frame, "jittery"] == 1
-            if len(mask_jitter.index[mask_jitter].tolist())/(end_frame - start_frame) > 0.1:
+            if len(mask_jitter.index[mask_jitter].tolist())/(end_frame - start_frame) > led_jitter_thresh:
                 print(f" >10% Jittery frames in {csv_file.name} during LED timing")
-                problems_csv.append([csv_file.name, mask_jitter.index[mask_jitter].tolist(), "jittery during LED"])
+                problems_csv.append([csv_file.name, "jittery frames during LED", mask_jitter.index[mask_jitter].tolist()])
 
         # getting acceleration
         df = acc(df, fps, debug) 
+
+        #distance to surface
+        df = distance_surface(df, debug)
+
+        # angle using tail and head
+        df = angle(df, debug)
         
         # Save to output path to the correct subdirectory path
         output_csv_path = output_path / csv_file.relative_to(csv_path)
@@ -132,6 +139,10 @@ if __name__ == "__main__":
     parser.add_argument("--percent_missing", default = 10, help="the threshold for percent missing data to be reported in problems_csv.txt (default is 10%)")
     parser.add_argument("--percent_low_likelihood", default = 15, help="the threshold for percent low likelihood data to be reported (default is 15%)")
     parser.add_argument("--two_sd_thresh", default = 88.44, help="the threshold for 2SD of body part (default is 88.44)")
+    parser.add_argument("--led_invalid_thresh", default = 0.1, help="the percentage threshold for invalid frames in LED timing (default is 0.1)")
+    parser.add_argument("--led_jitter_thresh", default = 0.15, help="the percentage threshold for jittery frames in LED timing (default is 0.15)")
+
+
 
     args = parser.parse_args()
     csv_path = Path(args.csv_path)
@@ -141,6 +152,8 @@ if __name__ == "__main__":
     percent_missing_thresh = args.percent_missing
     percent_low_likelihood_thresh = args.percent_low_likelihood
     sd_threshold = args.two_sd_thresh
+    led_absent_thresh = float(args.led_invalid_thresh)
+    led_jitter_thresh = float(args.led_jitter_thresh)
     debug = args.debug
 
     LED_csv = pd.read_csv(LED_csv_path)
