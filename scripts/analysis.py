@@ -57,7 +57,7 @@ def angle(df, debug):
     y_columns = ["Head_y", "Tail_y"]
     df["angle"] = np.arctan2(df[y_columns[0]] - df[y_columns[1]], df[x_columns[0]] - df[x_columns[1]]) * 180 / np.pi
     # convert the negative angles to positive
-    df["angle"].apply(lambda x: x if x >= 0 else 360 + x) # its positive because the angle itself is negative
+    df["angle"] = df["angle"].apply(lambda x: x if x >= 0 else 360 + x) # its positive because the angle itself is negative
     print(df.head(5)) if debug else None
     return df
 
@@ -75,6 +75,6 @@ def distance_surface(df, debug):
     # df["distance_surface"] = surface - df[y_columns].average(axis=0)
     df["distance_surface"] = (df[y_columns].mean(axis=1) - surface)
     # set negative values to nan and mark as jitter in the jitter column
-    df.loc[df["distance_surface"] < 0, ["distance_surface", "jitter"]] = [Null, 1]
+    df.loc[df["distance_surface"] < 0, ["distance_surface", "jitter"]] = [None, 1]
     print(df.head(5)) if debug else None
     return df
