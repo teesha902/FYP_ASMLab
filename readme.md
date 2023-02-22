@@ -20,6 +20,12 @@
 - [X] check if missing/low likelihood is during LED timing
 - [ ] verify conda setup and kernel/env setup using pure jupyterlab
 - [ ] find sd of fish length for jitter check
+- [X] convert angle to 360 degs
+- [X] histogram + polar histogram
+- [ ] find LED coordinate to figure out whether fish is facing led. Also useful for surface.
+- [ ] saveable visualisations
+- [ ] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn)
+- [ ] integrity column instead of missing/jitter/low thresh coz hard to find every time...
 
 #### stage 2?
 
@@ -27,6 +33,14 @@
 - [ ] python file for DLC (POC for refine tracklets done)
 - [ ] imrpove dynamic threshold?
 - [ ] improve jitter detection?
+
+### metrics
+
+1. [X] fish angle (head to tail)
+2. [X] dist (cumulative), vel, acc averaged over LED timing --> histogram
+3. [ ] surface (needs to incorporate LED coords)
+4. [ ] count of frames where y is higher than y_start --> % of frames where fish is above starting --> plot??
+5. [ ] averaged angle of movement across frames
 
 # Additions
 
