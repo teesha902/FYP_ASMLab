@@ -119,6 +119,20 @@ def get_timestamps(timestamps, debug):
         print(f"appending final timestamps {first_timestamp, last_timestamp}") if debug else None
     return final_timestamps
 
+def find_coordinates(mask, debug):
+    # given a mask, find the coordinates of the LED
+    # find contours
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # calculate area of each contour and find the largest one
+    areas = [cv2.contourArea(c) for c in contours]
+    # find the largest contour
+    max_index = np.argmax(areas)
+    cnt = contours[max_index]
+    # find the center coordinates of the LED (hopefully largest contour)
+    M = cv2.moments(cnt)
+    print(f"coordinates are {int(M['m10']/M['m00']), int(M['m01']/M['m00'])}") if debug else None
+    return (int(M['m10']/M['m00']), int(M['m01']/M['m00']))
+
 def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids,hist_thresh, sensitive = False ):
     video = cv2.VideoCapture(str(video_path))
     print(video_path.name)
@@ -128,6 +142,8 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids,hist_
         
     time_for_video=[]
     frame_for_video=[]
+    coordinates = []
+    coordinates_for_video=False # setting flag to false as coordinates are only calculated once per video
     bg = True
     mask_bg = []
     thresh = 0
@@ -157,20 +173,24 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids,hist_
                 frame_for_video.append(video.get(cv2.CAP_PROP_POS_FRAMES))
                     # print timestamp of video frame for debugging
                     # print(min(time_for_video), max(time_for_video), min(frame_for_video), max(frame_for_video)) if debug else None
-                    # EXPERIMENT IF ERODE AND DILATE IS NEEDED
+                # finding coordinates of the LED
+                coordinates = find_coordinates(mask_bw, debug) if coordinates_for_video == False else coordinates
+                coordinates_for_video = True
+
                 if vis == True:  
                     mask_dilate = cv2.dilate(mask_bw, None, iterations=3)
                     mask_erode = cv2.erode(mask_dilate, None, iterations=4)
+                    #plot coords on mask_erode
+                    cv2.circle(mask_erode, coordinates, 7, (255,0,0), -1)
                     cv2.imshow(f'{video_path.name} mask',mask_erode)
                 # Break the loop
         elif ret == False: 
             break
         progress_bar.update(1)
-   
     # When everything done, release the video capture object, progress bar, and close frames
     video.release()
     progress_bar.close()
-    cv2.destroyAllWindows()
+    cv2.destroyAllWindows() if vis else None
         
     #cluster analysis to find the start index and end index of LED
     print(time_for_video) if debug else None
@@ -189,7 +209,7 @@ def process_video(video_path, vis, debug, max_LED, LED_times, problem_vids,hist_
         return False
     else:
         for i in final_timestamps:
-            LED_times.append([str(video_path.name), f"{time_for_video[i[0]]/1000:.2f}", f"{time_for_video[i[1]]/1000:.2f}", frame_for_video[i[0]], frame_for_video[i[1]]]) 
+            LED_times.append([str(video_path.name), f"{time_for_video[i[0]]/1000:.2f}", f"{time_for_video[i[1]]/1000:.2f}", frame_for_video[i[0]], frame_for_video[i[1]], coordinates[0], coordinates[1]]) 
             print(LED_times[-1])
         return True
 
@@ -199,7 +219,7 @@ def main(video_path, vis, debug, max_LED, hist_thresh):
     vid_list = list(video_path.glob("**/*.mp4"))
     print(f' total videos found are {len(vid_list)}')
     print(f' Videos to be processed are {[i.name for i in vid_list]}') if debug else None
-    LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame"]]
+    LED_times = [["name", "start time(s)", "end time(s)", "start frame", "end frame", "x", "y"]]
 
     problem_vids = {'Too many LED events': [], 'LED not observed': []}
     

@@ -1,3 +1,28 @@
+"""
+DOCUMENTATION
+This script is used to convert the data from pixels to mm and perform data integrity checks.
+It also performs the analysis of the data and saves the results in a csv file.
+problematic csv files are saved in a problems_csv.txt file.
+
+main() function: 
+1. takes in the path to the csv files and the path to the LED csv file. 
+2. for each csv file, it checks for LED data. This is needed for integrity checks specifically during LED duration.
+3. The dataframe of the csv is reconstructed to have proper column names and numeric data type.
+4. The dataframe is converted to mm.
+5. The integrity checks such as missing data, low likelihood are performed. 
+6 The analysis such as distance travelled, velocity. These are done first to enable 7.
+7. The jittery moves are performed. This checks using sd of fish length and avg distance between keypoints.
+8. LED time integrity checks take place.
+9. acc, angle, distance_surface are calculated.
+10. The results are saved in a csv file.
+
+TODO:
+- get fps from csv file
+- improve jitter detection
+
+Created by: Aritejh
+"""
+
 import numpy as np
 import pandas as pd
 import glob
@@ -74,7 +99,6 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
             print(f"Too much low likelihood data in {csv_file.name}")
             problems_csv.append([csv_file.name, percent_low_likelihood, "low_likelihood"])
         
-        # print("checking for invalid frames") if debug else None
         # replace <bodypart>_likelihood with 0 depending on if it is invalid or not. NOT NEEDED RN.
         # invalid frames are frames where the likelihood is less than the invalid_thresh or null
         likelihood_columns = [col for col in df.columns if "likelihood" in col]
