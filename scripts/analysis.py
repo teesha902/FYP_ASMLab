@@ -47,7 +47,7 @@ def acc(df, fps, debug):
     print(df.head(5)) if debug else None
     return df
 
-def angle(df, debug):
+def tail_head_angle(df, debug):
     ''' 
     Calculate the angle between the tail and the head
     '''
@@ -61,20 +61,20 @@ def angle(df, debug):
     print(df.head(5)) if debug else None
     return df
 
-def distance_surface(df, debug):
-    """ calculate the distance between the surface and the body part
-    surface is set to the highest y coordinate in the frames
-    this outputs a column with averaged y distance of body parts from averaged ymax
-    calculations use min and subtract from max to work with flipped y axis"""
+def distance_led(df, led_y, debug):
+    """ calculate the distance between the led and the fish
+    this outputs a column with averaged y distance of body parts from led-y
+    for values below 0 (implying fish is above LED), set to nan and mark as jittery
+    """
 
     print ("Calculating distance from surface") if debug else None
 
     y_columns = [col for col in df.columns if "_y" in col]
-    # surface = df[y_columns].max(axis=1).average
-    surface = df[y_columns].max(axis=0).mean()
+    # surface = df[y_columns].max(axis=0).mean()
     # df["distance_surface"] = surface - df[y_columns].average(axis=0)
-    df["distance_surface"] = (df[y_columns].mean(axis=1) - surface)
+    df["distance_surface"] = (df[y_columns].mean(axis=1) - led_y)
+
     # set negative values to nan and mark as jitter in the jitter column
-    df.loc[df["distance_surface"] < 0, ["distance_surface", "jitter"]] = [None, 1]
+    df.loc[df["distance_surface"] > 0, ["distance_surface", "jittery"]] = [None, 1]
     print(df.head(5)) if debug else None
     return df

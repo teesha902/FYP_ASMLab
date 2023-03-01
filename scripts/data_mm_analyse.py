@@ -29,7 +29,7 @@ import glob
 import os
 import argparse
 from pathlib import Path
-from scripts.analysis import distance_vel, acc, angle, distance_surface
+from scripts.analysis import distance_vel, acc, tail_head_angle, distance_led
 
 from scripts.data_integrity import check_overall, jittery_frames
 
@@ -75,13 +75,14 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
             led_absent = True
         if not led_absent:
             start_frame, end_frame = led_row["start frame"].values[0] - 1, led_row["end frame"].values[0] - 1 # -1 because of 0 indexing
-
+            led_x = led_row["x"].values[0] * 0.28 # convert to mm
+            led_y = led_row["y"].values[0] * -0.304 # convert to mm
         df.columns = df.iloc[2] + "_" + df.iloc[3] # naming the columns as Tail_x, Tail_y, Tail_likelihood, etc.
         df.drop([0,1,2,3], inplace=True) # remove the first 4 rows. Contains model name, individual name, body part and x/y/likelihood
         df.reset_index(drop=True, inplace=True) # resets the row index
         print(df.head(5)) if debug else None
         
-        # convert to numeric dtype from str
+        # convert to numeric data type from str
         df = df.apply(pd.to_numeric, downcast = 'float' ,errors='coerce')
 
         # Convert to mm
@@ -133,10 +134,10 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
         df = acc(df, fps, debug) 
 
         #distance to surface
-        df = distance_surface(df, debug)
+        df = distance_led(df, led_y, debug)
 
         # angle using tail and head
-        df = angle(df, debug)
+        df = tail_head_angle(df, debug)
         
         # Save to output path to the correct subdirectory path
         output_csv_path = output_path / csv_file.relative_to(csv_path)

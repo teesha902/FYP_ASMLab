@@ -9,7 +9,7 @@
   - [X] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
   - [X] refactor to reduce code length
   - [X] create a notebook for final implementation for ease for running (main.ipynb)
-  - [ ] Create a random SUBSET_CSV also?
+  - [X] Create a random SUBSET_CSV also? done with getting the subsets
   - [X] missing data analysis/likelihood analysis - done in data_integrity.py
   - [X] Save according to the subfolder it was found in
 - [X] build an LED detector (done LED_times.py)
@@ -22,7 +22,7 @@
 - [ ] find sd of fish length for jitter check
 - [X] convert angle to 360 degs
 - [X] histogram + polar histogram
-- [ ] find LED coordinate to figure out whether fish is facing led. Also useful for surface.
+- [X] find LED coordinate to figure out whether fish is facing led. Also useful for surface.
 - [ ] saveable visualisations
 - [ ] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn)
 - [ ] integrity column instead of missing/jitter/low thresh coz hard to find every time...
