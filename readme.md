@@ -24,7 +24,7 @@
 - [X] histogram + polar histogram
 - [X] find LED coordinate to figure out whether fish is facing led. Also useful for surface.
 - [ ] saveable visualisations
-- [ ] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn)
+- [X] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn) (implemented as angle of max y frame position vs initial)
 - [ ] integrity column instead of missing/jitter/low thresh coz hard to find every time...
 
 #### stage 2?
@@ -38,8 +38,8 @@
 
 1. [X] fish angle (head to tail)
 2. [X] dist (cumulative), vel, acc averaged over LED timing --> histogram
-3. [ ] surface (needs to incorporate LED coords)
-4. [ ] count of frames where y is higher than y_start --> % of frames where fish is above starting --> plot??
+3. [X] surface (needs to incorporate LED coords) (now called distance_led)
+4. [X] count of frames where y is higher than y_start --> % of frames where fish is above starting --> plot?? (y_up in the visualisation nb)
 5. [ ] averaged angle of movement across frames
 
 # Additions
