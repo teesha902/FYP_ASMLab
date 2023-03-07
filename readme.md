@@ -41,6 +41,8 @@
 3. [X] surface (needs to incorporate LED coords) (now called distance_led)
 4. [X] count of frames where y is higher than y_start --> % of frames where fish is above starting --> plot?? (y_up in the visualisation nb)
 5. [ ] averaged angle of movement across frames
+6. [ ] multiple random before LED dfs --> x different population plots --> add plots to make a "superplot" to compare against LED
+7. [ ] Change trajectory polar to trajectory vs distance from LED at start (closer to led is lower)
 
 # Additions
 
