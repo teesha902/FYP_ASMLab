@@ -3,7 +3,7 @@
 ## TODO:
 
 - [X] find and stabilize package and python versions, upgrade if neccessary (created requirements.txt)
-- [ ] streamline / refactor
+- [X] streamline / refactor
   - [X] reduce hardcoded file paths, make scripts interoperable between mac and windows (pathlib)
   - [X] turn hardcoded variables into passable variables
   - [X] reduce number of files generated for the average values (1 row csvs) (descriptive data, orientation/*, surface)
@@ -23,7 +23,7 @@
 - [X] convert angle to 360 degs
 - [X] histogram + polar histogram
 - [X] find LED coordinate to figure out whether fish is facing led. Also useful for surface.
-- [ ] saveable visualisations
+- [X] saveable visualisations
 - [X] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn) (implemented as angle of max y frame position vs initial)
 - [ ] integrity column instead of missing/jitter/low thresh coz hard to find every time...
 
@@ -42,7 +42,8 @@
 4. [X] count of frames where y is higher than y_start --> % of frames where fish is above starting --> plot?? (y_up in the visualisation nb)
 5. [ ] averaged angle of movement across frames
 6. [ ] multiple random before LED dfs --> x different population plots --> add plots to make a "superplot" to compare against LED
-7. [ ] Change trajectory polar to trajectory vs distance from LED at start (closer to led is lower)
+7. [X] create trajectory + start from led + ymag + y_up plot
+8. [X] Change trajectory polar to trajectory vs distance from LED at start (closer to led is lower)
 
 # Additions
 
@@ -67,9 +68,11 @@ ASM_Killifish_repo/
 │   │    ├── subset (output from SUBSET_CSV_M.py)
 │   │    └── mm_analyse (output from data_mm_analyse.py)
 │   ├── csv/ (used to contain DLC output csvs)
+│   ├── visualisation/ (used to contain plots and csv from visualisation)
 │   └── videos/ (original videos)
 ├── scripts/ (contains the python scripts used)
 ├── main.ipynb (USE THIS!)
+├── visualisation.ipynb (For creating visualisations)
 ├── readme.md (BUT READ THIS FIRST!)
 ├── requirements.txt (keep track of packages used)
 └── .gitignore (hidden)
