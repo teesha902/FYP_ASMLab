@@ -6,11 +6,12 @@ import matplotlib.pyplot as plt
 from openpyxl import Workbook
 from openpyxl import load_workbook
 
+# upload results on nbox
 
 ###############################################
 ###Import the CSV's file for d48 ###
 ###############################################
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/')
+path = "C:\\Users\\ASMLabUser1\\Desktop\\killifish\\videos\\analyzed\\38-M1\\og_results\\week_12\\with_led\\control\\1\\"
 csv_files = glob.glob(os.path.join(path, "*S1_12S_INTER_MM.csv" ))
 
 fig, ax = plt.subplots(1, sharex=True, sharey=True)

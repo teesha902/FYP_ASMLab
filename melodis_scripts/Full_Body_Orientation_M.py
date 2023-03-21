@@ -7,7 +7,7 @@ import glob
 import os
 from tqdm import tqdm
 
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
+path = "C:\\Users\\ASMLabUser1\\Desktop\\killifish\\videos\\analyzed\\38-M1\\og_results\\week_12\\with_led\\control\\1\\"
 csv_files = glob.glob(os.path.join(path, "*.csv"))[:10]
 data = []
 
