@@ -7,18 +7,24 @@ import glob
 import os
 
 #This calculates the swimming trajectory of the fish from one head coordinate to the next
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
-csv_files = glob.glob(os.path.join(path, "*.csv"))[:10]
+path = "C:\\Users\\ASMLabUser1\\Desktop\\killifish\\videos\\analyzed\\38-M1\\og_results\\week_12\\with_led\\uroa\\1\\"
+out_path = "C:\\Users\\ASMLabUser1\\killifish\\data\\output\\week_12\\uroa\\1\\"
+out_out_path = "C:\\Users\\ASMLabUser1\\killifish\\data\\output\\week_12\\uroa\\1\\swimming_trajectory\\"
+csv_files = glob.glob(os.path.join(path, "*.csv"))
 data = []
 for f in csv_files:
     csv = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    d48='d48_'
-    name=full_path[51:54]
-    folder=full_path[54:56]
+    full_path = f.split("\\")
+    prefix = "week_12_"
+    name=full_path[-1].split(".")[0]
+    folder = str(full_path[-3]) + "_" + str(full_path[-2]) + "_"
+    # full_path = (f.split("\\")[-1])
+    # d48='d48_'
+    # name=full_path[51:54]
+    # folder=full_path[54:56]
 
 
-    led_csv12=pd.read_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/d48_'+name+folder+'_12S_INTER_MM.csv')
+    led_csv12=pd.read_csv(out_path+prefix+folder+name+'_12S_INTER_MM.csv')
     
     #Subset frame when LED turns on
     three_sec_mark=int(len(led_csv12)/2)
@@ -53,7 +59,7 @@ for f in csv_files:
     # print(fish_df)
 
     # print(results_df)
-    data.append([name+folder, angle])
+    data.append([folder+name, angle])
 print (data)
 #Write to excel
 results_df = pd.DataFrame(data, columns=["Fish Name", 'Trajectory Angle (deg)'])
@@ -62,9 +68,9 @@ print(results_df)
 
 # file_data_df=pd.DataFrame.from_dict(file_data, orient='index').T
 
-# writer = pd.ExcelWriter('/Users/asmlabuser1/Scripts_Ari/testing/d48_testing.xlsx')#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
-# results_df.to_excel(writer,index=False,header=True,sheet_name=folder)
-# writer.save()
-# print("Ran:"+name +folder)
+writer = pd.ExcelWriter(out_out_path + folder + ".xlsx")#('/Users/saoirselightbourne/Desktop/KilliFish_Analysis_Output/Orientation/3sec/Trajectory_Orientation_3Sec_'+name+folder+'.xlsx')
+results_df.to_excel(writer,index=False,header=True,sheet_name=folder)
+writer.save()
+print("Ran:"+folder)
     
 # /Users/asmlabuser1/Scripts_Ari/testing

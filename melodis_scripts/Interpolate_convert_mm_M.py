@@ -4,16 +4,17 @@ import pandas as pd
 import numpy as np
 import random
 
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
-csv_files_raw = glob.glob(os.path.join(path, "*.csv"))
+path = "C:\\Users\\ASMLabUser1\\Desktop\\killifish\\videos\\analyzed\\38-M1\\og_results\\week_12\\with_led\\uroa\\4\\"
+out_path = "C:\\Users\\ASMLabUser1\\killifish\\data\\output\\week_12\\uroa\\4\\"
+csv_files_raw = glob.glob(path + "*.csv")
 
 for f in csv_files_raw:
     # read the csv file
     csv_raw = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    raw_name=full_path[51:55]
-    raw_folder=full_path[55:56]
-    d48='d48_'
+    full_path = f.split("\\")
+    raw_name=full_path[-1].split(".")[0]
+    raw_folder = str(full_path[-3]) + "_" + str(full_path[-2]) + "_"
+    prefix='week_12_'
     
 
     last_row= csv_raw.iloc[:,1].index.get_loc(csv_raw.iloc[:, 1].last_valid_index())
@@ -40,19 +41,20 @@ for f in csv_files_raw:
     df_float_interpolate_raw["Head_Y"]=df_float_interpolate_raw ["Head_Y"]* -0.304
 
    # Write to excel
-    df_float_interpolate_raw.to_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/'+d48+raw_name+raw_folder+'_Raw_INTER_MM.csv')
+    df_float_interpolate_raw.to_csv(out_path+prefix+raw_folder+raw_name+'_Raw_INTER_MM.csv')
 
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48')
-csv_files_3 = glob.glob(os.path.join(path, "*_3S.csv"))
-
+csv_files_3 = glob.glob(os.path.join(out_path, "*_3S.csv"))
+# print("csv files 3")
+# print(csv_files_3)
 for f in csv_files_3:
-        # read the csv file
+    # print(f)
+    # read the csv file
     csv_3 = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
+    full_path = f.split("\\")
     
-    three_name = full_path[67:70]
-    three_folder = full_path[70:72]
-
+    three_name = full_path[-1].split(".")[0]
+    # three_folder = str(full_path[-3]) + "_" + str(full_path[-2]) + "_"
+    # print(three_name, three_folder)
 
     last_row= csv_3.iloc[:,1].index.get_loc(csv_3.iloc[:, 1].last_valid_index())
     csv_3= csv_3.iloc[:(last_row+1),:]
@@ -144,16 +146,17 @@ for f in csv_files_3:
     df_float_interpolate_3 ["sixth_3_head_Y"]=df_float_interpolate_3 ["sixth_3_head_Y"]* -0.304
 
     #3 sec
-    df_float_interpolate_3.to_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/'+d48+three_name+three_folder+'_3S_INTER_MM.csv')
+    df_float_interpolate_3.to_csv(out_path+three_name+'_INTER_MM.csv')
 
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48')
-csv_files_12 = glob.glob(os.path.join(path, "*_12S.csv"))
-
+csv_files_12 = glob.glob(os.path.join(out_path, "*_12S.csv"))
+# print("csv_files_12")
+# print(csv_files_12)
 for f in csv_files_12:
+    print(f)
     csv_12 = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    twelve_name = full_path[67:70]
-    twelve_folder = full_path[70:72]
+    full_path = f.split("\\")
+    twelve_name = full_path[-1].split(".")[0]
+    # twelve_folder = str(full_path[-3]) + "_" + str(full_path[-2]) + "_"
     last_row_12= csv_12.iloc[:,1].index.get_loc(csv_12.iloc[:, 1].last_valid_index())
     csv_12= csv_12.iloc[:(last_row_12+1),:]
 
@@ -190,8 +193,8 @@ for f in csv_files_12:
 
     # Write to CSV
     # 12 sec
-    df_float_interpolate_12.to_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/'+d48+twelve_name+twelve_folder+'_12S_INTER_MM.csv')
+    df_float_interpolate_12.to_csv(out_path+twelve_name+'_INTER_MM.csv')
     
-    print("Ran:"+twelve_name +twelve_folder)
+    # print("Ran:"+twelve_folder+twelve_name)
 
 

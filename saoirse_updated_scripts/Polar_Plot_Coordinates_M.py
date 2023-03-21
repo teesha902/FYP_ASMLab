@@ -14,12 +14,16 @@ full_names= []
 for f in excel_files:
     # read the csv file
     excel = pd.read_excel(f)
-    full_path = (f.split("\\")[-1])
-    name=full_path[132:134]
-    d77='d77_'
-    folder=full_path[134:137]
-    full_name=name + folder
-    full_names.append(full_name)
+    full_path = f.split("\\")
+    prefix = "week_12_"
+    name=full_path[-1].split(".")[0]
+    folder = str(full_path[-3]) + "_" + str(full_path[-2]) + "_"
+    # full_path = (f.split("\\")[-1])
+    # name=full_path[132:134]
+    # d77='d77_'
+    # folder=full_path[134:137]
+    # full_name=name + folder
+    # full_names.append(full_name)
 
 
 

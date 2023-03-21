@@ -7,16 +7,19 @@ import glob
 import os
 
 #This calculates the swimming trajectory of the fish from one head coordinate to the next
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
+path = "C:\\Users\\ASMLabUser1\\Desktop\\killifish\\videos\\analyzed\\38-M1\\og_results\\week_12\\with_led\\control\\1\\"
+out_path = "C:\\Users\\ASMLabUser1\\killifish\\data\\output\\week_12\\control\\1\\"
+out_out_path = "C:\\Users\\ASMLabUser1\\killifish\\data\\output\\week_12\\control\\1\\swimming_trajectory\\"
 csv_files = glob.glob(os.path.join(path, "*.csv"))
 data = []
 
 for f in csv_files:
     csv = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    d48='d48_'
-    name=full_path[51:54]
-    folder=full_path[54:56]
+    
+    # full_path = (f.split("\\")[-1])
+    # d48='d48_'
+    # name=full_path[51:54]
+    # folder=full_path[54:56]
 
 
     led_csv12=pd.read_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/d48_'+name+folder+'_12S_INTER_MM.csv')

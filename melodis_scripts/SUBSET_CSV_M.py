@@ -5,32 +5,41 @@ import numpy as np
 import pandas as pd
 import os
 import glob
-
+from pathlib import Path
 #Read in CSV file
-
-path = ('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48')
-csv_files = glob.glob(os.path.join(path, "*.csv"))
-
+path = "C:\\Users\\ASMLabUser1\\Desktop\\killifish\\videos\\analyzed\\38-M1\\og_results\\week_12\\with_led\\uroa\\4\\"
+out_path = "C:\\Users\\ASMLabUser1\\killifish\\data\\output\\week_12\\uroa\\4\\"
+csv_files = glob.glob(path + "*.csv")
+# print(path)
+# print(csv_files)
 for f in csv_files:
     # read the csv file
     csv = pd.read_csv(f)
-    full_path = (f.split("\\")[-1])
-    name=full_path[51:55]
-    d48='d48_'
-    folder=full_path[55:56]
-    print(name + folder)
+    # print(csv.head(5))
+    # print(f)
+    full_path = f.split("\\")
+    # print(full_path)
+    name=full_path[-1].split(".")[0]
+    prefix='week_12_'
+    # folder=full_path[-4:-2]
+    folder = str(full_path[-3]) + "_" + str(full_path[-2]) + "_"
+    print(folder + name)
+    # print(name)
     exp_time =int(csv.iloc[0,22])
     LED= int(csv.iloc[0,23])
+    # print(LED, exp_time)
 
     #calculate frame rate/frames per second
     n_row=3
     frame_per_sec = (len(csv)-n_row) / int(exp_time)
     frame_per_sec_r= round(frame_per_sec)
+    # print(frame_per_sec_r)
 
     #Find frame where LED light turns on
     n_column= 1
     last_column= 16
     LED_Frame= (int(LED)*frame_per_sec_r)+n_row+1
+    print(LED_Frame)
 
     #Subset data frame to extract 6 seconds before LED light turns on (-6 to 0) and 6 seconds after (0 to 6)
     before_LED = pd.DataFrame(csv.iloc[LED_Frame-(frame_per_sec_r*6):LED_Frame,n_column:last_column])
@@ -157,7 +166,7 @@ for f in csv_files:
     twelve_span_df.iloc[:, 31] = twelve_span_df.iloc[:, 31].shift(-(a6))
 
     # #write to new CSV
-    twelve_span_df.to_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/'+d48+name +folder+ '_12S.csv')#('/Users/saoirselightbourne/Desktop/Cropped_CSV/12_sec/'+big_folder+'/'+big_folder+'-'+folder+'/'+name +folder+ '_12S.csv')
+    twelve_span_df.to_csv(out_path+ prefix +folder+ name + '_12S.csv')#('/Users/saoirselightbourne/Desktop/Cropped_CSV/12_sec/'+big_folder+'/'+big_folder+'-'+folder+'/'+name +folder+ '_12S.csv')
 
 
     # #Subset random 3 second segments
@@ -460,7 +469,7 @@ for f in csv_files:
 
 
     #write to new CSV
-    three_sec_seg_df.to_csv('/Users/asmlabuser1/KF_SUMMER_2022/Raw_CSVs/d48/Cropped_CSV_d48/'+d48+name +folder+ '_3S.csv')
+    three_sec_seg_df.to_csv(out_path+prefix+folder+ name+ '_3S.csv')
     print("Ran:"+name +folder)
 
 
