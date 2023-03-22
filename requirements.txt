@@ -1,6 +1,6 @@
 numpy
 scipy
-opencv-python
+opencv-python # only for running led times otherwise not needed
 imageio
 jupyterlab
 ipython
@@ -11,3 +11,4 @@ pyyaml
 tqdm
 xlsxwriter
 seaborn
+dabest # for statistical analysis

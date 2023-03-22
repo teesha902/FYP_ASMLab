@@ -74,6 +74,9 @@ def distance_led(df, led_y, debug):
     # df["distance_surface"] = surface - df[y_columns].average(axis=0)
     df["distance_surface"] = (df[y_columns].mean(axis=1) - led_y)
 
+    # led_y and the column of y values are in the same units (negative pixels)
+    # the output is the distance between the fish and the surface (but negative)
+
     # set negative values to nan and mark as jitter in the jitter column
     df.loc[df["distance_surface"] > 0, ["distance_surface", "jittery"]] = [None, 1]
     print(df.head(5)) if debug else None
