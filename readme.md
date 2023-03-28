@@ -26,6 +26,9 @@
 - [X] saveable visualisations
 - [X] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn) (implemented as angle of max y frame position vs initial)
 - [ ] integrity column instead of missing/jitter/low thresh coz hard to find every time...
+- [ ] check csv names and videos for led - names and number should be same.
+- [ ] np.savetxt deprecation fix
+- [ ] organizing stuff into folders automation
 
 #### stage 2?
 
