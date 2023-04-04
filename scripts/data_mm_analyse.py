@@ -157,7 +157,6 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
         for item in problems_csv:
             # take out items from the list and put in new line
             f.write(f'{item} \n')
-        f.close()
 
     # np.savetxt(output_path / "problems_csv.txt", problems_csv, delimiter=",", fmt="%s")
 
