@@ -150,8 +150,16 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
     print(unique_csv) if debug else None
     print(len(unique_csv), " files with problems")
     print("Saving problems_csv.txt to output_path")
-    np.savetxt(output_path / "problems_csv.txt", problems_csv, delimiter=",", fmt="%s")
 
+    # replace np.savetxt with file due to deprecation warning
+
+    with open(output_path / "problems_csv.txt", "w") as f:
+        for item in problems_csv:
+            # take out items from the list and put in new line
+            f.write(f'{item} \n')
+        f.close()
+
+    # np.savetxt(output_path / "problems_csv.txt", problems_csv, delimiter=",", fmt="%s")
 
 if __name__ == "__main__":
     # Parser
