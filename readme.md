@@ -27,7 +27,7 @@
 - [X] trajectory angle ? (maybe direction of movement is useful, we only have direction of head to tail rn) (implemented as angle of max y frame position vs initial)
 - [ ] integrity column instead of missing/jitter/low thresh coz hard to find every time...
 - [ ] check csv names and videos for led - names and number should be same.
-- [ ] np.savetxt deprecation fix
+- [X] np.savetxt deprecation fix
 - [ ] organizing stuff into folders automation
 
 #### stage 2?
@@ -44,9 +44,10 @@
 3. [X] surface (needs to incorporate LED coords) (now called distance_led)
 4. [X] count of frames where y is higher than y_start --> % of frames where fish is above starting --> plot?? (y_up in the visualisation nb)
 5. [ ] averaged angle of movement across frames
-6. [ ] multiple random before LED dfs --> x different population plots --> add plots to make a "superplot" to compare against LED
+6. [X] multiple random before LED dfs --> x different population plots --> add plots to make a "superplot" to compare against LED
 7. [X] create trajectory + start from led + ymag + y_up plot
 8. [X] Change trajectory polar to trajectory vs distance from LED at start (closer to led is lower)
+9. [ ] change colorbar to reflect actual colors
 
 # Additions
 
