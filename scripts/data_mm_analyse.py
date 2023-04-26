@@ -130,11 +130,13 @@ def main(csv_path, LED_csv, percent_missing_thresh, percent_low_likelihood_thres
                 print(f" >10% Jittery frames in {csv_file.name} during LED timing")
                 problems_csv.append([csv_file.name, "jittery frames during LED", mask_jitter.index[mask_jitter].tolist()])
 
+            #distance to surface
+            df = distance_led(df, led_y, debug)
+
+
         # getting acceleration
         df = acc(df, fps, debug) 
 
-        #distance to surface
-        df = distance_led(df, led_y, debug)
 
         # angle using tail and head
         df = tail_head_angle(df, debug)
