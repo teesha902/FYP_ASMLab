@@ -1,5 +1,7 @@
 # killifish tracking python scripts
 
+This repository contains code to ingest and process data for the killifish project in ASM Lab.
+
 ## TODO:
 
 - [X] find and stabilize package and python versions, upgrade if neccessary (created requirements.txt)
@@ -30,7 +32,7 @@
 - [X] np.savetxt deprecation fix
 - [ ] organizing stuff into folders automation
 
-#### stage 2?
+### stage 2?
 
 - [ ] multiprocessing to improve performance
 - [ ] python file for DLC (POC for refine tracklets done)
@@ -49,19 +51,30 @@
 8. [X] Change trajectory polar to trajectory vs distance from LED at start (closer to led is lower)
 9. [ ] change colorbar to reflect actual colors
 
-# Additions
+## Files
 
-**main.ipynb** - main jupyter notebook to run everything. Use this to interact with the entire repository.
+**main.ipynb** - main jupyter notebook to run LED times and post-DLC analysis.
 
-**LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos. More info available in the readme in scripts folder, and in the script itself.
+**scripts/LED_times.py** - Script for running LED analysis. Contains video processing, mask creation, clustering analysis and re-analysis of problematic videos. More info available in the readme in scripts folder, and in the script itself.
 
-**data_mm_analyse.py** - Script for running data integrity checks like null/low likelihood and jittery frames, converting pixels to mm, and running the instantaneous analysis such as calculating distance travelled, speed and acceleration.
+**scripts/data_mm_analyse.py** - Script for running data integrity checks like null/low likelihood and jittery frames, converting pixels to mm, and running the instantaneous analysis such as calculating distance travelled, speed and acceleration etc.
 
-**data_integrity.py** - Contains code used by `data_mm_analyse.py` for data integrity checks, mainly for checking overall missing data, and calculating jittery frames.
+**scripts/data_integrity.py** - Contains code used by `data_mm_analyse.py` for data integrity checks, mainly for checking overall missing data, and calculating jittery frames.
 
-**dist_vel_acc.py** - Contains code used by `data_mm_analyse.py` for converting mm to distance travelled, speed and acceleration per frame respectively.
+**scripts/dist_vel_acc.py** - Contains code used by `data_mm_analyse.py` for converting mm to distance travelled, speed and acceleration per frame respectively.
 
-**SUBSET_CSV_M.py** - script for creating MANUAL subsets. Contains subset parsing and creating individual csvs for each subset for each original DLC csv. Input is DLC csvs path, output path, and the subsets needed. Subsets are given as "[(-6, -3)...(-3, 'start'), ('start','end'), ('end', 3)....(4,6)]", in which 'start' and 'end' denote LED event. Currently, only the first led event in the video is used. Subsets can be designed completely arbitrarily by the user.
+
+## Visualisations
+
+Several visualisations are created by `visualisation_<exp set>.ipynb` notebooks. These notebooks are used to create visualisations for the data, and are not used for data processing. The visualisations are saved in the `data/visualisation/<exp set>/` folder. 
+
+To create visualisations for a new set of data, copy the template notebook and rename it. Then, define the experiment name and the paths, and run the cells.
+
+First, a LED df and a pre-LED df are created. This is done to benchmark the animal against itself, and is used in dabest plots later. CSVs with no LED time are skipped. For the non-LED df, a subset of same duration as LED time but occuring before it with decent data quality is chosen. If multiple valid subsets exist, a random subset is chosen.
+
+After creating the dataframes, the visualisations are created.
+Currently, the following visualisations are created:
+
 
 ## New folder structure
 
@@ -69,11 +82,16 @@
 ASM_Killifish_repo/
 └── data/
 │   └── output/
-│   │    ├── subset (output from SUBSET_CSV_M.py)
-│   │    └── mm_analyse (output from data_mm_analyse.py)
+│   │    ├── <LED analysis output>
+|   |    |   ├── LED_times.csv
+|   |    |   └── problems_csv.txt 
+│   │    └── <Post DLC output CSV>
+|   |        ├── uroa
+|   |        └── control
 │   ├── csv/ (used to contain DLC output csvs)
 │   ├── visualisation/ (used to contain plots and csv from visualisation)
-│   └── videos/ (original videos)
+|   |   └── <Experiment Set>/<data type>
+│   └── videos/ (original videos to be used for LED detection)
 ├── scripts/ (contains the python scripts used)
 ├── main.ipynb (USE THIS!)
 ├── visualisation.ipynb (For creating visualisations)
@@ -132,6 +150,30 @@ Launch jupyterlab using the command below. This should open up the browser in th
 ```
 jupyterlab
 ```
+
+### Download and put post-DLC data into `/data/`
+
+This will usually contain DLC pickle files, tracked csv and videos, and raw videos.
+
+### Create the control/uroa csv
+
+In this case, we can just copy paste from the google sheet into a uroa_control.csv in the raw data folder. Usually, this is just a csv to tell the program which animal is in uroa and which is in control.
+
+### Run main.ipynb
+
+This notebook contains:
+1. processing the raw folder into `./data/csv` for post-DLC csvs, `./data/videos` for the original videos. This follows the structure of `csv/<uroa or control>/<1/2/3/4 for the day>` based on the day dictionary in the ipynb
+
+After this, the raw folder can be deleted
+
+2. LED analysis on the original videos
+3. Calculating instantaneous metrics like speed/angle and such
+
+### Run visualisation.ipynb
+Create a copy of visualisation_template.ipynb and rename it to the experiment set. After this, you can run all to get the current plots.
+
+If you observe the error where dabest takes too long and chart has too many points, means the naming is not happening appropriately. This happens when files dont follow the `<experiment set>_<animal number>_<day>.csv`
+
 
 ## Previous Workflow:
 
