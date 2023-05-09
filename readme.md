@@ -86,12 +86,12 @@ ASM_Killifish_repo/
 |   |    |   ├── LED_times.csv
 |   |    |   └── problems_csv.txt 
 │   │    └── <Post DLC output CSV>
-|   |        ├── uroa
-|   |        └── control
+|   |        ├── uroa/<day>/<fish>
+|   |        └── control/<day>/<fish>
 │   ├── csv/ (used to contain DLC output csvs)
 │   ├── visualisation/ (used to contain plots and csv from visualisation)
 |   |   └── <Experiment Set>/<data type>
-│   └── videos/ (original videos to be used for LED detection)
+│   └── videos/<uroa or control>/<fish> (original videos to be used for LED detection)
 ├── scripts/ (contains the python scripts used)
 ├── main.ipynb (USE THIS!)
 ├── visualisation.ipynb (For creating visualisations)
