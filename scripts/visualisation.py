@@ -139,5 +139,20 @@ def create_master_dataframe(columns, csv_files, led_csv, random_pre_led = False,
         print(key, len(value))
     data_df = pd.DataFrame(data)
     print(data_df.head(5))
-
     return data_df
+
+
+# function to generate n number of before led dfs and combine to return the one avg df
+
+def create_averaged_before_led_df(n, columns, csv_files, led_csv, random_pre_led, debug):
+    # create n number of before led dfs
+    before_led_dfs = []
+    for i in range(n):
+        i_before_led_df = create_master_dataframe(columns, csv_files, led_csv, random_pre_led = random_pre_led, debug = debug)
+        before_led_dfs.append(i_before_led_df)
+    # combine the before led dfs into one df
+    before_led_df = pd.concat(before_led_dfs)
+    # get the average of the before led dfs
+    before_led_df = before_led_df.groupby(["name", "uroa_control", "day"]).mean().reset_index()
+    return before_led_df
+
