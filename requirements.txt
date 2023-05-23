@@ -12,3 +12,4 @@ tqdm
 xlsxwriter
 seaborn
 dabest # for statistical analysis
+statsmodels # needed for dabest
