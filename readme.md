@@ -31,6 +31,7 @@ This repository contains code to ingest and process data for the killifish proje
 - [ ] check csv names and videos for led - names and number should be same.
 - [X] np.savetxt deprecation fix
 - [ ] organizing stuff into folders automation
+- [ ] clean up visualisation.py
 
 ### stage 2?
 
