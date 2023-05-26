@@ -155,4 +155,3 @@ def create_averaged_before_led_df(n, columns, csv_files, led_csv, random_pre_led
     # get the average of the before led dfs
     before_led_df = before_led_df.groupby(["name", "uroa_control", "day"]).mean().reset_index()
     return before_led_df
-
