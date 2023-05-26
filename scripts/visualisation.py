@@ -3,6 +3,7 @@
 
 import pandas as pd
 import numpy as np
+import random 
 
 
 def find_consecutive_subsets(lst, n):
