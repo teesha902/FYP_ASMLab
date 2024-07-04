@@ -2,6 +2,95 @@
 
 This repository contains code to ingest and process data for the killifish project in ASM Lab.
 
+## DLC WORKFLOW: 
+The package consists of 10 python scripts. The scripts should be run in order, but can also function
+independently on the needs of the user. For example, if the user wants to run a full analysis then they
+should follow the pipeline below, but if the user only wants to get specific information ( e.g surface
+calculations) they can just run the relevant script.
+
+**PIPELINE**:
+
+**PREPARE CSV FILES**
+  1. The first step after obtaining CSV files of XY coordinates from Deeplabcut is to rename the files. Deeplabcut adds a large suffix to the end of each CSV file created (e.g DLC_resnet50_KF_Full...le1_50000_el_filtered.csv).
+  
+  To avoid issues caused by too long file names remove the added suffix: change _d48_23_F1_FDLC_resnet50_KF_Full...le1_50000_el_filtered.csv_ to _d48_23_F1.csv_
+    
+  2. Once the files have been renamed create the following folder hierarchy:
+    - First created a folder called Raw_CSVs.
+    - Within the Raw_CSVs folder create a folder titled the name of the batch you want to
+      analyse (e.g d48) and place all the raw CSV files containing the XY coordinates inside.
+    - Within the batch folder create a folder called Cropped_CSV.
+        - The Cropped_CSV folder is where the output of SUBSET_CSV.py and
+            Interpolate_convert_mm.py will be written.
+
+
+**PRE-PROCESS FILES**
+1. The first script in the package is SUBSET_CSV.py.
+  - The script reads all the raw CSV files in the batch folder (e.g in the d48 folder. Adjust
+    input and output path locations to specify the correct location to read in and write
+    output files. The script creates 12-second subsets and 6 randomly selected 3-second
+    segments within the first minute. The 12-second subsets comprise XY coordinate data
+    6 seconds before (-6 to 0 s) and after (0 to 6s) the LED light turns on. The 6
+    randomly generated 3-second segments act as a baseline for further analyses. The
+    generated 3 seconds serve as a baseline for further analysis.
+  - The script produces 2 CSV files for each raw CSV file read in:
+    - filename_12s.csv ( for the subsetted 12-second segments)
+    - filname_3s.csv (for the 6 randomly selected 3-second segments)
+    c. The script writes the outputted files to the Cropped_CSV folder
+2. The second script to be run is Interpolate_convert_mm.py
+  - The script reads in the subsetted CSV files produced by SUBSET_CSV.py (line ***)
+    as well as the raw CSV files (line ***)
+  - The script interpolates any missing data in the CSV files using linear interpolation.
+    The script also converts the XY data from pixels to mm.
+  - The script produces three CSV files:
+    - filename_Raw_INTER_MM.csv (CSV file containing interpolated and
+      converter to mm XY coordinates of the raw CSV file)
+    - Filesname_3S_INTER_MM.csv (CSV file containing interpolated and
+      converter to mm XY coordinates of filname_3s.csv file)
+    - Filesname_12S_INTER_MM.csv (CSV file containing interpolated and
+      converter to mm XY coordinates of filname_12s.csv file)
+
+** The INTER_MM.csv - files are used for the rest of the analysis
+
+
+**ANALYSIS**
+
+The analysis files can be run in any order, except for the polar plots scripts which require the
+orientation scripts to be run first. Each of the analysis scripts reads in all the files in a specified folder.
+
+- Dist_Ac_Vel.py
+  - Calculate distance, velocity &amp; acceleration &amp; corrects for incorrect distances (if
+    distance is mean +2SD the script using linear interpolation to recalculate distance)
+  - outputs per frame metrics and averages
+- Trajectory_Plot.py
+  - Plots Trajectory line plots for specified files
+- Surface.py
+  - Calculates the distance between fish and the surface of the tank using different
+  parameters
+  - Uses max y coordinate reached by fish (head)
+  - calculate displacement between max Y and head Y values at:
+    - 0S
+    - 3S
+    - 6S
+- Orientation
+  - Full_Body_Orientaion.py
+    - Calculates median body orientation for 0-3S
+    - Body orientation is calculated using the head and tail XY coordinates to
+    calculate the angle from tail to head for each frame
+  - Head_Orientation_Rand_3_sec.py
+    - Calculates mean body orientation for each of the randomly generated 3
+    second segments
+  - Swimming_Trajectory_Orientaion.py
+    - Calculate swimming trajectory ie angle in degrees from head coordinates at
+    0s to head coordinates at 3s
+- Polar_Plot_Coordinates.py
+  - Calculates angle of fish’s trajectory, centred at 0,0.
+  - Plots polar plots of angles and stores angles in excel file.
+  - Angles are binned into 16 bins
+- Dot_Plot.py
+  - dot plot shows first and last coordinates of each fish
+
+
 ## TODO:
 
 - [X] find and stabilize package and python versions, upgrade if neccessary (created requirements.txt)
