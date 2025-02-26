@@ -45,17 +45,6 @@ void triggerFeedingA();
 void triggerFeedingB();
 void triggerFeedingBoth();
 
-const unsigned char PROGMEM fish_bitmap[] = {
-  0b00011100,
-  0b00100010,
-  0b01000001,
-  0b10000000,
-  0b10000000,
-  0b01000001,
-  0b00100010,
-  0b00011100
-};
-
 //toggle variables
 enum FeedingMode { SIDE_A, SIDE_B, BOTH }; 
 FeedingMode currentMode = SIDE_A; // Start with Side A
@@ -210,65 +199,37 @@ void loop() {
   
 }
 
-//simple backup welcome screen 
-void welcomeScreen() {
+void welcomeAnimation() {
+    int fishX = -20; // Start off-screen (left)
+    int fishY = SCREEN_HEIGHT / 2 - 4; // Center vertically
+    int maxX = SCREEN_WIDTH - 20; // Stop moving when fish reaches the right edge
+
+    while (fishX < maxX) { // Stop fish at maxX, preventing wrap-around
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setTextColor(SSD1306_WHITE);
+        display.setCursor(fishX, fishY);
+        display.print("><((()^>"); // Fish ASCII art
+        display.display();
+
+        fishX++; // Move fish to the right
+        delay(70); // Adjust speed if needed
+    }
+
+    delay(1000);
+
     display.clearDisplay();
     display.setTextSize(1);
-
-    String welcomeText = "Autofeeder Ready!";
-    int textWidth = welcomeText.length() * 6;
-    int textX = (SCREEN_WIDTH - textWidth) / 2;
-    int textY = (SCREEN_HEIGHT - 8) / 2; // Center vertically
-
-    display.setCursor(textX, textY);
-    display.print(welcomeText);
-
+    String readyText = "Fish Feeder Ready!";
+    int readyWidth = readyText.length() * 6;
+    int readyX = (SCREEN_WIDTH - readyWidth) / 2;
+    display.setCursor(readyX, SCREEN_HEIGHT / 2 - 4);
+    display.print(readyText);
     display.display();
     delay(3000);
-
+    
     display.clearDisplay();
     display.display();
-}
-//FIX 
-void welcomeAnimation() {
-  int fishX = -20; // Start off-screen
-  int fishY = SCREEN_HEIGHT / 2 - 4; // Center vertically
-
-  // Fish swimming across the screen
-  for (int i = 0; i < SCREEN_WIDTH + 20; i++) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(fishX, fishY);
-    display.print("><((()^>" ); // Fish ASCII art - can remove '°' if causing issues 
-    display.display();
-
-    fishX++; // Move fish to the right
-    delay(50); // Adjust speed if needed
-  }
-
-  // Display final message
-  /*
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setCursor(10, SCREEN_HEIGHT / 2 - 4);
-  display.print("Fish Feeder Ready!");
-  display.display();
-  delay(3000);
-  */
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  String readyText = "Fish Feeder Ready!";
-  int readyWidth = readyText.length() * 6;
-  int readyX = (SCREEN_WIDTH - readyWidth) / 2;
-  display.setCursor(readyX, SCREEN_HEIGHT / 2 - 4);
-  display.print(readyText);
-  display.display();
-  delay(3000);
-  
-  display.clearDisplay();
-  display.display();
 }
 
 
