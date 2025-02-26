@@ -190,23 +190,24 @@ void loop() {
 
   //5 min feeding event - 5 sec feeding/LED starts after 1 min elapsed
   if (isButtonPressed(BUTTON_4)) {
-        Serial.println("Button 3 pressed");
-        handleButton4Start();
-
-    switch (button4Phase) {
-        case INTRO:
-            displayButton4Intro();
-            break;
-        case TIMER:
-            displayButton4Timer();
-            break;
-        case FEEDING_EVENT:
-            handleButton4FeedingEvent();
-            break;
-        default:
-            break;
-    }
+    Serial.println("Button 4 pressed");
+    handleButton4Start();
   }
+    
+  switch (button4Phase) {
+    case INTRO:
+      displayButton4Intro();
+      break;
+    case TIMER:
+      displayButton4Timer();
+      break;
+    case FEEDING_EVENT:
+      handleButton4FeedingEvent();
+      break;
+    default:
+      break;
+  }
+  
 }
 
 //simple backup welcome screen 
@@ -243,7 +244,7 @@ void welcomeAnimation() {
     display.display();
 
     fishX++; // Move fish to the right
-    delay(70); // Adjust speed if needed
+    delay(50); // Adjust speed if needed
   }
 
   // Display final message
@@ -273,14 +274,16 @@ void welcomeAnimation() {
 
 // helper method to improve button responsiveness
 bool isButtonPressed(int buttonPin) {
-    if (digitalRead(buttonPin) == LOW) {  // Button pressed (LOW because of INPUT_PULLUP)
-        delay(50);                        // Short delay to debounce (50ms is common)
-        if (digitalRead(buttonPin) == LOW) {  // Still pressed after 50ms
-            return true;
-        }
+    static unsigned long lastPressTime = 0;
+    const int debounceDelay = 150; // Increased debounce delay
+
+    if (digitalRead(buttonPin) == LOW && millis() - lastPressTime > debounceDelay) {  
+        lastPressTime = millis();
+        return true;
     }
     return false;
 }
+
 // helper method to get mode name
 String getMode(FeedingMode mode) {
     switch (mode) {
@@ -653,6 +656,7 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
     display.display();
 }
 
+
 //BUTTON 4 functionality 
 void handleButton4Start() {
     button4Phase = INTRO;
@@ -660,40 +664,44 @@ void handleButton4Start() {
     feedingTriggered = false;
 }
 void displayButton4Intro() {
-    unsigned long elapsedMillis = millis() - button4StartTime;
-    unsigned long elapsedSeconds = elapsedMillis / 1000;
+    static unsigned long lastUpdate = 0;
+    unsigned long elapsedSeconds = (millis() - button4StartTime) / 1000;
 
-    if (elapsedSeconds >= 5) {
+    if (elapsedSeconds >= 5) { 
         button4Phase = TIMER;
         button4StartTime = millis();
         return;
     }
 
-    display.clearDisplay();
-    display.setTextSize(1);
+    // update screen once per second
+    if (millis() - lastUpdate >= 1000) {
+        lastUpdate = millis();
 
-    String introText = "5 min feeding event";
-    String modeText = getMode(currentMode);
-    String countdownText = "in " + String(5 - elapsedSeconds) + "s";
+        display.clearDisplay();
+        display.setTextSize(1);
 
-    int centerY = (SCREEN_HEIGHT - 3 * 8) / 2;
+        String introText = "5 min feeding event";
+        String modeText = getMode(currentMode);
+        String countdownText = "in " + String(5 - elapsedSeconds) + "s";
 
-    display.setCursor((SCREEN_WIDTH - introText.length() * 6) / 2, centerY);
-    display.print(introText);
+        int centerY = (SCREEN_HEIGHT - 3 * 8) / 2;
 
-    display.setCursor((SCREEN_WIDTH - modeText.length() * 6) / 2, centerY + 10);
-    display.print(modeText);
+        display.setCursor((SCREEN_WIDTH - introText.length() * 6) / 2, centerY);
+        display.print(introText);
 
-    display.setCursor((SCREEN_WIDTH - countdownText.length() * 6) / 2, centerY + 20);
-    display.print(countdownText);
+        display.setCursor((SCREEN_WIDTH - modeText.length() * 6) / 2, centerY + 10);
+        display.print(modeText);
 
-    display.display();
+        display.setCursor((SCREEN_WIDTH - countdownText.length() * 6) / 2, centerY + 20);
+        display.print(countdownText);
+
+        display.display();
+    }
 }
 void displayButton4Timer() {
-    unsigned long elapsedMillis = millis() - button4StartTime;
-    unsigned long elapsedSeconds = elapsedMillis / 1000;
+    unsigned long elapsedSeconds = (millis() - button4StartTime) / 1000;
 
-    if (elapsedSeconds >= 300) {
+    if (elapsedSeconds >= 300) { // 5-minute timer ends
         button4Phase = INACTIVE;
         display.clearDisplay();
         display.display();
@@ -721,19 +729,12 @@ void displayButton4Timer() {
     display.print(timeText);
 
     display.display();
-
-    // Trigger feeding event exactly at 1:00
-    if (elapsedSeconds == 60 && !feedingTriggered) {
-        feedingTriggered = true;
-        button4Phase = FEEDING_EVENT;
-        button4StartTime = millis(); // Start timing the feeding event itself
-    }
 }
-void handleButton4FeedingEvent() {
-    unsigned long elapsedMillis = millis() - button4StartTime;
-    unsigned long elapsedSeconds = elapsedMillis / 1000;
 
-    if (elapsedSeconds < 3) {
+void handleButton4FeedingEvent() {
+    unsigned long elapsedSeconds = (millis() - button4StartTime) / 1000;
+
+    if (elapsedSeconds < 3) { // ✅ Show countdown before feeding
         digitalWrite(LED1, HIGH);
 
         display.clearDisplay();
@@ -743,26 +744,48 @@ void handleButton4FeedingEvent() {
         display.setCursor((SCREEN_WIDTH - modeText.length() * 6) / 2, 0);
         display.print(modeText);
 
-        String countdownText = "Feeding in " + String(3 - elapsedSeconds) + "s";
+        String countdownText = "Feeding in " + String(3 - elapsedSeconds) + " sec";
         display.setCursor((SCREEN_WIDTH - countdownText.length() * 6) / 2, 16);
         display.print(countdownText);
 
         display.display();
-    } else if (elapsedSeconds == 3) {
+    } 
+    else if (elapsedSeconds >= 3 && !feedingTriggered) { // Ensure feeding only runs once
+        feedingTriggered = true;
+
+        Serial.print("Feeding started in mode: ");
+        Serial.println(getMode(currentMode)); // Debug: Print Mode in Serial Monitor
+
         switch (currentMode) {
             case SIDE_A:
+                Serial.println("Triggering Feeding A...");
                 triggerFeedingA();
                 break;
             case SIDE_B:
+                Serial.println("Triggering Feeding B...");
                 triggerFeedingB();
                 break;
             case BOTH:
+                Serial.println("Triggering Feeding Both...");
                 triggerFeedingBoth();
                 break;
         }
-    } else if (elapsedSeconds >= 5) {
+
+        button4StartTime = millis(); // Reset timer for "Feeding Complete" message
+    } 
+    else if (elapsedSeconds >= 3 && elapsedSeconds < 5) { //"Feeding Complete" message fo
+        display.clearDisplay();
+        display.setTextSize(1);
+
+        String completeText = "Feeding Complete!";
+        display.setCursor((SCREEN_WIDTH - completeText.length() * 6) / 2, SCREEN_HEIGHT / 2 - 4);
+        display.print(completeText);
+
+        display.display();
+    }
+    else if (elapsedSeconds >= 5) { // Return to TIMER phase after message
         digitalWrite(LED1, LOW);
         button4Phase = TIMER;
-        button4StartTime = millis() - (60 * 1000); // Keep the timer accurate
+        button4StartTime = millis(); // Reset timer for 5-minute countdown
     }
 }
