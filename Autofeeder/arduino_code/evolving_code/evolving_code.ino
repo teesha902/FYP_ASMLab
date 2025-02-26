@@ -486,10 +486,12 @@ void displayImmediateFeedingStart(FeedingMode mode) {
     int feedingNowX = (SCREEN_WIDTH - feedingNowWidth) / 2;
     int modeX = (SCREEN_WIDTH - modeWidth) / 2;
 
-    display.setCursor(feedingNowX, 0);
+    int centerY = (SCREEN_HEIGHT - 2 * 8) / 2; // Centering vertically (2 lines)
+
+    display.setCursor(feedingNowX, centerY);
     display.print(feedingNowText);
 
-    display.setCursor(modeX, 12);
+    display.setCursor(modeX, centerY + 10);
     display.print(modeText);
 
     display.display();
@@ -516,16 +518,19 @@ void displayCountdown(const char* side) {
         int feedingX = (SCREEN_WIDTH - feedingTextWidth) / 2;
         int countdownX = (SCREEN_WIDTH - countdownTextWidth) / 2;
 
-        display.setCursor(feedingX, 0);
+        int centerY = (SCREEN_HEIGHT - 2 * 8) / 2; // Centering vertically
+
+        display.setCursor(feedingX, centerY);
         display.print(feedingText);
 
-        display.setCursor(countdownX, 12);
+        display.setCursor(countdownX, centerY + 10);
         display.print(countdownText);
 
         display.display();
         delay(1000);
     }
-    // After "in 1 sec", show "now"
+
+    // Show "now" before feeding
     display.clearDisplay();
     display.setTextSize(1);
 
@@ -535,14 +540,16 @@ void displayCountdown(const char* side) {
     int feedingX = (SCREEN_WIDTH - feedingTextWidth) / 2;
     int nowX = (SCREEN_WIDTH - nowWidth) / 2;
 
-    display.setCursor(feedingX, 0);
+    int centerY = (SCREEN_HEIGHT - 2 * 8) / 2;
+
+    display.setCursor(feedingX, centerY);
     display.print(feedingText);
 
-    display.setCursor(nowX, 12);
+    display.setCursor(nowX, centerY + 10);
     display.print("now!");
 
     display.display();
-    delay(1000); // Show "now" for 1 second before feeding
+    delay(1000);
 }
 void displayFedConfirmation(const char* side) {
     display.clearDisplay();
@@ -558,11 +565,12 @@ void displayFedConfirmation(const char* side) {
     int fedTextWidth = fedText.length() * 6;
     int fedTextX = (SCREEN_WIDTH - fedTextWidth) / 2;
 
-    display.setCursor(fedTextX, 12); // Center vertically
+    int centerY = (SCREEN_HEIGHT - 8) / 2; // Center single-line message
+
+    display.setCursor(fedTextX, centerY);
     display.print(fedText);
     display.display();
 
-    // Blank screen after 5 seconds
     delay(5000);
     display.clearDisplay();
     display.display();
