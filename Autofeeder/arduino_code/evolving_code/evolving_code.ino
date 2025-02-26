@@ -190,8 +190,8 @@ void loop() {
 
   //5 min feeding event - 5 sec feeding/LED starts after 1 min elapsed
   if (isButtonPressed(BUTTON_4)) {
+        Serial.println("Button 3 pressed");
         handleButton4Start();
-    }
 
     switch (button4Phase) {
         case INTRO:
@@ -206,8 +206,7 @@ void loop() {
         default:
             break;
     }
-
-  //delay(300); // IS THIS NEEDED???
+  }
 }
 
 //simple backup welcome screen 
@@ -237,7 +236,7 @@ void welcomeAnimation() {
   // Fish swimming across the screen
   for (int i = 0; i < SCREEN_WIDTH + 20; i++) {
     display.clearDisplay();
-    display.setTextSize(2);
+    display.setTextSize(1);
     display.setTextColor(SSD1306_WHITE);
     display.setCursor(fishX, fishY);
     display.print("><((()^>" ); // Fish ASCII art - can remove '°' if causing issues 
@@ -572,36 +571,63 @@ void displayFedConfirmation(const char* side) {
 
 //BUTTON 3 functionality
 void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingMode currentMode) {
-    //unsigned long startTime = millis();
-    //const unsigned long displayDuration = 10000; // 10 seconds
-    const int scrollSpeed =200; // Adjust speed for smoother scrolling (lower = slower)
-    int textHeight = 9; // Height of each line
-    int totalHeight = numFeedingTimes * textHeight;
-    const int repeatScroll = 3;   // How many times the scrolling should repeat
-    int headerY = 5; // Position of the "Feeding Times" header
+    const int scrollSpeed = 200; // Adjust speed for smoother scrolling (lower = slower)
+    const int textHeight = 9; // Height of each line
+    const int visibleLines = (SCREEN_HEIGHT - 12) / textHeight; // Max full lines visible
+    const int totalScrollHeight = numFeedingTimes * textHeight; // Total height of all entries
+    const int repeatScroll = 3; // Number of times scrolling should repeat
+    const int headerY = 0; // Position of the "Feeding Times" header
+    const int startScrollY = headerY + 10; // Feeding times start below the header
+    const int pauseDuration = 2000; // 2-second pause before scrolling
 
-    for (int r = 0; r < repeatScroll; r++) { // Repeat scroll 3 times
-        unsigned long scrollStartTime = millis();
+    for (int r = 0; r < repeatScroll; r++) { // Repeat scrolling 3 times
         int scrollOffset = 0;
 
-        while (scrollOffset <= totalHeight) {
+        // **Step 1: Display feeding schedule before scrolling starts**
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setTextColor(SSD1306_WHITE);
+
+        // Display header (STATIC)
+        int headerX = (SCREEN_WIDTH - 14 * 6) / 2; // Centered header
+        display.setCursor(headerX, headerY);
+        display.print("Feeding Times");
+
+        // Display as many feeding times as fit on the screen
+        for (int i = 0; i < min(numFeedingTimes, visibleLines); i++) {
+            int yPosition = startScrollY + (i * textHeight);
+            String timeText = formatTime(feedingTimes[i][0], feedingTimes[i][1]);
+            int timeWidth = timeText.length() * 6;
+            int timeX = (SCREEN_WIDTH - timeWidth) / 2;
+
+            display.setCursor(timeX, yPosition);
+            display.print(timeText);
+        }
+
+        display.display();
+        delay(pauseDuration); // Pause for 2 seconds before scrolling
+
+        // **Step 2: Start scrolling, keeping the header fixed**
+        int maxScrollOffset = totalScrollHeight - (visibleLines * textHeight) + textHeight;
+        // Ensures last item scrolls out fully without pushing the first entry over the header
+
+        while (scrollOffset <= maxScrollOffset) {
             display.clearDisplay();
             display.setTextSize(1);
             display.setTextColor(SSD1306_WHITE);
 
-            // Centered "Feeding Times" Header
-            int headerX = (SCREEN_WIDTH - 14 * 6) / 2; // "Feeding Times" is 14 characters
+            // Keep the header fixed
             display.setCursor(headerX, headerY);
             display.print("Feeding Times");
-
-            // Scroll feeding times
+            // Scroll feeding times (Prevent them from crossing over the header)
             for (int i = 0; i < numFeedingTimes; i++) {
-                int yPosition = headerY + 12 + (i * textHeight) - scrollOffset;
+                int yPosition = startScrollY + (i * textHeight) - scrollOffset;
 
-                if (yPosition >= 0 && yPosition <= SCREEN_HEIGHT) { // Draw only if visible
+                if (yPosition >= startScrollY && yPosition <= SCREEN_HEIGHT) { 
+                    // Only draw visible times, ensuring they don't overwrite the header
                     String timeText = formatTime(feedingTimes[i][0], feedingTimes[i][1]);
                     int timeWidth = timeText.length() * 6;
-                    int timeX = (SCREEN_WIDTH - timeWidth) / 2; // Center horizontally
+                    int timeX = (SCREEN_WIDTH - timeWidth) / 2;
 
                     display.setCursor(timeX, yPosition);
                     display.print(timeText);
@@ -609,47 +635,15 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
             }
 
             display.display();
-
-            // Smooth scrolling
-            delay(50);
+            delay(50); // Smooth scrolling delay
             scrollOffset += 1;
         }
     }
-    /*
-    while (millis() - startTime < displayDuration) {
-        int scrollOffset = (millis() - startTime) / scrollSpeed; // Move up every few ms
 
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(SSD1306_WHITE);
-
-        // Top: Current Mode
-        display.setCursor(0, 0);
-        display.print(getMode(currentMode));
-
-        // Centered "Feeding Times" Header - stays static
-        int headerX = (SCREEN_WIDTH - 14 * 6) / 2; // Center horizontally (14 chars "Feeding Times")
-        display.setCursor(headerX, 10);
-        display.print("Feeding Times");
-
-        // Scrolling feeding times
-        for (int i = 0; i < numFeedingTimes; i++) {
-            int yPosition = 25 + (i * textHeight) - scrollOffset; // Start below the header, scroll up
-            if (yPosition >= 15 && yPosition <= SCREEN_HEIGHT) { // Only draw if visible
-                display.setCursor(0, yPosition); // Left align times
-                display.print(formatTime(feedingTimes[i][0], feedingTimes[i][1]));
-            }
-        }
-        display.display();
-        delay(50); // Small delay to reduce flicker & control speed
-    }
-    */
-
-    // Clear the screen after 10 seconds
+    // Clear screen after finishing
     display.clearDisplay();
     display.display();
 }
-
 
 //BUTTON 4 functionality 
 void handleButton4Start() {
