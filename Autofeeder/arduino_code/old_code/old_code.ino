@@ -575,7 +575,7 @@ void displayFedConfirmation(const char* side) {
     display.print(fedText);
     display.display();
 
-    delay(5000);
+    delay(2000);
     display.clearDisplay();
     display.display();
 }
