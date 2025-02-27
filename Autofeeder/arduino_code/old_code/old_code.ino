@@ -40,21 +40,30 @@ const int feedingTimes[][3] = {
 };
 const int numFeedingTimes = sizeof(feedingTimes) / sizeof(feedingTimes[0]);
 
+//Fish image
+const unsigned char PROGMEM epd_bitmap_fish [] = {
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x0f, 0x80, 
+	0x00, 0x06, 0x00, 0xff, 0xf0, 0x00, 0x07, 0x01, 0xc0, 0x3c, 0x00, 0x07, 0x07, 0x00, 0x0e, 0x00, 
+	0x07, 0x8e, 0x00, 0x03, 0x80, 0x06, 0xd8, 0x00, 0x01, 0xc0, 0x06, 0xf0, 0x00, 0x30, 0xc0, 0x06, 
+	0x70, 0x00, 0x00, 0x60, 0x06, 0x70, 0x00, 0x00, 0x60, 0x06, 0xf0, 0x00, 0x00, 0xc0, 0x06, 0xd8, 
+	0x00, 0x01, 0xc0, 0x07, 0x8e, 0x00, 0x03, 0x80, 0x07, 0x07, 0x00, 0x0e, 0x00, 0x07, 0x01, 0xc0, 
+	0x3c, 0x00, 0x06, 0x00, 0xff, 0xf0, 0x00, 0x04, 0x00, 0x0f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+//INTERRUPT FUNCTIONALITY
+volatile bool interruptTriggered = false;
+
 //FUNCTION DECLARATIONS
 void triggerFeedingA();
 void triggerFeedingB();
 void triggerFeedingBoth();
-
-const unsigned char PROGMEM fish_bitmap[] = {
-  0b00011100,
-  0b00100010,
-  0b01000001,
-  0b10000000,
-  0b10000000,
-  0b01000001,
-  0b00100010,
-  0b00011100
-};
 
 //toggle variables
 enum FeedingMode { SIDE_A, SIDE_B, BOTH }; 
@@ -82,6 +91,7 @@ void setup() {
     rtc.begin();
     delay(100);
     //rtc.setDateTime(__DATE__, __TIME__); // COMMENT OUT after first time 
+      //when using this line, OLED mght not initialise (communicatoion interruption), once time is set, comment out and repload for OLED
       //only needed if and only if RTC battery dies 
       //ELSE: everytime feeder powered on and off, will attempt to reset time even thoguhg no computer is connected. 
 
@@ -122,11 +132,10 @@ void setup() {
     Serial.print(now.minute); Serial.print(":");
     Serial.print(now.second); Serial.println("");
     
-    //welcomeScreen();
-    welcomeAnimation();
+    animateFish();
+    displayReadyMessage(); 
     display.clearDisplay();
     Serial.println("Setup Complete.");
-    //error messages print to screen also? 
 }
 
 void loop() {
@@ -190,97 +199,81 @@ void loop() {
 
   //5 min feeding event - 5 sec feeding/LED starts after 1 min elapsed
   if (isButtonPressed(BUTTON_4)) {
-        Serial.println("Button 3 pressed");
-        handleButton4Start();
-
-    switch (button4Phase) {
-        case INTRO:
-            displayButton4Intro();
-            break;
-        case TIMER:
-            displayButton4Timer();
-            break;
-        case FEEDING_EVENT:
-            handleButton4FeedingEvent();
-            break;
-        default:
-            break;
-    }
+    Serial.println("Button 4 pressed");
+    handleButton4Start();
   }
+    
+  switch (button4Phase) {
+    case INTRO:
+      displayButton4Intro();
+      break;
+    case TIMER:
+      displayButton4Timer();
+      break;
+    case FEEDING_EVENT:
+      handleButton4FeedingEvent();
+      break;
+    default:
+      break;
+  }
+  
 }
 
-//simple backup welcome screen 
-void welcomeScreen() {
+void animateFish() {
+    int fishWidth = 40;  // Width of bitmap in pixels
+    int fishHeight = 40; // Height of bitmap in pixels
+    int fishX = -fishWidth; // Start completely off-screen (left)
+    int fishY = (SCREEN_HEIGHT - fishHeight) / 2; // Center vertically
+    int maxX = SCREEN_WIDTH; // Stop moving when fish reaches the right edge
+
+    while (fishX < maxX) { // Stop fish at maxX to prevent wrap-around
+        display.clearDisplay();
+        display.setTextColor(SSD1306_WHITE);
+        display.drawBitmap(fishX, fishY, epd_bitmap_fish, fishWidth, fishHeight, 1);
+        display.display();
+
+        fishX++; // Move fish to the right
+        delay(7); // Adjust speed if needed (lower value = faster)
+    }
+    //delay(1000); // Pause before switching to text
+}
+void displayReadyMessage() {
     display.clearDisplay();
     display.setTextSize(1);
-
-    String welcomeText = "Autofeeder Ready!";
-    int textWidth = welcomeText.length() * 6;
-    int textX = (SCREEN_WIDTH - textWidth) / 2;
-    int textY = (SCREEN_HEIGHT - 8) / 2; // Center vertically
-
-    display.setCursor(textX, textY);
-    display.print(welcomeText);
-
+    String readyText = "Auto-Feeder Ready!";
+    int readyWidth = readyText.length() * 6;
+    int readyX = (SCREEN_WIDTH - readyWidth) / 2;
+    display.setCursor(readyX, SCREEN_HEIGHT / 2 - 4);
+    display.print(readyText);
     display.display();
     delay(3000);
-
+    
     display.clearDisplay();
     display.display();
+    // Keep message visible, do not clear after
 }
-//FIX 
-void welcomeAnimation() {
-  int fishX = -20; // Start off-screen
-  int fishY = SCREEN_HEIGHT / 2 - 4; // Center vertically
 
-  // Fish swimming across the screen
-  for (int i = 0; i < SCREEN_WIDTH + 20; i++) {
-    display.clearDisplay();
-    display.setTextSize(1);
-    display.setTextColor(SSD1306_WHITE);
-    display.setCursor(fishX, fishY);
-    display.print("><((()^>" ); // Fish ASCII art - can remove '°' if causing issues 
-    display.display();
-
-    fishX++; // Move fish to the right
-    delay(70); // Adjust speed if needed
-  }
-
-  // Display final message
-  /*
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setCursor(10, SCREEN_HEIGHT / 2 - 4);
-  display.print("Fish Feeder Ready!");
-  display.display();
-  delay(3000);
-  */
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  String readyText = "Fish Feeder Ready!";
-  int readyWidth = readyText.length() * 6;
-  int readyX = (SCREEN_WIDTH - readyWidth) / 2;
-  display.setCursor(readyX, SCREEN_HEIGHT / 2 - 4);
-  display.print(readyText);
-  display.display();
-  delay(3000);
-  
-  display.clearDisplay();
-  display.display();
+// Call these in setup():
+void welcomeAnimationFish() {
+    animateFish();          // Move the fish across the screen
+    displayReadyMessage();  // Show "Auto-Feeder Ready!" afterward
 }
+
 
 
 // helper method to improve button responsiveness
 bool isButtonPressed(int buttonPin) {
-    if (digitalRead(buttonPin) == LOW) {  // Button pressed (LOW because of INPUT_PULLUP)
-        delay(50);                        // Short delay to debounce (50ms is common)
-        if (digitalRead(buttonPin) == LOW) {  // Still pressed after 50ms
-            return true;
-        }
+    static unsigned long lastPressTime = 0;
+    const int debounceDelay = 150; // Increased debounce delay
+
+    if (digitalRead(buttonPin) == LOW && millis() - lastPressTime > debounceDelay) {  
+        lastPressTime = millis();
+        interruptTriggered = true;  // Set interrupt flag
+        return true;
     }
     return false;
 }
+
 // helper method to get mode name
 String getMode(FeedingMode mode) {
     switch (mode) {
@@ -449,6 +442,8 @@ void displayMode(FeedingMode mode) {
 
 //BUTTON 2 FUNCTIONALITY
 void handleImmediateFeeding() {
+    interruptTriggered = false; //reset interrupt flag 
+
     // show which mode will be fed
     displayImmediateFeedingStart(currentMode);
 
@@ -499,6 +494,8 @@ void displayImmediateFeedingStart(FeedingMode mode) {
 }
 //5 second countdown before feeding event
 void displayCountdown(const char* side) {
+    interruptTriggered = false; //reset interrupt flag 
+
     String feedingText;
     if (strcmp(side, "both sides") == 0) {
         feedingText = "Feeding both sides";
@@ -507,6 +504,8 @@ void displayCountdown(const char* side) {
     }
 
     for (int i = 5; i > 0; i--) {
+        if (interruptTriggered) return;  // Stop if interrupted
+
         display.clearDisplay();
         display.setTextSize(1);
 
@@ -527,6 +526,11 @@ void displayCountdown(const char* side) {
         display.print(countdownText);
 
         display.display();
+
+        unsigned long startTime = millis();
+        while (millis() - startTime < 1000) {  
+            if (interruptTriggered) return;  // Stop if interrupted
+        }
         delay(1000);
     }
 
@@ -579,6 +583,8 @@ void displayFedConfirmation(const char* side) {
 
 //BUTTON 3 functionality
 void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingMode currentMode) {
+    interruptTriggered = false;
+
     const int scrollSpeed = 200; // Adjust speed for smoother scrolling (lower = slower)
     const int textHeight = 9; // Height of each line
     const int visibleLines = (SCREEN_HEIGHT - 12) / textHeight; // Max full lines visible
@@ -589,6 +595,8 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
     const int pauseDuration = 2000; // 2-second pause before scrolling
 
     for (int r = 0; r < repeatScroll; r++) { // Repeat scrolling 3 times
+        if (interruptTriggered) return;
+
         int scrollOffset = 0;
 
         // **Step 1: Display feeding schedule before scrolling starts**
@@ -613,13 +621,18 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
         }
 
         display.display();
-        delay(pauseDuration); // Pause for 2 seconds before scrolling
+        unsigned long startTime = millis();
+        while (millis() - startTime < pauseDuration) { //Check for interrupt during pause
+            if (interruptTriggered) return;
+        }
 
         // **Step 2: Start scrolling, keeping the header fixed**
         int maxScrollOffset = totalScrollHeight - (visibleLines * textHeight) + textHeight;
         // Ensures last item scrolls out fully without pushing the first entry over the header
 
         while (scrollOffset <= maxScrollOffset) {
+            if (interruptTriggered) return;
+
             display.clearDisplay();
             display.setTextSize(1);
             display.setTextColor(SSD1306_WHITE);
@@ -643,7 +656,11 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
             }
 
             display.display();
-            delay(50); // Smooth scrolling delay
+
+            unsigned long scrollStartTime = millis();
+            while (millis() - scrollStartTime < 50) { // Check for interrupt during scrolling
+                if (interruptTriggered) return;
+            }
             scrollOffset += 1;
         }
     }
@@ -653,6 +670,7 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
     display.display();
 }
 
+
 //BUTTON 4 functionality 
 void handleButton4Start() {
     button4Phase = INTRO;
@@ -660,40 +678,44 @@ void handleButton4Start() {
     feedingTriggered = false;
 }
 void displayButton4Intro() {
-    unsigned long elapsedMillis = millis() - button4StartTime;
-    unsigned long elapsedSeconds = elapsedMillis / 1000;
+    static unsigned long lastUpdate = 0;
+    unsigned long elapsedSeconds = (millis() - button4StartTime) / 1000;
 
-    if (elapsedSeconds >= 5) {
+    if (elapsedSeconds >= 5) { 
         button4Phase = TIMER;
         button4StartTime = millis();
         return;
     }
 
-    display.clearDisplay();
-    display.setTextSize(1);
+    // update screen once per second
+    if (millis() - lastUpdate >= 1000) {
+        lastUpdate = millis();
 
-    String introText = "5 min feeding event";
-    String modeText = getMode(currentMode);
-    String countdownText = "in " + String(5 - elapsedSeconds) + "s";
+        display.clearDisplay();
+        display.setTextSize(1);
 
-    int centerY = (SCREEN_HEIGHT - 3 * 8) / 2;
+        String introText = "5 min feeding event";
+        String modeText = getMode(currentMode);
+        String countdownText = "in " + String(5 - elapsedSeconds) + "s";
 
-    display.setCursor((SCREEN_WIDTH - introText.length() * 6) / 2, centerY);
-    display.print(introText);
+        int centerY = (SCREEN_HEIGHT - 3 * 8) / 2;
 
-    display.setCursor((SCREEN_WIDTH - modeText.length() * 6) / 2, centerY + 10);
-    display.print(modeText);
+        display.setCursor((SCREEN_WIDTH - introText.length() * 6) / 2, centerY);
+        display.print(introText);
 
-    display.setCursor((SCREEN_WIDTH - countdownText.length() * 6) / 2, centerY + 20);
-    display.print(countdownText);
+        display.setCursor((SCREEN_WIDTH - modeText.length() * 6) / 2, centerY + 10);
+        display.print(modeText);
 
-    display.display();
+        display.setCursor((SCREEN_WIDTH - countdownText.length() * 6) / 2, centerY + 20);
+        display.print(countdownText);
+
+        display.display();
+    }
 }
 void displayButton4Timer() {
-    unsigned long elapsedMillis = millis() - button4StartTime;
-    unsigned long elapsedSeconds = elapsedMillis / 1000;
+    unsigned long elapsedSeconds = (millis() - button4StartTime) / 1000;
 
-    if (elapsedSeconds >= 300) {
+    if (elapsedSeconds >= 300 || interruptTriggered) {  // Allow exit on interrupt
         button4Phase = INACTIVE;
         display.clearDisplay();
         display.display();
@@ -721,19 +743,19 @@ void displayButton4Timer() {
     display.print(timeText);
 
     display.display();
-
-    // Trigger feeding event exactly at 1:00
-    if (elapsedSeconds == 60 && !feedingTriggered) {
-        feedingTriggered = true;
-        button4Phase = FEEDING_EVENT;
-        button4StartTime = millis(); // Start timing the feeding event itself
-    }
 }
-void handleButton4FeedingEvent() {
-    unsigned long elapsedMillis = millis() - button4StartTime;
-    unsigned long elapsedSeconds = elapsedMillis / 1000;
 
-    if (elapsedSeconds < 3) {
+void handleButton4FeedingEvent() {
+    unsigned long elapsedSeconds = (millis() - button4StartTime) / 1000;
+
+    if (interruptTriggered) {  // Allow interruptions
+        digitalWrite(LED1, LOW);
+        button4Phase = TIMER;
+        button4StartTime = millis(); // Reset timer for 5-minute countdown
+        return;
+    }
+
+    if (elapsedSeconds < 3) { //  Show countdown before feeding
         digitalWrite(LED1, HIGH);
 
         display.clearDisplay();
@@ -743,26 +765,48 @@ void handleButton4FeedingEvent() {
         display.setCursor((SCREEN_WIDTH - modeText.length() * 6) / 2, 0);
         display.print(modeText);
 
-        String countdownText = "Feeding in " + String(3 - elapsedSeconds) + "s";
+        String countdownText = "Feeding in " + String(3 - elapsedSeconds) + " sec";
         display.setCursor((SCREEN_WIDTH - countdownText.length() * 6) / 2, 16);
         display.print(countdownText);
 
         display.display();
-    } else if (elapsedSeconds == 3) {
+    } 
+    else if (elapsedSeconds >= 3 && !feedingTriggered) { // Ensure feeding only runs once
+        feedingTriggered = true;
+
+        Serial.print("Feeding started in mode: ");
+        Serial.println(getMode(currentMode)); // Debug: Print Mode in Serial Monitor
+
         switch (currentMode) {
             case SIDE_A:
+                Serial.println("Triggering Feeding A...");
                 triggerFeedingA();
                 break;
             case SIDE_B:
+                Serial.println("Triggering Feeding B...");
                 triggerFeedingB();
                 break;
             case BOTH:
+                Serial.println("Triggering Feeding Both...");
                 triggerFeedingBoth();
                 break;
         }
-    } else if (elapsedSeconds >= 5) {
+
+        button4StartTime = millis(); // Reset timer for "Feeding Complete" message
+    } 
+    else if (elapsedSeconds >= 3 && elapsedSeconds < 5) { //"Feeding Complete" message fo
+        display.clearDisplay();
+        display.setTextSize(1);
+
+        String completeText = "Feeding Complete!";
+        display.setCursor((SCREEN_WIDTH - completeText.length() * 6) / 2, SCREEN_HEIGHT / 2 - 4);
+        display.print(completeText);
+
+        display.display();
+    }
+    else if (elapsedSeconds >= 5) { // Return to TIMER phase after message
         digitalWrite(LED1, LOW);
         button4Phase = TIMER;
-        button4StartTime = millis() - (60 * 1000); // Keep the timer accurate
+        button4StartTime = millis(); // Reset timer for 5-minute countdown
     }
 }
