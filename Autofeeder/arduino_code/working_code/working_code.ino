@@ -101,7 +101,6 @@ void setup() {
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
     Serial.println("OLED Ready!");
-    //display.setTextColor(SSD1306_WHITE); where declared?
     
     // Initialize Servos
     servo1.attach(12);
@@ -197,29 +196,7 @@ void loop() {
   if (isButtonPressed(BUTTON_4)) {
     Serial.println("Button 4 pressed");
     handleFiveMinuteFeeding();
-    //displayFeedingSchedule(feedingTimes, numFeedingTimes, currentMode);
   }
-  /*
-  //5 min feeding event - 5 sec feeding/LED starts after 1 min elapsed
-  if (isButtonPressed(BUTTON_4)) {
-        Serial.println("Button 3 pressed");
-        handleButton4Start();
-
-    switch (button4Phase) {
-        case INTRO:
-            displayButton4Intro();
-            break;
-        case TIMER:
-            displayButton4Timer();
-            break;
-        case FEEDING_EVENT:
-            handleButton4FeedingEvent();
-            break;
-        default:
-            break;
-    }
-  }
-  */
 }
 
 
@@ -258,9 +235,9 @@ void welcomeAnimation() {
 
 // helper method to improve button responsiveness
 bool isButtonPressed(int buttonPin) {
-    if (digitalRead(buttonPin) == LOW) {  // Button pressed (LOW because of INPUT_PULLUP)
-        delay(50);                        // Short delay to debounce (50ms is common)
-        if (digitalRead(buttonPin) == LOW) {  // Still pressed after 50ms
+    if (digitalRead(buttonPin) == LOW) {  
+        delay(50);                        
+        if (digitalRead(buttonPin) == LOW) {  
             return true;
         }
     }
@@ -288,9 +265,7 @@ String formatTime(int hour, int minute) {
     snprintf(buffer, sizeof(buffer), "%02d:%02d %s", hour, minute, period.c_str());
     return String(buffer);
 }
-
-
-//When time for daily feeding
+//Daily feeding time setting
 void displaySetFeedingTime(const RTCDateTime& time) {
     display.clearDisplay();
     display.setTextSize(1);
@@ -342,7 +317,7 @@ void triggerFeedingBoth() {
     delay(3000);                 
     servo1.write(SERVO_OPEN_ANGLE);
     servo2.write(SERVO_OPEN_ANGLE);          
-    delay(SERVO_OPEN_TIME); // minus arduino reaction time? 
+    delay(SERVO_OPEN_TIME);  
     servo1.write(SERVO_CLOSE_ANGLE);
     servo2.write(SERVO_CLOSE_ANGLE);          
     delay(2000);              
@@ -363,7 +338,6 @@ void handleModeSelection() {
     }
     // Show immediate feedback of toggling
     displayMode(currentMode);
-
     // Record the time for confirmation process
     lastButton1PressTime = millis();
     isModeConfirmed = true;
@@ -373,7 +347,6 @@ void handleModeConfirmation() {
         unsigned long elapsedTime = millis() - lastButton1PressTime;
 
         if (elapsedTime >= 3000 && elapsedTime < 8000) {
-            // After 3 seconds: Show "Selected:" \n {Mode Text}, centered
             display.clearDisplay();
             display.setTextSize(1);
 
@@ -385,7 +358,6 @@ void handleModeConfirmation() {
 
             int selectedX = (SCREEN_WIDTH - selectedWidth) / 2;
             int modeX = (SCREEN_WIDTH - modeWidth) / 2;
-
 
             // Vertically center the two lines as a block
             int blockHeight = 2 * 8; // Two lines, each 8 pixels high
@@ -399,7 +371,6 @@ void handleModeConfirmation() {
 
             display.display();
         } else if (elapsedTime >= 8000) {
-            // 5 seconds after selection: Clear display
             display.clearDisplay();
             display.display();
 
@@ -512,7 +483,7 @@ void displayCountdown(const char* side) {
     display.setTextSize(1);
 
     int feedingTextWidth = feedingText.length() * 6;
-    int nowWidth = 4 * 6; // "now!" is 3 characters
+    int nowWidth = 4 * 6; 
 
     int feedingX = (SCREEN_WIDTH - feedingTextWidth) / 2;
     int nowX = (SCREEN_WIDTH - nowWidth) / 2;
@@ -657,7 +628,6 @@ void handleFiveMinuteFeeding() {
             displayFedConfirmation("both sides");
             break;
     }
-
     // Countdown remaining time (to reach 5:00 total)
     displayFinalCountdown();
 }
