@@ -29,7 +29,7 @@ Servo servo1, servo2;
 #define BUTTON_4 7 
 #define SERVO_OPEN_ANGLE 110
 #define SERVO_CLOSE_ANGLE 135
-#define SERVO_OPEN_TIME 150
+#define SERVO_OPEN_TIME 100 // change to give more/less food 
 
 // Feeding schedule
 const int feedingTimes[][3] = {
