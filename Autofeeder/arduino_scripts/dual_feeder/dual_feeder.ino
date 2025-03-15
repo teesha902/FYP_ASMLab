@@ -23,15 +23,16 @@ Servo servo1, servo2;
 // Pin assignments
 #define LED1 11
 #define LED2 A1
-#define BUTTON_1 10
-#define BUTTON_2 9
-#define BUTTON_3 8
-#define BUTTON_4 7 
+#define BUTTON_1 10 // Select between dual/single feeding mode
+#define BUTTON_2 9  // Immediate feeding
+#define BUTTON_3 8  // Show feeding schedule
+#define BUTTON_4 7  // 5-minute feeding event
 #define SERVO_OPEN_ANGLE 110
 #define SERVO_CLOSE_ANGLE 135
 #define SERVO_OPEN_TIME 100 // change to give more/less food 
 
-// Feeding schedule
+// Feeding schedule - this can be changed according to experimental setup
+// Use the format {HH, MM, SS} in 24 hour time. Any number of feeding times can be added here, each as a different element in the array
 const int feedingTimes[][3] = {
     {9, 30, 0},    
     {10, 07, 0}, 
@@ -86,11 +87,27 @@ void setup() {
     Serial.println("Initializing RTC...");
     rtc.begin();
     delay(100);
-    //rtc.setDateTime(__DATE__, __TIME__); // COMMENT OUT after first time 
-      //only needed if and only if RTC battery dies 
-      //when using this line, OLED mght not initialise (communicatoion interruption), once time is set, comment out and repload for OLED
-      //only needed if and only if RTC battery dies 
-      //ELSE: everytime feeder powered on and off, will attempt to reset time even thoguhg no computer is connected. 
+
+    /*
+     * !!! IMPORTANT: SETTING THE RTC TIME (ONLY NEEDED ONCE) !!!
+     * 
+     * - The line below sets the RTC to the current date & time from your computer.
+     * - This should ONLY be done the FIRST TIME you upload the code to a new feeder device OR if the RTC battery dies.
+     * - After setting the time once, you MUST COMMENT OUT the line, re-upload the code, and restart the device.
+     * - Why? Because leaving it active will reset the RTC every time the device is powered on.
+     *
+     * >>> STEPS TO SET TIME ON FIRST UPLOAD:
+     * 1. Uncomment the line below (`rtc.setDateTime(__DATE__, __TIME__);`).
+     * 2. Upload the code to the microcontroller.
+     * 3. After uploading, **comment out the line again** to prevent resetting the time every restart.
+     * 4. Upload the modified code again (with the line commented out), to allow proper initialisation of the OLED screen.
+     *
+     * >>> WHEN TO DO THIS AGAIN?
+     * - If you are uploading code to a new device for the first time OR if the RTC battery is removed or dies. 
+     * - Repeat the steps above to reset the time.
+     */
+
+    //rtc.setDateTime(__DATE__, __TIME__); // Uncomment this line ONLY for the first upload, then comment it out
 
     // Initialize OLED AFTER RTC
     Serial.println("Initializing OLED...");
@@ -200,7 +217,6 @@ void loop() {
 }
 
 
-//FIX 
 void welcomeAnimation() {
     int fishWidth = 40;  // Width of bitmap in pixels
     int fishHeight = 40; // Height of bitmap in pixels
@@ -265,7 +281,36 @@ String formatTime(int hour, int minute) {
     snprintf(buffer, sizeof(buffer), "%02d:%02d %s", hour, minute, period.c_str());
     return String(buffer);
 }
-//Daily feeding time setting
+//Daily scheduled feeding time// Button 2 - 5 second countdown before feeding event
+void displayCountdown() {
+    for (int i = 5; i > 0; i--) {
+        display.clearDisplay();
+        display.setTextSize(1);
+
+        String countdownText = "Feeding in " + String(i) + " sec";
+        int countdownX = (SCREEN_WIDTH - countdownText.length() * 6) / 2;
+        int centerY = (SCREEN_HEIGHT - 8) / 2; 
+
+        display.setCursor(countdownX, centerY);
+        display.print(countdownText);
+
+        display.display();
+        delay(1000);
+    }
+
+    // Show "Feeding now!" message
+    display.clearDisplay();
+    display.setTextSize(1);
+
+    int nowX = (SCREEN_WIDTH - 9 * 6) / 2;  // Center "Feeding now!"
+    int centerY = (SCREEN_HEIGHT - 8) / 2;
+
+    display.setCursor(nowX, centerY);
+    display.print("Feeding now!");
+
+    display.display();
+    delay(1000);
+}
 void displaySetFeedingTime(const RTCDateTime& time) {
     display.clearDisplay();
     display.setTextSize(1);
@@ -539,7 +584,7 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
     for (int r = 0; r < repeatScroll; r++) { // Repeat scrolling 3 times
         int scrollOffset = 0;
 
-        // **Step 1: Display feeding schedule before scrolling starts**
+        // Display feeding schedule before scrolling starts
         display.clearDisplay();
         display.setTextSize(1);
         display.setTextColor(SSD1306_WHITE);
@@ -563,7 +608,7 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
         display.display();
         delay(pauseDuration); // Pause for 2 seconds before scrolling
 
-        // **Step 2: Start scrolling, keeping the header fixed**
+        // Start scrolling, keeping the header fixed
         int maxScrollOffset = totalScrollHeight - (visibleLines * textHeight) + textHeight;
         // Ensures last item scrolls out fully without pushing the first entry over the header
 
