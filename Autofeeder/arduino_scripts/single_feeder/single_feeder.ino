@@ -51,7 +51,11 @@ const unsigned char PROGMEM epd_bitmap_fish [] = {
 	0x07, 0x8e, 0x00, 0x03, 0x80, 0x06, 0xd8, 0x00, 0x01, 0xc0, 0x06, 0xf0, 0x00, 0x30, 0xc0, 0x06, 
 	0x70, 0x00, 0x00, 0x60, 0x06, 0x70, 0x00, 0x00, 0x60, 0x06, 0xf0, 0x00, 0x00, 0xc0, 0x06, 0xd8, 
 	0x00, 0x01, 0xc0, 0x07, 0x8e, 0x00, 0x03, 0x80, 0x07, 0x07, 0x00, 0x0e, 0x00, 0x07, 0x01, 0xc0, 
-	0x3c, 0x00, 0x06, 0x00, 0xff, 0xf0, 0x00, 0x04, 0x00, 0x0f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00
+	0x3c, 0x00, 0x06, 0x00, 0xff, 0xf0, 0x00, 0x04, 0x00, 0x0f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 void setup() {
@@ -169,29 +173,36 @@ void loop() {
 }
 
 void welcomeAnimation() {
-    int fishWidth = 40;  
-    int fishHeight = 40; 
-    int fishX = -fishWidth; // Start off-screen
-    int fishY = (SCREEN_HEIGHT - fishHeight) / 2; // Centered
-    int maxX = SCREEN_WIDTH; 
+    int fishWidth = 40;  // Width of bitmap in pixels
+    int fishHeight = 40; // Height of bitmap in pixels
+    int fishX = -fishWidth; // Start completely off-screen (left)
+    int fishY = (SCREEN_HEIGHT - fishHeight) / 2; // Center vertically
+    int maxX = SCREEN_WIDTH; // Stop moving when fish reaches the right edge
 
-    while (fishX < maxX) {
+    while (fishX < maxX) { // Stop fish at maxX to prevent wrap-around
         display.clearDisplay();
+        display.setTextColor(SSD1306_WHITE);
         display.drawBitmap(fishX, fishY, epd_bitmap_fish, fishWidth, fishHeight, 1);
         display.display();
-        fishX++;
-        delay(7);
+
+        fishX++; // Move fish to the right
+        delay(7); // Adjust speed if needed (lower value = faster)
     }
 
     display.clearDisplay();
     display.setTextSize(1);
-    display.setCursor(20, SCREEN_HEIGHT / 2 - 4);
-    display.print("Auto-Feeder Ready!");
+    String readyText = "Auto-Feeder Ready!";
+    int readyWidth = readyText.length() * 6;
+    int readyX = (SCREEN_WIDTH - readyWidth) / 2;
+    display.setCursor(readyX, SCREEN_HEIGHT / 2 - 4);
+    display.print(readyText);
     display.display();
     delay(3000);
+    
     display.clearDisplay();
     display.display();
 }
+
 
 // helper method to improve button responsiveness
 bool isButtonPressed(int buttonPin) {
@@ -219,11 +230,12 @@ String formatTime(int hour, int minute) {
 void triggerFeeding() {
     Serial.println("Feeding now...");
     digitalWrite(LED1, HIGH);
+    delay(3000); // Keep LED on for 3 seconds
     servo1.write(SERVO_OPEN_ANGLE);          
     delay(SERVO_OPEN_TIME);
-    servo1.write(SERVO_CLOSE_ANGLE);
-    delay(2000); 
-    digitalWrite(LED1, LOW);
+    servo1.write(SERVO_CLOSE_ANGLE);          
+    delay(2000); // Keep LED on for 2 more seconds
+    digitalWrite(LED1, LOW); // Turn off LED
 }
 
 
