@@ -299,7 +299,7 @@ void displayFedConfirmation() {
 
 
 //BUTTON 3 FUNCTIONALITY 
-void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingMode currentMode) {
+void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes) {
     const int scrollSpeed = 200; // Adjust speed for smoother scrolling (lower = slower)
     const int textHeight = 9; // Height of each line
     const int visibleLines = (SCREEN_HEIGHT - 12) / textHeight; // Max full lines visible
