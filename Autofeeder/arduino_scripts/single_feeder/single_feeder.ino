@@ -311,6 +311,28 @@ void displayFedConfirmation() {
 
 
 //BUTTON 3 FUNCTIONALITY 
+void displayCurrentTime() {
+    RTCDateTime now = rtc.getDateTime();
+    String currentTime = formatTime(now.hour, now.minute);
+
+    display.clearDisplay();
+    display.setTextSize(1);
+
+    String header = "Current Time";
+    int headerX = (SCREEN_WIDTH - header.length() * 6) / 2;
+    int timeX = (SCREEN_WIDTH - currentTime.length() * 6) / 2;
+    int centerY = (SCREEN_HEIGHT - 2 * 8) / 2;
+
+    display.setCursor(headerX, centerY);
+    display.print(header);
+
+    display.setCursor(timeX, centerY + 10);
+    display.print(currentTime);
+
+    display.display();
+    delay(3000); // Show time for 3 seconds
+}
+
 void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes) {
     const int scrollSpeed = 200; // Adjust speed for smoother scrolling (lower = slower)
     const int textHeight = 9; // Height of each line
@@ -322,6 +344,7 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes) {
     const int pauseDuration = 2000; // 2-second pause before scrolling
 
     for (int r = 0; r < repeatScroll; r++) { // Repeat scrolling 3 times
+        displayCurrentTime();
         int scrollOffset = 0;
 
         // Display feeding schedule before scrolling starts

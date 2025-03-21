@@ -281,36 +281,7 @@ String formatTime(int hour, int minute) {
     snprintf(buffer, sizeof(buffer), "%02d:%02d %s", hour, minute, period.c_str());
     return String(buffer);
 }
-//Daily scheduled feeding time// Button 2 - 5 second countdown before feeding event
-void displayCountdown() {
-    for (int i = 5; i > 0; i--) {
-        display.clearDisplay();
-        display.setTextSize(1);
 
-        String countdownText = "Feeding in " + String(i) + " sec";
-        int countdownX = (SCREEN_WIDTH - countdownText.length() * 6) / 2;
-        int centerY = (SCREEN_HEIGHT - 8) / 2; 
-
-        display.setCursor(countdownX, centerY);
-        display.print(countdownText);
-
-        display.display();
-        delay(1000);
-    }
-
-    // Show "Feeding now!" message
-    display.clearDisplay();
-    display.setTextSize(1);
-
-    int nowX = (SCREEN_WIDTH - 9 * 6) / 2;  // Center "Feeding now!"
-    int centerY = (SCREEN_HEIGHT - 8) / 2;
-
-    display.setCursor(nowX, centerY);
-    display.print("Feeding now!");
-
-    display.display();
-    delay(1000);
-}
 void displaySetFeedingTime(const RTCDateTime& time) {
     display.clearDisplay();
     display.setTextSize(1);
@@ -492,26 +463,27 @@ void displayImmediateFeedingStart(FeedingMode mode) {
 }
 //5 second countdown before feeding event
 void displayCountdown(const char* side) {
-    String feedingText;
+    char feedingText[30]; 
     if (strcmp(side, "both sides") == 0) {
-        feedingText = "Feeding both sides";
+        strcpy(feedingText, "Feeding both sides");
     } else {
-        feedingText = "Feeding " + String(side);
+        snprintf(feedingText, sizeof(feedingText), "Feeding %s", side);
     }
 
     for (int i = 5; i > 0; i--) {
         display.clearDisplay();
         display.setTextSize(1);
 
-        String countdownText = "in " + String(i) + " sec";
+        char countdownText[15];
+        snprintf(countdownText, sizeof(countdownText), "in %d sec", i);
 
-        int feedingTextWidth = feedingText.length() * 6;
-        int countdownTextWidth = countdownText.length() * 6;
+        int feedingTextWidth = strlen(feedingText) * 6;
+        int countdownTextWidth = strlen(countdownText) * 6;
 
         int feedingX = (SCREEN_WIDTH - feedingTextWidth) / 2;
         int countdownX = (SCREEN_WIDTH - countdownTextWidth) / 2;
 
-        int centerY = (SCREEN_HEIGHT - 2 * 8) / 2; // Centering vertically
+        int centerY = (SCREEN_HEIGHT - 2 * 8) / 2; 
 
         display.setCursor(feedingX, centerY);
         display.print(feedingText);
@@ -523,11 +495,11 @@ void displayCountdown(const char* side) {
         delay(1000);
     }
 
-    // Show "now" before feeding
+    // Display "now!" message
     display.clearDisplay();
     display.setTextSize(1);
 
-    int feedingTextWidth = feedingText.length() * 6;
+    int feedingTextWidth = strlen(feedingText) * 6;
     int nowWidth = 4 * 6; 
 
     int feedingX = (SCREEN_WIDTH - feedingTextWidth) / 2;
@@ -548,17 +520,17 @@ void displayFedConfirmation(const char* side) {
     display.clearDisplay();
     display.setTextSize(1);
 
-    String fedText;
+    char fedText[30]; 
     if (strcmp(side, "both sides") == 0) {
-        fedText = "Fed both sides!";
+        strcpy(fedText, "Fed both sides!");
     } else {
-        fedText = "Fed " + String(side) + "!";
+        snprintf(fedText, sizeof(fedText), "Fed %s!", side);
     }
 
-    int fedTextWidth = fedText.length() * 6;
+    int fedTextWidth = strlen(fedText) * 6;
     int fedTextX = (SCREEN_WIDTH - fedTextWidth) / 2;
 
-    int centerY = (SCREEN_HEIGHT - 8) / 2; // Center single-line message
+    int centerY = (SCREEN_HEIGHT - 8) / 2;
 
     display.setCursor(fedTextX, centerY);
     display.print(fedText);
@@ -570,7 +542,30 @@ void displayFedConfirmation(const char* side) {
 }
 
 
+
 //BUTTON 3 functionality
+void displayCurrentTime() {
+    RTCDateTime now = rtc.getDateTime();
+    String currentTime = formatTime(now.hour, now.minute);
+
+    display.clearDisplay();
+    display.setTextSize(1);
+
+    String header = "Current Time";
+    int headerX = (SCREEN_WIDTH - header.length() * 6) / 2;
+    int timeX = (SCREEN_WIDTH - currentTime.length() * 6) / 2;
+    int centerY = (SCREEN_HEIGHT - 2 * 8) / 2;
+
+    display.setCursor(headerX, centerY);
+    display.print(header);
+
+    display.setCursor(timeX, centerY + 10);
+    display.print(currentTime);
+
+    display.display();
+    delay(3000); // Show time for 3 seconds
+}
+
 void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingMode currentMode) {
     const int scrollSpeed = 200; // Adjust speed for smoother scrolling (lower = slower)
     const int textHeight = 9; // Height of each line
@@ -582,6 +577,7 @@ void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingM
     const int pauseDuration = 2000; // 2-second pause before scrolling
 
     for (int r = 0; r < repeatScroll; r++) { // Repeat scrolling 3 times
+        displayCurrentTime();
         int scrollOffset = 0;
 
         // Display feeding schedule before scrolling starts
@@ -703,34 +699,42 @@ void displayFiveMinuteFeedingStart(FeedingMode mode) {
 }
 // First-minute countdown (display numbers counting down from 60 to 0) and include side
 void displayCountdownOneMinute(FeedingMode mode) {
-    String modeText = getMode(mode);
-    
+    char modeText[20];
+
+    // Ensure mode is correctly assigned
+    switch (mode) {
+        case SIDE_A: strcpy(modeText, "Side A"); break;
+        case SIDE_B: strcpy(modeText, "Side B"); break;
+        case BOTH: strcpy(modeText, "Both Sides"); break;
+        default: strcpy(modeText, "Unknown"); break; // Fallback in case of error
+    }
+
     for (int i = 60; i > 0; i--) {
         display.clearDisplay();
         display.setTextSize(1);
 
-        // Split message into two lines for better centering
-        String line1 = "Feeding event for";
-        String line2 = modeText;
-        String line3 = "starting in " + String(i) + "s";
+        char line1[] = "Feeding event for";
+        char line2[20]; 
+        snprintf(line2, sizeof(line2), "%s", modeText);  // Properly formatted mode name
 
-        // Calculate text positioning
-        int line1Width = line1.length() * 6;
-        int line2Width = line2.length() * 6;
-        int line3Width = line3.length() * 6;
+        char line3[20];
+        snprintf(line3, sizeof(line3), "starting in %d s", i);
+
+        int line1Width = strlen(line1) * 6;
+        int line2Width = strlen(line2) * 6;
+        int line3Width = strlen(line3) * 6;
 
         int centerX1 = (SCREEN_WIDTH - line1Width) / 2;
         int centerX2 = (SCREEN_WIDTH - line2Width) / 2;
         int centerX3 = (SCREEN_WIDTH - line3Width) / 2;
 
-        int centerY = (SCREEN_HEIGHT - 3 * 8) / 2; // Three-line vertical centering
+        int centerY = (SCREEN_HEIGHT - 3 * 8) / 2; 
 
-        // Display each line
         display.setCursor(centerX1, centerY);
         display.print(line1);
 
         display.setCursor(centerX2, centerY + 10);
-        display.print(line2);
+        display.print(line2);  // Now properly displays mode (Side A, Side B, Both Sides)
 
         display.setCursor(centerX3, centerY + 20);
         display.print(line3);
@@ -739,6 +743,7 @@ void displayCountdownOneMinute(FeedingMode mode) {
         delay(1000);
     }
 }
+
 // Countdown after feeding event (to complete the 5 minutes)
 void displayFinalCountdown() {
     for (int i = 240; i > 0; i--) { // 4 minutes remaining
@@ -748,15 +753,13 @@ void displayFinalCountdown() {
         int minutes = i / 60;
         int seconds = i % 60;
 
-        // Fix: Proper string formatting
-        String countdownText = "Time left: ";
-        countdownText += (minutes < 10 ? "0" : "") + String(minutes) + ":";
-        countdownText += (seconds < 10 ? "0" : "") + String(seconds);
+        char countdownText[20]; 
+        snprintf(countdownText, sizeof(countdownText), "Time left: %02d:%02d", minutes, seconds);
 
-        int countdownTextWidth = countdownText.length() * 6;
+        int countdownTextWidth = strlen(countdownText) * 6;
         int countdownX = (SCREEN_WIDTH - countdownTextWidth) / 2;
 
-        int centerY = (SCREEN_HEIGHT - 8) / 2; // Centering vertically
+        int centerY = (SCREEN_HEIGHT - 8) / 2;
 
         display.setCursor(countdownX, centerY);
         display.print(countdownText);
@@ -765,15 +768,15 @@ void displayFinalCountdown() {
         delay(1000);
     }
 
-    // Event complete
+    // Show event completion message
     display.clearDisplay();
     display.setTextSize(1);
 
-    String completeText = "Feeding Event Over!";
-    int completeTextWidth = completeText.length() * 6;
+    char completeText[] = "Feeding Event Over!";
+    int completeTextWidth = strlen(completeText) * 6;
     int completeX = (SCREEN_WIDTH - completeTextWidth) / 2;
 
-    int centerY = (SCREEN_HEIGHT - 8) / 2; // Centering vertically
+    int centerY = (SCREEN_HEIGHT - 8) / 2;
 
     display.setCursor(completeX, centerY);
     display.print(completeText);
