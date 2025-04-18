@@ -3,6 +3,7 @@ scipy
 opencv-python # only for running led times otherwise not needed
 imageio
 jupyterlab
+#ipykernel
 ipython
 matplotlib
 pandas

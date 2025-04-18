@@ -106,7 +106,6 @@ void setup() {
      * - If you are uploading code to a new device for the first time OR if the RTC battery is removed or dies. 
      * - Repeat the steps above to reset the time.
      */
-
     //rtc.setDateTime(__DATE__, __TIME__); // Uncomment this line ONLY for the first upload, then comment it out
 
     // Initialize OLED AFTER RTC
