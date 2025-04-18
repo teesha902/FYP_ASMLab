@@ -1,0 +1,31 @@
+#numpy
+#scipy
+#opencv-python # only for running led times otherwise not needed
+#imageio
+#jupyterlab
+#ipykernel
+#ipython
+#matplotlib
+#pandas
+#openpyxl
+#pyyaml
+#tqdm
+#xlsxwriter
+#seaborn
+#dabest # for statistical analysis
+#statsmodels # needed for dabest
+
+numpy==1.24.3
+scipy==1.9.3
+pandas==1.5.3
+matplotlib
+seaborn
+opencv-python
+tqdm
+openpyxl
+xlsxwriter
+dabest
+statsmodels
+jupyterlab
+ipython
+#pyyaml #only needed for DLC 
