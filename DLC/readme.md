@@ -33,6 +33,7 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html
    https://github.com/DeepLabCut/DeepLabCut/blob/main/conda-environments/DEEPLABCUT.yaml
 
 2. Open terminal and navigate to the folder with the `.yaml`, then run:
+
 ```bash
 conda env create -f DEEPLABCUT.yaml
 conda activate DEEPLABCUT
@@ -41,11 +42,13 @@ This installs DLC and all required dependencies with the PyTorch backend, which 
 
 #### 3. Launch DLC 
 You can start DLC from the terminal with:
+
 ```bash
 python -m deeplabcut
     ```
 
 If you encounter errors related to pyqt or ffmpeg, try installing them separately (inside the conda environment):
+
 ```bash
 conda install pyqt
 conda install -c conda-forge ffmpeg
