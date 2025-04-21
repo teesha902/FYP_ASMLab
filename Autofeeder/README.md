@@ -20,6 +20,18 @@ There are **two versions** of the system:
 ---
 
 ## **2. First-Time Setup & Uploading Code to the Feeder**  
+### **📌 Before You Start – Install the RTC Library**
+To enable communication with the DS3231 Real-Time Clock, you must install the provided library:
+1. Open **Arduino IDE.**
+2. Go to **Sketch > Include Library > Add .ZIP Library...**
+3. Navigate to the project folder:
+
+   ```bash
+      Autofeeder/additional_libraries_peripherals/Libraries
+      ```
+4. Select the file: `DS3231.zip`
+5. Click Open.
+✅ You should now see DS3231 available under Sketch > Include Library > Contributed Libraries.
 
 ### **📌 Steps for First-Time Setup (New Device)**
 1. **Download the code from the `arduino_scripts` folder**.  
@@ -32,17 +44,26 @@ There are **two versions** of the system:
    - This allows you to check if the RTC and other components are working properly.
 
 ### **📌 If This Is the First Upload (Setting the RTC Time)**
-1. Locate this line in `setup()`:  
+> 🕒 The RTC (Real-Time Clock) module keeps track of the current time — even when the device is powered off — using a small coin-cell battery (CR2032). However, it needs to be set once with your computer’s current time.
+
+1. In the `setup()` function, locate the following two lines:
+
    ```cpp
+   rtc.begin();
    rtc.setDateTime(__DATE__, __TIME__);
    ```
-2. **Uncomment the line** (remove `//` at the beginning).  
-3. **Upload the code** to set the RTC to the current time.  
-4. **Comment the line back out** and re-upload the code:  
-   ```cpp
-   // rtc.setDateTime(__DATE__, __TIME__);
+2. **Uncomment both lines** if they are commented out. This allows the code to communicate with the RTC and set the time.  
+3. **Upload the code.** The RTC will now be set to your computer's compile-time.
+4. After uploading, **comment both lines back out** to avoid OLED startup conflicts and prevent resetting the time on every reboot.
+
+```cpp
+   //rtc.begin();
+   //rtc.setDateTime(__DATE__, __TIME__);
    ```
-   ✅ **Why?** If this line is left active, the RTC will reset every time the Arduino restarts.  
+
+   ✅ **Why?** 
+   * Leaving `rtc.setDateTime()` uncommented will reset the clock every time the device restarts.
+   * Leaving `rtc.begin()` uncommented can sometimes prevent the OLED screen from initializing properly on certain boards.
 
 5. **Check the Serial Monitor output** to verify the RTC is set correctly:
    ```
@@ -50,10 +71,10 @@ There are **two versions** of the system:
    ```
    If incorrect, repeat the steps above.
 
-### **📌 If Reuploading Code Later**
-- If making **changes to feeding times or parameters**, just upload the updated code.
-- If the **RTC time is incorrect**, follow the **RTC resetting instructions** above.
-
+### 📌 On Future Uploads or Code Changes: 
+* You can safely leave both lines commented out if the RTC was previously set and is running correctly.
+* The RTC will continue tracking time on its own (via battery backup).
+* If the RTC loses power (battery removed or dies), you’ll need to repeat the steps above to reset the time.
 ---
 
 ## **3. Changing the Scheduled Feeding Times**  
@@ -183,4 +204,4 @@ Triggering Feeding...
 ✅ **Ensure the correct time is set before leaving the feeder unattended.**  
 ✅ **Regularly check the RTC battery and servo connections for accuracy.**  
 
-🚀 **Auto-Feeder System is now ready for use in lab experiments!** 🚀
+**Auto-Feeder System is now ready for use in lab experiments!**
