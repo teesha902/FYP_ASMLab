@@ -192,5 +192,3 @@ This notebook includes:
 - Angle/trajectory computation
 - Trial segmentation and alignment with stimulus events
 - Summary metrics extraction (acceleration, trajectory, etc)
-
-
