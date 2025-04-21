@@ -37,7 +37,7 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/macos.html
 ```bash
 conda env create -f DEEPLABCUT.yaml
 conda activate DEEPLABCUT
-    ```
+```
 This installs DLC and all required dependencies with the PyTorch backend, which is preferred on macOS.
 
 #### 3. Launch DLC 
@@ -45,14 +45,14 @@ You can start DLC from the terminal with:
 
 ```bash
 python -m deeplabcut
-    ```
+```
 
 If you encounter errors related to pyqt or ffmpeg, try installing them separately (inside the conda environment):
 
 ```bash
 conda install pyqt
 conda install -c conda-forge ffmpeg
-    ```
+```
 
 ### GPU (Windows with CUDA) --> For Lab PC: Toothless
 
@@ -72,7 +72,7 @@ After installation, open **Command Prompt** and type:
 
 ```bash
 nvidia-smi
-    ```
+```
 > This command should show GPU details. If you see "driver not found" or an error, your driver isn't set up properly.
     
     
@@ -87,7 +87,7 @@ After installing, check if it worked by running this command:
 To verify CUDA after installation:
 ```bash
 nvcc -V
-    ```
+```
 You should see a message showing your installed CUDA version (e.g., "release 11.8").
 
 ⚠️ Note: You don’t need to install cuDNN manually — it's already included in the DeepLabCut environment you'll set up later.
@@ -103,33 +103,33 @@ Open **Anaconda Prompt**, (not the Command Prompt) and run:
 ```bash
 conda create -n DEEPLABCUT python=3.10
 conda activate DEEPLABCUT
-    ```
+```
     
 #### 5. Install PyTorch with CUDA Support
 Use PyTorch’s install command for your CUDA version. For CUDA 11.8:
 
 ```bash
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-    ```
+```
 You can confirm GPU access with:
 
 ```bash
 import torch
 print(torch.cuda.is_available())  # Should return True
-    ```
+```
     
 #### 6. Install DeepLabCut
 Once PyTorch is installed, install DLC with GUI support:
 
 ```bash
 pip install deeplabcut[gui]
-    ```
+```
 
 #### 7. Launch DLC 
 Now you can start DLC with:
 ```bash
 python -m deeplabcut
-    ```
+```
       
 ##### With DLC up and running we can move onto the next steps...
 
@@ -192,5 +192,3 @@ This notebook includes:
 - Angle/trajectory computation
 - Trial segmentation and alignment with stimulus events
 - Summary metrics extraction (acceleration, trajectory, etc)
-
-
