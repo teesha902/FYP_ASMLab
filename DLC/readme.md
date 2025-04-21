@@ -148,7 +148,7 @@ It contains:
 
 - Creating a new DLC project
 - Extracting & labeling frames
-- Training a network (on GPU only)
+- Training a network (run on GPU only)
 - Running inference
 
 ---
@@ -160,6 +160,7 @@ Also in `DLC_Workflow_Guide.ipynb`, under **Section B**, you’ll find steps for
 - Loading an existing DLC config
 - Verifying model files
 - Running inference and generating labeled videos
+- Generate labeled videos
 
 ---
 
@@ -171,9 +172,8 @@ When switching between Mac and GPU PC (e.g., Toothless), be sure to copy the fol
 |-------------------|---------|
 | `config.yaml`     | All project metadata and paths |
 | `labeled-data/` (if labelling was done)  | Manually labeled frames |
-| `dlc-models/`     | Contains trained model (`pose_cfg.yaml`, snapshots, logs) |
+| `dlc-models/`     | Contains trained model (`pose_cfg.yaml`, snapshots, logs) | 
 | `videos/`         | Input videos used for training/inference |
-| `.h5` / `.csv`    | Output prediction files |
 
 > ⚠️ You must recheck all paths in `config.yaml` after moving to another machine.
 
@@ -188,6 +188,6 @@ This notebook includes:
 - Filtering low-confidence predictions
 - Angle/trajectory computation
 - Trial segmentation and alignment with stimulus events
-- Metrics .... 
+- Summary metrics extraction (acceleration, trajectory, etc)
 
 
