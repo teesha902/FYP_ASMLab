@@ -62,42 +62,51 @@ void setup() {
     Serial.begin(9600); 
     Serial.println("Initializing Auto-Feeder...");
 
-    // Initialize RTC
-    Serial.println("Initializing RTC...");
-    rtc.begin();
-    delay(100);
-
-    /*
-     * !!! IMPORTANT: SETTING THE RTC TIME (ONLY NEEDED ONCE) !!!
-     * 
-     * - The line below sets the RTC to the current date & time from your computer.
-     * - This should ONLY be done the FIRST TIME you upload the code to a new feeder device OR if the RTC battery dies.
-     * - After setting the time once, you MUST COMMENT OUT the line, re-upload the code, and restart the device.
-     * - Why? Because leaving it active will reset the RTC every time the device is powered on.
-     *
-     * >>> STEPS TO SET TIME ON FIRST UPLOAD:
-     * 1. Uncomment the line below (`rtc.setDateTime(__DATE__, __TIME__);`).
-     * 2. Upload the code to the microcontroller.
-     * 3. After uploading, **comment out the line again** to prevent resetting the time every restart.
-     * 4. Upload the modified code again (with the line commented out), to allow proper initialisation of the OLED screen.
-     *
-     * >>> WHEN TO DO THIS AGAIN?
-     * - If you are uploading code to a new device for the first time OR if the RTC battery is removed or dies. 
-     * - Repeat the steps above to reset the time.
-     */
-
-
-    //rtc.setDateTime(__DATE__, __TIME__); // Uncomment for first-time setup, then comment & re-upload
-
-    // Initialize OLED AFTER RTC
+    // Initialize OLED
     Serial.println("Initializing OLED...");
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
         Serial.println("SSD1306 OLED allocation failed!");
-        for(;;); // Halt execution if OLED fails to initialize
+        for(;;); // Don't proceed, loop until screen is ready
     }
+    delay(100);
+
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
     Serial.println("OLED Ready!");
+
+    // Initialize RTC 
+    /*
+    * The RTC (Real-Time Clock) tracks the current time even when the device is off,
+    * using a backup battery (usually a CR2032).
+    *
+    * You need to call rtc.begin() once to access the RTC — but calling it repeatedly can
+    * interfere with OLED startup on some boards. So, once the RTC is running, you can safely
+    * comment this out unless you need to access the time.
+    */
+
+    //Uncomment these 3 lines below and reupload, ONLY if the OLED fails to initialize without it:
+    //rtc.begin();  
+    //Serial.println("Initializing RTC...");
+    //delay(100);
+
+    /*
+    * >>> SETTING THE RTC TIME: ONLY ONCE
+    * --------------------------------------------------
+    * The line below sets the RTC to your computer's current time.
+    * ONLY do this:
+    *   - The very first time you upload the code to a new feeder.
+    *   - If the RTC battery was removed or has died.
+    *
+    * >>> HOW TO SET THE TIME:
+    *   1. Uncomment the line below (`rtc.setDateTime(...)`).
+    *   2. Upload the code to your board.
+    *   3. Comment the line out again.
+    *   4. Upload the code again (with the line commented).
+    *   This ensures time is NOT reset on every restart.
+    */
+
+    // rtc.setDateTime(__DATE__, __TIME__); // <- Uncomment only to set time once, then re-comment
+    delay(100); // Small delay to stabilize any RTC startup if used
     
     // Initialize Servo
     servo1.attach(12);

@@ -3,6 +3,7 @@
 #include <Adafruit_SSD1306.h> // OLED display driver
 #include <DS3231.h> // RTC library
 #include <Servo.h> // Servo library
+#include <SPI.h>
 
 // Screen settings 
 #define SCREEN_WIDTH 128
@@ -34,7 +35,7 @@ Servo servo1, servo2;
 // Feeding schedule - this can be changed according to experimental setup
 // Use the format {HH, MM, SS} in 24 hour time. Any number of feeding times can be added here, each as a different element in the array
 const int feedingTimes[][3] = {
-    {9, 30, 0},    
+    {8, 40, 0},    
     {10, 07, 0}, 
     {15, 34, 0},   
     {20, 00, 00}
@@ -80,43 +81,54 @@ unsigned long button4StartTime = 0;
 bool feedingTriggered = false;
 
 void setup() {
-  Serial.begin(9600); 
+    Serial.begin(9600); 
     Serial.println("Initializing Auto-Feeder...");
 
-    // Initialize RTC FIRST
-    Serial.println("Initializing RTC...");
-    rtc.begin();
-    delay(100);
-
-    /*
-     * !!! IMPORTANT: SETTING THE RTC TIME (ONLY NEEDED ONCE) !!!
-     * 
-     * - The line below sets the RTC to the current date & time from your computer.
-     * - This should ONLY be done the FIRST TIME you upload the code to a new feeder device OR if the RTC battery dies.
-     * - After setting the time once, you MUST COMMENT OUT the line, re-upload the code, and restart the device.
-     * - Why? Because leaving it active will reset the RTC every time the device is powered on.
-     *
-     * >>> STEPS TO SET TIME ON FIRST UPLOAD:
-     * 1. Uncomment the line below (`rtc.setDateTime(__DATE__, __TIME__);`).
-     * 2. Upload the code to the microcontroller.
-     * 3. After uploading, **comment out the line again** to prevent resetting the time every restart.
-     * 4. Upload the modified code again (with the line commented out), to allow proper initialisation of the OLED screen.
-     *
-     * >>> WHEN TO DO THIS AGAIN?
-     * - If you are uploading code to a new device for the first time OR if the RTC battery is removed or dies. 
-     * - Repeat the steps above to reset the time.
-     */
-    //rtc.setDateTime(__DATE__, __TIME__); // Uncomment this line ONLY for the first upload, then comment it out
-
-    // Initialize OLED AFTER RTC
+    // Initialize OLED
     Serial.println("Initializing OLED...");
     if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
         Serial.println("SSD1306 OLED allocation failed!");
         for(;;); // Don't proceed, loop until screen is ready
     }
+    delay(100);
+
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
     Serial.println("OLED Ready!");
+
+    // Initialize RTC 
+    /*
+    * The RTC (Real-Time Clock) tracks the current time even when the device is off,
+    * using a backup battery (usually a CR2032).
+    *
+    * You need to call rtc.begin() once to access the RTC — but calling it repeatedly can
+    * interfere with OLED startup on some boards. So, once the RTC is running, you can safely
+    * comment this out unless you need to access the time.
+    */
+
+    //Uncomment these 3 lines below and reupload, ONLY if the OLED fails to initialize without it:
+    //rtc.begin();  
+    //Serial.println("Initializing RTC...");
+    //delay(100);
+
+    /*
+    * >>> SETTING THE RTC TIME: ONLY ONCE
+    * --------------------------------------------------
+    * The line below sets the RTC to your computer's current time.
+    * ONLY do this:
+    *   - The very first time you upload the code to a new feeder.
+    *   - If the RTC battery was removed or has died.
+    *
+    * >>> HOW TO SET THE TIME:
+    *   1. Uncomment the line below (`rtc.setDateTime(...)`).
+    *   2. Upload the code to your board.
+    *   3. Comment the line out again.
+    *   4. Upload the code again (with the line commented).
+    *   This ensures time is NOT reset on every restart.
+    */
+
+    // rtc.setDateTime(__DATE__, __TIME__); // <- Uncomment only to set time once, then re-comment
+    delay(100); // Small delay to stabilize any RTC startup if used
     
     // Initialize Servos
     servo1.attach(12);
@@ -564,7 +576,6 @@ void displayCurrentTime() {
     display.display();
     delay(3000); // Show time for 3 seconds
 }
-
 void displayFeedingSchedule(int feedingTimes[][3], int numFeedingTimes, FeedingMode currentMode) {
     const int scrollSpeed = 200; // Adjust speed for smoother scrolling (lower = slower)
     const int textHeight = 9; // Height of each line
@@ -742,7 +753,6 @@ void displayCountdownOneMinute(FeedingMode mode) {
         delay(1000);
     }
 }
-
 // Countdown after feeding event (to complete the 5 minutes)
 void displayFinalCountdown() {
     for (int i = 240; i > 0; i--) { // 4 minutes remaining
